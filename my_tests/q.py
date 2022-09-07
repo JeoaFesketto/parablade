@@ -1,5 +1,5 @@
 import parablade as pb
 
-details_dict = pb.ReadUserInput(r'./testcases/MatchBlades/NASA_R67/NASA_R67.cfg')
+details_dict = pb.ReadUserInput(r'./testcases/MatchBlades/Aachen_2D/Aachen_2D.cfg')
 o = pb.BladeMatch(details_dict)
 o.match_blade(matching_mode='DVs')
