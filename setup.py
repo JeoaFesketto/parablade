@@ -7,5 +7,5 @@ setup(
    author='',
    author_email='',
    packages=['parablade','parablade.common'],
-   install_requires=['numpy','matplotlib','scipy','slackclient','pytecplot'],
+   install_requires=['numpy','matplotlib','scipy','pytecplot'],
 )

@@ -8,7 +8,7 @@
 ###############################################################################################
 
 ################################# FILE NAME: MakeBlade.py #####################################
-#=============================================================================================#
+# =============================================================================================#
 # author: Roberto, Nitish Anand                                                               |
 #    :PhD Candidates,                                                                         |
 #    :Power and Propulsion, Energy Technology,                                                |
@@ -18,20 +18,21 @@
 #                                                                                             |
 # Description:                                                                                |
 #                                                                                             |
-#=============================================================================================#
+# =============================================================================================#
 
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 # Importing general packages
-#---------------------------------------------------------------------------------------------#
-import sys                                              # Throw exception errors
-import os                                               # Get current working directory
-import time                                             # Quick time measurement
-import pdb                                              # Python debugging tool
-import copy                                             # Make a deep copy of an object
-from scipy.optimize import *                            # Optimization library
-import numpy as np                                      # Scientific computing library
+# ---------------------------------------------------------------------------------------------#
+import sys  # Throw exception errors
+import os  # Get current working directory
+import time  # Quick time measurement
+import pdb  # Python debugging tool
+import copy  # Make a deep copy of an object
+from scipy.optimize import *  # Optimization library
+import numpy as np  # Scientific computing library
+
 try:
-    import matplotlib as mpl                                # Plotting library
+    import matplotlib as mpl  # Plotting library
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.animation as animation
@@ -40,21 +41,20 @@ except:
 from scipy import stats
 import warnings
 
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 # Importing user-defined packages
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 from parablade.blade_3D import Blade3D
 from parablade.common.common import printProgress
 from parablade.common.config import ReadUserInput, WriteBladeConfigFile
 
 
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 # Define the blade matching class
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 class BladeMatch:
 
-
-    """ Create a BladeMatch object to match the geometry of an prescribed blade
+    """Create a BladeMatch object to match the geometry of an prescribed blade
 
     BladeMatch can be used to find the set of design variables of a Blade3D object that replicate the geometry of an
     existing turbomachinery blade. This is an important step in shape optimization because it allows to find a
@@ -81,14 +81,26 @@ class BladeMatch:
 
     """
 
-    def __init__(self, IN, coarseness=1, plot_options=None):
+    def __init__(
+        self,
+        IN,
+        coarseness=1,
+        plot_options={
+            "view_xy": "yes",
+            "view_xR": "yes",
+            "view_yz": "yes",
+            "view_3D": "yes",
+            "error_distribution": "yes"
+
+        },
+    ):
 
         # Declare input variables as instance variables
-        self.IN                         = IN
-        self.NDIM                       = int(self.IN["NDIM"][0])
-        self.N_SECTIONS                 = self.IN["N_SECTIONS"][0]
-        self.PRESCRIBED_BLADE_FILENAME  = self.IN["PRESCRIBED_BLADE_FILENAME"]
-        self.plot_options               = plot_options
+        self.IN = IN
+        self.NDIM = int(self.IN["NDIM"][0])
+        self.N_SECTIONS = self.IN["N_SECTIONS"][0]
+        self.PRESCRIBED_BLADE_FILENAME = self.IN["PRESCRIBED_BLADE_FILENAME"]
+        self.plot_options = plot_options
 
         # Create output directory
         os.system("rm -rf output_matching")
@@ -96,18 +108,27 @@ class BladeMatch:
 
         # Load prescribed blade coordinates
         if self.NDIM == 2:
-            self.coordinates_prescribed = np.loadtxt(self.PRESCRIBED_BLADE_FILENAME, delimiter='\t').transpose()
+            self.coordinates_prescribed = np.loadtxt(
+                self.PRESCRIBED_BLADE_FILENAME, delimiter="\t"
+            ).transpose()
             self.coordinates_prescribed = self.coordinates_prescribed[:, ::coarseness]
             self.N_points = np.shape(self.coordinates_prescribed)[1]
-            self.coordinates_prescribed = np.concatenate((self.coordinates_prescribed, np.zeros((1, self.N_points))))
+            self.coordinates_prescribed = np.concatenate(
+                (self.coordinates_prescribed, np.zeros((1, self.N_points)))
+            )
         elif self.NDIM == 3:
-            self.coordinates_prescribed = np.loadtxt(self.PRESCRIBED_BLADE_FILENAME, delimiter='\t').transpose()
+            self.coordinates_prescribed = np.loadtxt(
+                self.PRESCRIBED_BLADE_FILENAME, delimiter="\t"
+            ).transpose()
             # self.coordinates_prescribed = self.coordinates_prescribed[:, ::coarseness]
-            self.coordinates_prescribed = self.coordinates_prescribed[[0, 3, 2, 1], ::coarseness] # Fix SU2 convention
+            self.coordinates_prescribed = self.coordinates_prescribed[
+                [0, 3, 2, 1], ::coarseness
+            ]  # Fix SU2 convention
             # R_condition = (self.coordinates_prescribed[[3],:]**2 + self.coordinates_prescribed[[1],:]**2)**(1/2)
             # self.coordinates_prescribed = np.where(R_condition < 0.046, self.coordinates_prescribed, 0*self.coordinates_prescribed)
             self.N_points = np.shape(self.coordinates_prescribed)[1]
-        else: raise Exception('The number of dimensions must be 2 or 3')
+        else:
+            raise Exception("The number of dimensions must be 2 or 3")
 
         # Initialize optimization problem
         self.function_calls = 0
@@ -123,16 +144,17 @@ class BladeMatch:
         self.blade_matched.make_blade()
         self.u = self.blade_matched.u
         self.v = self.blade_matched.v
-        self.coordinates_matched = self.blade_matched.get_surface_coordinates(self.u, self.v)
+        self.coordinates_matched = self.blade_matched.get_surface_coordinates(
+            self.u, self.v
+        )
         self.error_distribution = None
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Blade matching main function
     # ---------------------------------------------------------------------------------------------------------------- #
-    def match_blade(self, matching_mode='auto'):
+    def match_blade(self, matching_mode="auto"):
 
-        """ Match a blade parametrization to a prescribed blade
+        """Match a blade parametrization to a prescribed blade
 
         This function contains three matching modes:
 
@@ -161,13 +183,13 @@ class BladeMatch:
 
         """
 
-        if matching_mode == 'manual':
+        if matching_mode == "manual":
 
             # Plot the prescribed and matched blades in interactive mode
             self.plot_blade_matching()
             self.do_interactive_matching()
 
-        elif matching_mode == 'uv':
+        elif matching_mode == "uv":
 
             # Run the (u,v) matching
             self.match_blade_uv()
@@ -181,7 +203,7 @@ class BladeMatch:
             self.print_config_file()
             plt.show()
 
-        elif matching_mode == 'DVs':
+        elif matching_mode == "DVs":
 
             # Run the (u,v) matching one time first
             self.match_blade_uv()
@@ -204,18 +226,19 @@ class BladeMatch:
 
         else:
 
-            raise Exception("Choose a valid option for matching_mode: 'manual', 'uv', or 'DVs'")
-
+            raise Exception(
+                "Choose a valid option for matching_mode: 'manual', 'uv', or 'DVs'"
+            )
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Match the (u,v) parametrization
     # ---------------------------------------------------------------------------------------------------------------- #
     def match_blade_uv(self):
 
-        """ Solve the blade matching problem for each prescibed point using (u,v) as independent variables """
+        """Solve the blade matching problem for each prescibed point using (u,v) as independent variables"""
 
         # Initialize the arrays for the (u,v) parametrization
-        print('\n', 'Starting (u,v) parametrization matching...')
+        print("\n", "Starting (u,v) parametrization matching...")
         my_u = []
         my_v = []
         h = 1e-5
@@ -230,24 +253,50 @@ class BladeMatch:
             if self.NDIM == 2:
                 my_u0 = [0.100, 0.250, 0.500, 0.750, 0.900]
                 my_v0 = [0.500, 0.500, 0.500, 0.500, 0.500]
-                my_bounds = [[(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)]]
+                my_bounds = [
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                ]
             else:
-                my_u0 = [0.100, 0.250, 0.500, 0.750, 0.900, 0.100, 0.250, 0.500, 0.750, 0.900]
-                my_v0 = [0.250, 0.250, 0.250, 0.250, 0.250, 0.750, 0.750, 0.750, 0.750, 0.750]
-                my_bounds = [[(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
-                             [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)]]
+                my_u0 = [
+                    0.100,
+                    0.250,
+                    0.500,
+                    0.750,
+                    0.900,
+                    0.100,
+                    0.250,
+                    0.500,
+                    0.750,
+                    0.900,
+                ]
+                my_v0 = [
+                    0.250,
+                    0.250,
+                    0.250,
+                    0.250,
+                    0.250,
+                    0.750,
+                    0.750,
+                    0.750,
+                    0.750,
+                    0.750,
+                ]
+                my_bounds = [
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                    [(0.00 + h, 1.00 - h), (0.00 + h, 1.00 - h)],
+                ]
 
             # Add the converged solution from the previous iteration as initial guess
             if self.iteration > 0:
@@ -263,25 +312,29 @@ class BladeMatch:
             for k in range(len(my_u0)):
 
                 # Optimization algorithm options
-                my_options = {'disp': False,
-                              'ftol': 1e-8,
-                              #'gtol': 1e-9,
-                              #'eps': np.
-                              # finfo(np.float64).eps ** (1 / 2),
-                              'maxiter': 1000}
+                my_options = {
+                    "disp": False,
+                    "ftol": 1e-8,
+                    #'gtol': 1e-9,
+                    #'eps': np.
+                    # finfo(np.float64).eps ** (1 / 2),
+                    "maxiter": 1000,
+                }
 
                 # Solve the optimization problem
-                solution = minimize(fun=self.my_objective_function,
-                                    x0=np.asarray([my_u0[k], my_v0[k]]),
-                                    args=('uv_parametrization', i),
-                                    method='L-BFGS-B',   # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
-                                    jac=None,
-                                    # hess=None,
-                                    # hessp=None,
-                                    bounds=my_bounds[k],
-                                    # constraints=None,
-                                    callback=None,
-                                    options=my_options)
+                solution = minimize(
+                    fun=self.my_objective_function,
+                    x0=np.asarray([my_u0[k], my_v0[k]]),
+                    args=("uv_parametrization", i),
+                    method="L-BFGS-B",  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
+                    jac=None,
+                    # hess=None,
+                    # hessp=None,
+                    bounds=my_bounds[k],
+                    # constraints=None,
+                    callback=None,
+                    options=my_options,
+                )
 
                 # Store the current solution
                 my_x.append(solution.x)
@@ -295,19 +348,20 @@ class BladeMatch:
         # Update the class (u,v) parametrization
         self.u = np.asarray(my_u)
         self.v = np.asarray(my_v)
-        self.coordinates_matched = self.blade_matched.get_surface_coordinates(self.u, self.v)
-        print('\n', '(u,v) parametrization matching is finished...')
-
+        self.coordinates_matched = self.blade_matched.get_surface_coordinates(
+            self.u, self.v
+        )
+        print("\n", "(u,v) parametrization matching is finished...")
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Match design variables
     # ---------------------------------------------------------------------------------------------------------------- #
     def match_blade_DVs(self):
 
-        """ Solve the blade matching problem using the design variables as independent variables """
+        """Solve the blade matching problem using the design variables as independent variables"""
 
         # Initialize design variable names and bounds
-        print('\n', 'Starting design variables matching...')
+        print("\n", "Starting design variables matching...")
         self.DVs_names = self.blade_matched.DVs_names
         # self.DVs_names = self.blade_matched.DVs_names_2D
         # self.DVs_names = self.blade_matched.DVs_names_meridional
@@ -328,43 +382,48 @@ class BladeMatch:
         self.iteration = 0
 
         # Optimization algorithm options
-        my_options = {'disp': False,
-                      'ftol': 1e-8,
-                      # 'gtol': 1e-9,
-                      # 'eps': np.finfo(np.float64).eps ** (1 / 2),
-                      'maxiter': 1000}
+        my_options = {
+            "disp": False,
+            "ftol": 1e-8,
+            # 'gtol': 1e-9,
+            # 'eps': np.finfo(np.float64).eps ** (1 / 2),
+            "maxiter": 1000,
+        }
 
         # Solve the optimization problem
-        self.solution = minimize(fun=self.my_objective_function,
-                                 x0=my_x0,
-                                 args='design_variables',
-                                 method='SLSQP',
-                                 jac=None,
-                                 # hess=None,
-                                 # hessp=None,
-                                 bounds=my_bounds,
-                                 # constraints=None,
-                                 callback=self.callback_function,
-                                 options=my_options)
+        self.solution = minimize(
+            fun=self.my_objective_function,
+            x0=my_x0,
+            args="design_variables",
+            method="SLSQP",
+            jac=None,
+            # hess=None,
+            # hessp=None,
+            bounds=my_bounds,
+            # constraints=None,
+            callback=self.callback_function,
+            options=my_options,
+        )
 
-        self.coordinates_matched = self.blade_matched.get_surface_coordinates(self.u, self.v)
-        print('\n', 'Design variable matching is finished...')
-
+        self.coordinates_matched = self.blade_matched.get_surface_coordinates(
+            self.u, self.v
+        )
+        print("\n", "Design variable matching is finished...")
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Initialize the design variable bounds
     # ---------------------------------------------------------------------------------------------------------------- #
     def initialize_DVs_bounds(self):
 
-        """ Set the bounds for the design variables
+        """Set the bounds for the design variables
 
-            The blade matching problem could be formulated as an unconstrained optimization problem
+        The blade matching problem could be formulated as an unconstrained optimization problem
 
-            However, experience showed that it is necessary to specify some reasonable bounds so that the internal
-            iterations do not lead to strange unfeasible geometries that would prevent the optimization to converge
+        However, experience showed that it is necessary to specify some reasonable bounds so that the internal
+        iterations do not lead to strange unfeasible geometries that would prevent the optimization to converge
 
-            The optimization bounds set by this function constrain the internal iterations but should be inactive
-            constraints when the optimization converges
+        The optimization bounds set by this function constrain the internal iterations but should be inactive
+        constraints when the optimization converges
 
         """
 
@@ -378,60 +437,90 @@ class BladeMatch:
         for k in self.DVs_names:
             for i in range(len(self.IN[k])):
 
-                if k in ['x_leading', 'y_leading', 'z_leading', 'x_trailing', 'z_trailing',
-                         'x_hub', 'z_hub', 'x_shroud', 'z_shroud']:
-                    self.DVs_bounds.append((self.IN[k][i] - self.meanline_length, self.IN[k][i] + self.meanline_length))
+                if k in [
+                    "x_leading",
+                    "y_leading",
+                    "z_leading",
+                    "x_trailing",
+                    "z_trailing",
+                    "x_hub",
+                    "z_hub",
+                    "x_shroud",
+                    "z_shroud",
+                ]:
+                    self.DVs_bounds.append(
+                        (
+                            self.IN[k][i] - self.meanline_length,
+                            self.IN[k][i] + self.meanline_length,
+                        )
+                    )
 
-                elif k in ['theta_in', 'theta_out', 'stagger']:
+                elif k in ["theta_in", "theta_out", "stagger"]:
                     self.DVs_bounds.append((-89.9, 89.9))
 
-                elif k in ['wedge_in', 'wedge_out']:
+                elif k in ["wedge_in", "wedge_out"]:
                     self.DVs_bounds.append((0.1, 89.9))
 
-                elif k in ['radius_in', 'radius_out']:
+                elif k in ["radius_in", "radius_out"]:
                     self.DVs_bounds.append((1e-4, 1.000))
 
-                elif k in ['dist_in', 'dist_out', 'dist_1', 'dist_2', 'dist_3', 'dist_4']:
+                elif k in [
+                    "dist_in",
+                    "dist_out",
+                    "dist_1",
+                    "dist_2",
+                    "dist_3",
+                    "dist_4",
+                ]:
                     self.DVs_bounds.append((1e-4, 2.000))
 
-                elif k in ['thickness_upper_1', 'thickness_upper_2', 'thickness_upper_3',
-                           'thickness_upper_4', 'thickness_upper_5', 'thickness_upper_6',
-                           'thickness_lower_1', 'thickness_lower_2', 'thickness_lower_3',
-                           'thickness_lower_4', 'thickness_lower_5', 'thickness_lower_6']:
+                elif k in [
+                    "thickness_upper_1",
+                    "thickness_upper_2",
+                    "thickness_upper_3",
+                    "thickness_upper_4",
+                    "thickness_upper_5",
+                    "thickness_upper_6",
+                    "thickness_lower_1",
+                    "thickness_lower_2",
+                    "thickness_lower_3",
+                    "thickness_lower_4",
+                    "thickness_lower_5",
+                    "thickness_lower_6",
+                ]:
                     self.DVs_bounds.append((1e-4, 1.000))
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Define the objective function of the problem
     # ---------------------------------------------------------------------------------------------------------------- #
     def my_objective_function(self, x, optimization_type, i=0):
 
-        """ Evaluate the objective function of the optimization problem
+        """Evaluate the objective function of the optimization problem
 
-            The objective function is the two-norm of the mismatch between the prescribed and the matched blades
+        The objective function is the two-norm of the mismatch between the prescribed and the matched blades
 
-            When optimization_type='uv' the vector of degrees of freedom contains the current (u,v) parametrization.
-            In this case the error between prescribed and fitted blades is evaluated at one point at a time
+        When optimization_type='uv' the vector of degrees of freedom contains the current (u,v) parametrization.
+        In this case the error between prescribed and fitted blades is evaluated at one point at a time
 
-            When optimization_type='DVs' the vector of degrees of freedom contains the design variables
-            In this case the error between prescribed and fitted blades is evaluated at every point at once (two-norm)
+        When optimization_type='DVs' the vector of degrees of freedom contains the design variables
+        In this case the error between prescribed and fitted blades is evaluated at every point at once (two-norm)
 
         """
 
-        if optimization_type == 'uv_parametrization':
+        if optimization_type == "uv_parametrization":
 
             # Use the parameters (u,v) as independent variables
             u = np.asarray([x[0]])
             v = np.asarray([x[1]])
 
-        elif optimization_type == 'design_variables':
+        elif optimization_type == "design_variables":
 
             # Use the design variables as independent variables
             variable_values = x
-            k_start=0
+            k_start = 0
             for key in self.DVs_names:
                 len_value = len(self.IN[key])
-                k_end = k_start+len_value
+                k_end = k_start + len_value
                 self.IN[key] = variable_values[k_start:k_end].tolist()
                 k_start = k_end
 
@@ -444,14 +533,15 @@ class BladeMatch:
             v = self.v
 
         else:
-            raise Exception("Choose a valid option for optimization_type: 'parameter_distribution' or 'design_variables'")
-
+            raise Exception(
+                "Choose a valid option for optimization_type: 'parameter_distribution' or 'design_variables'"
+            )
 
         # Get the coordinates of the matched blade
         coordinates_matched = self.blade_matched.get_surface_coordinates(u, v)
 
         # Get the coordinates of the prescribed blade
-        if optimization_type == 'uv_parametrization':
+        if optimization_type == "uv_parametrization":
             coordinates_prescribed = self.coordinates_prescribed[1:, [i]]
         else:
             coordinates_prescribed = self.coordinates_prescribed[1:, :]
@@ -462,14 +552,24 @@ class BladeMatch:
             coordinates_prescribed = coordinates_prescribed[[0, 1], :]
 
         # Compute the two-norm of the deviation between prescribed and matched blade
-        two_norm_error = np.real(np.sum((coordinates_matched - coordinates_prescribed) ** 2) ** (1 / 2))
+        two_norm_error = np.real(
+            np.sum((coordinates_matched - coordinates_prescribed) ** 2) ** (1 / 2)
+        )
 
         # Compute additional mismatch indicators
-        if optimization_type == 'design_variables':
-            self.error_distribution = np.real(np.sum((coordinates_matched - coordinates_prescribed) ** 2, axis=0) ** (1 / 2))
+        if optimization_type == "design_variables":
+            self.error_distribution = np.real(
+                np.sum((coordinates_matched - coordinates_prescribed) ** 2, axis=0)
+                ** (1 / 2)
+            )
             self.mean_deviation = self.error_distribution.mean()
             self.mean_deviation_rel = self.mean_deviation / self.meanline_length * 100
-            self.max_deviation = np.real(np.max(np.sum((coordinates_matched-coordinates_prescribed)**2,axis=0)**(1/2)))
+            self.max_deviation = np.real(
+                np.max(
+                    np.sum((coordinates_matched - coordinates_prescribed) ** 2, axis=0)
+                    ** (1 / 2)
+                )
+            )
             self.max_deviation_rel = self.max_deviation / self.meanline_length * 100
 
         # Update number of function calls
@@ -477,15 +577,14 @@ class BladeMatch:
 
         return two_norm_error
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Optimization callback function
     # ---------------------------------------------------------------------------------------------------------------- #
     def callback_function(self, x):
 
-        """ Display optimization progress and update the plots
+        """Display optimization progress and update the plots
 
-            In addition callback_function() performs the (u,v) parametrization matching every N-th iteration
+        In addition callback_function() performs the (u,v) parametrization matching every N-th iteration
 
         """
 
@@ -494,12 +593,21 @@ class BladeMatch:
 
         # Print header each N iterations
         N = 10
-        if (self.iteration == 1) or ((self.iteration-1) % N == 0):
-            print('\n Iteration \t Mean deviation (m) \t Maximum deviation (m) \t Mean deviation (%) \t Maximum deviation (%)' )
+        if (self.iteration == 1) or ((self.iteration - 1) % N == 0):
+            print(
+                "\n Iteration \t Mean deviation (m) \t Maximum deviation (m) \t Mean deviation (%) \t Maximum deviation (%)"
+            )
 
         # Print the optimization status
-        print('{:>10} \t {:>18.6f} \t {:>21.6f} \t {:>18.6f} \t {:>21.6f}'.format(
-            self.iteration, self.mean_deviation, self.max_deviation, self.mean_deviation_rel, self.max_deviation_rel))
+        print(
+            "{:>10} \t {:>18.6f} \t {:>21.6f} \t {:>18.6f} \t {:>21.6f}".format(
+                self.iteration,
+                self.mean_deviation,
+                self.max_deviation,
+                self.mean_deviation_rel,
+                self.max_deviation_rel,
+            )
+        )
 
         # Update the plot each iteration
         if self.iteration % 1 == 0:
@@ -510,103 +618,137 @@ class BladeMatch:
             self.match_blade_uv()
 
         # Update the matched coordinates
-        self.coordinates_matched = self.blade_matched.get_surface_coordinates(self.u, self.v)
+        self.coordinates_matched = self.blade_matched.get_surface_coordinates(
+            self.u, self.v
+        )
 
         # Print the matching status and optimization progress
         self.print_coordinates()
         self.print_config_file()
         self.print_optimization_progress()
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Save the current blade matching
     # ---------------------------------------------------------------------------------------------------------------- #
-    def print_coordinates(self, filename='matched_coordinates', path=os.getcwd()):
+    def print_coordinates(self, filename="matched_coordinates", path=os.getcwd()):
 
-        """ Print the coordinates of the prescribed and matched blades in a .csv file """
+        """Print the coordinates of the prescribed and matched blades in a .csv file"""
 
         # Print the matched blade coordinates
-        full_path = path + '/output_matching/'
-        file = open(full_path + filename + '.csv', 'w')
+        full_path = path + "/output_matching/"
+        file = open(full_path + filename + ".csv", "w")
 
         if self.NDIM == 2:
-            file.write("\"index\",\t\"x_prescribed\",\t\"y_prescribed\",\t\"x_match\",\t\"y_match\",\t\"u\",\t\"v\"\n")
+            file.write(
+                '"index",\t"x_prescribed",\t"y_prescribed",\t"x_match",\t"y_match",\t"u",\t"v"\n'
+            )
             for i in range(self.N_points):
-                file.write('%i,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%.15f,\t%.15f\n' %
-                           (self.coordinates_prescribed[0, i],          # Mesh point index
-                            self.coordinates_prescribed[1, i],          # Prescribed x coordinate (axial)
-                            self.coordinates_prescribed[2, i],          # Prescribed y coordinate (tangential)
-                            np.real(self.coordinates_matched[0, i]),    # Matched x-coordinate (axial)
-                            np.real(self.coordinates_matched[1, i]),    # Matched y-coordinate (tangential)
-                            self.u[i], self.v[i]))                      # (u,v) parametrization
+                file.write(
+                    "%i,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%.15f,\t%.15f\n"
+                    % (
+                        self.coordinates_prescribed[0, i],  # Mesh point index
+                        self.coordinates_prescribed[
+                            1, i
+                        ],  # Prescribed x coordinate (axial)
+                        self.coordinates_prescribed[
+                            2, i
+                        ],  # Prescribed y coordinate (tangential)
+                        np.real(
+                            self.coordinates_matched[0, i]
+                        ),  # Matched x-coordinate (axial)
+                        np.real(
+                            self.coordinates_matched[1, i]
+                        ),  # Matched y-coordinate (tangential)
+                        self.u[i],
+                        self.v[i],
+                    )
+                )  # (u,v) parametrization
 
         elif self.NDIM == 3:
-            file.write("\"index\",\t\"x_prescribed\",\t\"y_prescribed\",\t\"z_prescribed\",\t\"x_match\",\t\"y_match\",\t\"z_match\",\t\"u\",\t\"v\"\n")
+            file.write(
+                '"index",\t"x_prescribed",\t"y_prescribed",\t"z_prescribed",\t"x_match",\t"y_match",\t"z_match",\t"u",\t"v"\n'
+            )
             for i in range(self.N_points):
-                file.write('%i,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%.15f,\t%.15f\n' %
-                           (self.coordinates_prescribed[0, i],          # Mesh point index
-                            self.coordinates_prescribed[3, i],          # SU2 x coordinate (radial)
-                            self.coordinates_prescribed[2, i],          # SU2 y coordinate (tangential)
-                            self.coordinates_prescribed[1, i],          # SU2 z coordinate (axial)
-                            np.real(self.coordinates_matched[2, i]),    # SU2 x coordinate (radial)
-                            np.real(self.coordinates_matched[1, i]),    # SU2 y coordinate (tangential)
-                            np.real(self.coordinates_matched[0, i]),    # SU2 z coordinate (axial)
-                            self.u[i], self.v[i]))                      # SU2 z coordinate (axial)
+                file.write(
+                    "%i,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%.15f,\t%.15f\n"
+                    % (
+                        self.coordinates_prescribed[0, i],  # Mesh point index
+                        self.coordinates_prescribed[3, i],  # SU2 x coordinate (radial)
+                        self.coordinates_prescribed[
+                            2, i
+                        ],  # SU2 y coordinate (tangential)
+                        self.coordinates_prescribed[1, i],  # SU2 z coordinate (axial)
+                        np.real(
+                            self.coordinates_matched[2, i]
+                        ),  # SU2 x coordinate (radial)
+                        np.real(
+                            self.coordinates_matched[1, i]
+                        ),  # SU2 y coordinate (tangential)
+                        np.real(
+                            self.coordinates_matched[0, i]
+                        ),  # SU2 z coordinate (axial)
+                        self.u[i],
+                        self.v[i],
+                    )
+                )  # SU2 z coordinate (axial)
 
         else:
-            raise Exception('The number of dimensions must be 2 or 3')
+            raise Exception("The number of dimensions must be 2 or 3")
 
         file.close()
-
 
     def print_config_file(self, filename="matched_parametrization", path=os.getcwd()):
 
-        """ Print a configuration .cfg file for the current set of design variables """
+        """Print a configuration .cfg file for the current set of design variables"""
 
-        full_path = path + '/output_matching/'
-        file = open(full_path + filename + '.cfg', 'w')
+        full_path = path + "/output_matching/"
+        file = open(full_path + filename + ".cfg", "w")
         WriteBladeConfigFile(file, self.IN)
         file.close()
 
+    def print_optimization_progress(
+        self, filename="optimization_progress", path=os.getcwd()
+    ):
 
-    def print_optimization_progress(self, filename="optimization_progress", path=os.getcwd()):
-
-        """ Print the convergence history of the design variable optimization """
+        """Print the convergence history of the design variable optimization"""
 
         # Open the file in "append" mode
-        full_path = path + '/output_matching/'
-        file = open(full_path + filename + '.txt', 'a')
+        full_path = path + "/output_matching/"
+        file = open(full_path + filename + ".txt", "a")
 
         # Print the header for the first iteration
         if self.iteration == 1:
-            header = 'Iteration \t Mean deviation (m) \t Maximum deviation (m) \t Mean deviation (%) \t Maximum deviation (%)\n'
+            header = "Iteration \t Mean deviation (m) \t Maximum deviation (m) \t Mean deviation (%) \t Maximum deviation (%)\n"
             file.write(header)
 
         # Print optimization progress
-        file.write('%i \t %.6f \t %.6f \t %.6f \t %.6f\n' %
-                            (self.iteration,
-                             self.mean_deviation,
-                             self.max_deviation,
-                             self.mean_deviation_rel,
-                             self.max_deviation_rel))
+        file.write(
+            "%i \t %.6f \t %.6f \t %.6f \t %.6f\n"
+            % (
+                self.iteration,
+                self.mean_deviation,
+                self.max_deviation,
+                self.mean_deviation_rel,
+                self.max_deviation_rel,
+            )
+        )
 
         file.close()
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Make plots for the matching
     # ---------------------------------------------------------------------------------------------------------------- #
     def plot_blade_matching(self):
 
-        """ Plot of the prescribed and the matched blades
+        """Plot of the prescribed and the matched blades
 
-            The figures plotted can be controlled with the "options" dictionary
-            The plotting possibilities include:
+        The figures plotted can be controlled with the "options" dictionary
+        The plotting possibilities include:
 
-                1) 2D view of the (z,y)-plane (airfoil sections)
-                2) 2D view of the (z,R)-plane (meridional channel)
-                3) 2D view of the (y,x)-plane (front view of the blade)
-                4) 3D view of the blade
+            1) 2D view of the (z,y)-plane (airfoil sections)
+            2) 2D view of the (z,R)-plane (meridional channel)
+            3) 2D view of the (y,x)-plane (front view of the blade)
+            4) 3D view of the blade
 
         """
 
@@ -614,13 +756,13 @@ class BladeMatch:
         x_prescribed = self.coordinates_prescribed[1, :]
         y_prescribed = self.coordinates_prescribed[2, :]
         z_prescribed = self.coordinates_prescribed[3, :]
-        R_prescribed = np.sqrt(y_prescribed ** 2 + z_prescribed ** 2)
+        R_prescribed = np.sqrt(y_prescribed**2 + z_prescribed**2)
 
         # Matched coordinates
         x_matched = np.real(self.coordinates_matched[0, :])
         y_matched = np.real(self.coordinates_matched[1, :])
         z_matched = np.real(self.coordinates_matched[2, :])
-        R_matched = np.sqrt(y_matched ** 2 + z_matched ** 2)
+        R_matched = np.sqrt(y_matched**2 + z_matched**2)
 
         # Get minimum axes values
         x_max = np.max(x_prescribed)
@@ -643,17 +785,19 @@ class BladeMatch:
         # Activate interactive mode plotting for the animations (not necessary)
         # plt.ion()
 
-        if self.plot_options['view_xy'] == 'yes':
+        if self.plot_options["view_xy"] == "yes":
 
             # Plot the prescribed and the matched blades
             self.figure_1, self.axes_1 = plt.subplots()
             self.axes_1.set_aspect(1.00)
-            self.axes_1.set_xlabel('$x$ - axis', fontsize=12, color='k', labelpad=12)
-            self.axes_1.set_ylabel('$y$ - axis', fontsize=12, color='k', labelpad=12)
+            self.axes_1.set_xlabel("$x$ - axis", fontsize=12, color="k", labelpad=12)
+            self.axes_1.set_ylabel("$y$ - axis", fontsize=12, color="k", labelpad=12)
             # self.axes_1.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
             # self.axes_1.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
-            for t in self.axes_1.xaxis.get_major_ticks(): t.label.set_fontsize(12)
-            for t in self.axes_1.yaxis.get_major_ticks(): t.label.set_fontsize(12)
+            for t in self.axes_1.xaxis.get_major_ticks():
+                t.label.set_fontsize(12)
+            for t in self.axes_1.yaxis.get_major_ticks():
+                t.label.set_fontsize(12)
             plt.tight_layout(pad=1.0, w_pad=None, h_pad=None)
 
             # Set the axes for the plot
@@ -662,7 +806,7 @@ class BladeMatch:
             self.axes_1.set_ylim([y_mid - 1.25 * L, y_mid + 1.25 * L])
 
             # Plot prescribed coordinates
-            self.points_1p, = self.axes_1.plot(x_prescribed, y_prescribed)
+            (self.points_1p,) = self.axes_1.plot(x_prescribed, y_prescribed)
             self.points_1p.set_marker("o")
             self.points_1p.set_markersize(2.5)
             self.points_1p.set_markeredgewidth(0.5)
@@ -671,10 +815,10 @@ class BladeMatch:
             self.points_1p.set_linestyle(" ")
             self.points_1p.set_color("k")
             self.points_1p.set_linewidth(0.50)
-            self.points_1p.set_label('Blade prescribed')
+            self.points_1p.set_label("Blade prescribed")
 
             # Plot matched coordinates
-            self.points_1m, = self.axes_1.plot(x_matched, y_matched)
+            (self.points_1m,) = self.axes_1.plot(x_matched, y_matched)
             self.points_1m.set_marker("o")
             self.points_1m.set_markersize(2.5)
             self.points_1m.set_markeredgewidth(0.5)
@@ -683,20 +827,21 @@ class BladeMatch:
             self.points_1m.set_linestyle(" ")
             self.points_1m.set_color("k")
             self.points_1m.set_linewidth(0.50)
-            self.points_1m.set_label('Blade matched')
+            self.points_1m.set_label("Blade matched")
 
-
-        if self.plot_options['view_xR'] == 'yes':
+        if self.plot_options["view_xR"] == "yes":
 
             # Plot the prescribed and the matched blades
             self.figure_2, self.axes_2 = plt.subplots()
             self.axes_2.set_aspect(1.00)
-            self.axes_2.set_xlabel('$x$ - axis', fontsize=12, color='k', labelpad=12)
-            self.axes_2.set_ylabel('$R$ - axis', fontsize=12, color='k', labelpad=12)
+            self.axes_2.set_xlabel("$x$ - axis", fontsize=12, color="k", labelpad=12)
+            self.axes_2.set_ylabel("$R$ - axis", fontsize=12, color="k", labelpad=12)
             # self.axes_2.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
             # self.axes_2.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
-            for t in self.axes_2.xaxis.get_major_ticks(): t.label.set_fontsize(12)
-            for t in self.axes_2.yaxis.get_major_ticks(): t.label.set_fontsize(12)
+            for t in self.axes_2.xaxis.get_major_ticks():
+                t.label.set_fontsize(12)
+            for t in self.axes_2.yaxis.get_major_ticks():
+                t.label.set_fontsize(12)
             plt.tight_layout(pad=1.0, w_pad=None, h_pad=None)
 
             # Set the axes for the plot
@@ -705,7 +850,7 @@ class BladeMatch:
             self.axes_2.set_ylim([R_mid - 1.25 * L, R_mid + 1.25 * L])
 
             # Plot prescribed coordinates
-            self.points_2p, = self.axes_2.plot(x_prescribed, R_prescribed)
+            (self.points_2p,) = self.axes_2.plot(x_prescribed, R_prescribed)
             self.points_2p.set_marker("o")
             self.points_2p.set_markersize(3.0)
             self.points_2p.set_markeredgewidth(0.5)
@@ -714,10 +859,10 @@ class BladeMatch:
             self.points_2p.set_linestyle(" ")
             self.points_2p.set_color("k")
             self.points_2p.set_linewidth(0.50)
-            self.points_2p.set_label('Blade prescribed')
+            self.points_2p.set_label("Blade prescribed")
 
             # Plot matched coordinates
-            self.points_2m, = self.axes_2.plot(x_matched, R_matched)
+            (self.points_2m,) = self.axes_2.plot(x_matched, R_matched)
             self.points_2m.set_marker("o")
             self.points_2m.set_markersize(3.0)
             self.points_2m.set_markeredgewidth(0.5)
@@ -726,20 +871,21 @@ class BladeMatch:
             self.points_2m.set_linestyle(" ")
             self.points_2m.set_color("k")
             self.points_2m.set_linewidth(0.50)
-            self.points_2m.set_label('Blade matched')
+            self.points_2m.set_label("Blade matched")
 
-
-        if self.plot_options['view_yz'] == 'yes':
+        if self.plot_options["view_yz"] == "yes":
 
             # Plot the prescribed and the matched blades
             self.figure_3, self.axes_3 = plt.subplots()
             self.axes_3.set_aspect(1.00)
-            self.axes_3.set_xlabel('$y$ - axis', fontsize=12, color='k', labelpad=12)
-            self.axes_3.set_ylabel('$z$ - axis', fontsize=12, color='k', labelpad=12)
+            self.axes_3.set_xlabel("$y$ - axis", fontsize=12, color="k", labelpad=12)
+            self.axes_3.set_ylabel("$z$ - axis", fontsize=12, color="k", labelpad=12)
             # self.axes_3.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
             # self.axes_3.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
-            for t in self.axes_3.xaxis.get_major_ticks(): t.label.set_fontsize(12)
-            for t in self.axes_3.yaxis.get_major_ticks(): t.label.set_fontsize(12)
+            for t in self.axes_3.xaxis.get_major_ticks():
+                t.label.set_fontsize(12)
+            for t in self.axes_3.yaxis.get_major_ticks():
+                t.label.set_fontsize(12)
             plt.tight_layout(pad=1.0, w_pad=None, h_pad=None)
 
             # Set the axes for the plot
@@ -748,7 +894,7 @@ class BladeMatch:
             self.axes_3.set_ylim([z_mid - 1.25 * L, z_mid + 1.25 * L])
 
             # Plot prescribed coordinates
-            self.points_3p, = self.axes_3.plot(y_prescribed, z_prescribed)
+            (self.points_3p,) = self.axes_3.plot(y_prescribed, z_prescribed)
             self.points_3p.set_marker("o")
             self.points_3p.set_markersize(3.0)
             self.points_3p.set_markeredgewidth(0.5)
@@ -757,10 +903,10 @@ class BladeMatch:
             self.points_3p.set_linestyle(" ")
             self.points_3p.set_color("k")
             self.points_3p.set_linewidth(0.50)
-            self.points_3p.set_label('Blade prescribed')
+            self.points_3p.set_label("Blade prescribed")
 
             # Plot matched coordinates
-            self.points_3m, = self.axes_3.plot(y_matched, z_matched)
+            (self.points_3m,) = self.axes_3.plot(y_matched, z_matched)
             self.points_3m.set_marker("o")
             self.points_3m.set_markersize(3.0)
             self.points_3m.set_markeredgewidth(0.5)
@@ -769,29 +915,31 @@ class BladeMatch:
             self.points_3m.set_linestyle(" ")
             self.points_3m.set_color("k")
             self.points_3m.set_linewidth(0.50)
-            self.points_3m.set_label('Blade matched')
+            self.points_3m.set_label("Blade matched")
 
-
-        if self.plot_options['view_3D'] == 'yes':
+        if self.plot_options["view_3D"] == "yes":
 
             # Prepare the plot
             self.figure_4 = plt.figure()
             self.axes_4 = Axes3D(self.figure_4)
             self.axes_4.view_init(azim=-55, elev=25)
             self.axes_4.grid(False)
-            self.axes_4.xaxis.pane.set_edgecolor('black')
-            self.axes_4.yaxis.pane.set_edgecolor('black')
-            self.axes_4.zaxis.pane.set_edgecolor('black')
+            self.axes_4.xaxis.pane.set_edgecolor("black")
+            self.axes_4.yaxis.pane.set_edgecolor("black")
+            self.axes_4.zaxis.pane.set_edgecolor("black")
             self.axes_4.xaxis.pane.fill = False
             self.axes_4.yaxis.pane.fill = False
             self.axes_4.zaxis.pane.fill = False
             fontsize = 12
-            self.axes_4.set_xlabel('$x$ - axis', fontsize=12, color='k', labelpad=12)
-            self.axes_4.set_ylabel('$y$ - axis', fontsize=12, color='k', labelpad=12)
-            self.axes_4.set_zlabel('$z$ - axis', fontsize=12, color='k', labelpad=12)
-            for t in self.axes_4.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in self.axes_4.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in self.axes_4.zaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+            self.axes_4.set_xlabel("$x$ - axis", fontsize=12, color="k", labelpad=12)
+            self.axes_4.set_ylabel("$y$ - axis", fontsize=12, color="k", labelpad=12)
+            self.axes_4.set_zlabel("$z$ - axis", fontsize=12, color="k", labelpad=12)
+            for t in self.axes_4.xaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in self.axes_4.yaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in self.axes_4.zaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
             # self.axes_4.set_xticks([])
             # self.axes_4.set_yticks([])
             # self.axes_4.set_zticks([])
@@ -804,7 +952,9 @@ class BladeMatch:
             self.axes_4.set_zlim3d(z_mid - 1.1 * L, z_mid + 1.1 * L)
 
             # Plot prescribed coordinates
-            self.points_4p, = self.axes_4.plot(x_prescribed, y_prescribed, z_prescribed)
+            (self.points_4p,) = self.axes_4.plot(
+                x_prescribed, y_prescribed, z_prescribed
+            )
             self.points_4p.set_marker("o")
             self.points_4p.set_markersize(3)
             self.points_4p.set_markeredgewidth(0.5)
@@ -813,10 +963,10 @@ class BladeMatch:
             self.points_4p.set_linestyle(" ")
             self.points_4p.set_color("k")
             self.points_4p.set_linewidth(0.50)
-            self.points_4p.set_label('Blade prescribed')
+            self.points_4p.set_label("Blade prescribed")
 
             # Plot matched coordinates
-            self.points_4m, = self.axes_4.plot(x_matched, y_matched, z_matched)
+            (self.points_4m,) = self.axes_4.plot(x_matched, y_matched, z_matched)
             self.points_4m.set_marker("o")
             self.points_4m.set_markersize(3)
             self.points_4m.set_markeredgewidth(0.5)
@@ -825,36 +975,41 @@ class BladeMatch:
             self.points_4m.set_linestyle(" ")
             self.points_4m.set_color("k")
             self.points_4m.set_linewidth(0.50)
-            self.points_4m.set_label('Blade matched')
-
+            self.points_4m.set_label("Blade matched")
 
     def plot_error_distribution(self):
 
-        """ Plot the distribution of the fitting error between prescribed and matched blades"""
+        """Plot the distribution of the fitting error between prescribed and matched blades"""
 
-        if self.plot_options['error_distribution'] == 'yes':
+        if self.plot_options["error_distribution"] == "yes":
 
             # Prepare figure
             self.figure_5, self.axes_5 = plt.subplots()
             self.axes_5.set_xlim(0, 1)
-            self.axes_5.set_xlabel('Matching error distribution (mm)', fontsize=11, color='k', labelpad=12)
-            self.axes_5.set_xscale('linear')
+            self.axes_5.set_xlabel(
+                "Matching error distribution (mm)", fontsize=11, color="k", labelpad=12
+            )
+            self.axes_5.set_xscale("linear")
             self.axes_5.set_ylim(0, 1.25)
             self.axes_5.set_yticks([])
             self.axes_5.set_yticklabels([])
-            for t in self.axes_5.yaxis.get_major_ticks(): t.label.set_fontsize(10)
+            for t in self.axes_5.yaxis.get_major_ticks():
+                t.label.set_fontsize(10)
 
             # Make error distribution plot
             # if self.NDIM == 2: error = np.sum((self.coordinates_prescribed[1:-1, :] - self.coordinates_matched[0:-1,:])**2, axis=0)**(1/2)
             # else: error  = np.sum((self.coordinates_prescribed[1:, :] - self.coordinates_matched)**2, axis=0)**(1/2)
-            if self.error_distribution is None: self.error_distribution = np.linspace(0,1,200)
-            error = np.real(self.error_distribution)*1000
+            if self.error_distribution is None:
+                self.error_distribution = np.linspace(0, 1, 200)
+            error = np.real(self.error_distribution) * 1000
             error_mean = error.mean()
             kernel = stats.gaussian_kde(error)
             x_values = np.linspace(0, np.amax(error), 200)
 
             # Plot error distribution
-            self.error_plot, = self.axes_5.plot(x_values, kernel(x_values)/np.amax(kernel(x_values)))
+            (self.error_plot,) = self.axes_5.plot(
+                x_values, kernel(x_values) / np.amax(kernel(x_values))
+            )
             self.error_plot.set_marker(" ")
             self.error_plot.set_markersize(3)
             self.error_plot.set_markeredgewidth(0.5)
@@ -863,10 +1018,13 @@ class BladeMatch:
             self.error_plot.set_linestyle("-")
             self.error_plot.set_color("b")
             self.error_plot.set_linewidth(1.00)
-            self.error_plot.set_label('Error distribution')
+            self.error_plot.set_label("Error distribution")
 
             # Plot mean error line
-            self.error_mean, = self.axes_5.plot([error_mean, error_mean], [0, kernel(error_mean)/np.amax(kernel(x_values))])
+            (self.error_mean,) = self.axes_5.plot(
+                [error_mean, error_mean],
+                [0, kernel(error_mean) / np.amax(kernel(x_values))],
+            )
             self.error_mean.set_marker(" ")
             self.error_mean.set_markersize(3)
             self.error_mean.set_markeredgewidth(0.5)
@@ -875,95 +1033,106 @@ class BladeMatch:
             self.error_mean.set_linestyle("-")
             self.error_mean.set_color("k")
             self.error_mean.set_linewidth(1.25)
-            self.error_mean.set_label('Mean error')
+            self.error_mean.set_label("Mean error")
 
             # Manufacturing tolerance reference
-            manufacturing_line, = self.axes_5.plot([0.05, 0.05], [0, 1.25], 'r', linewidth=1)
-            manufacturing_line.set_label('Manufacturing tolerance')
+            (manufacturing_line,) = self.axes_5.plot(
+                [0.05, 0.05], [0, 1.25], "r", linewidth=1
+            )
+            manufacturing_line.set_label("Manufacturing tolerance")
 
             # Create legend
-            self.axes_5.legend(ncol=1, loc='upper right', fontsize=10, edgecolor='k', framealpha=1.0)
+            self.axes_5.legend(
+                ncol=1, loc="upper right", fontsize=10, edgecolor="k", framealpha=1.0
+            )
 
             # Adjust PAD
             plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
-
-
     def plot_error_lines(self):
 
-        """ Draw error lines between the prescribed and the matched blades """
+        """Draw error lines between the prescribed and the matched blades"""
 
         # Prescribed coordinates
         x_prescribed = self.coordinates_prescribed[1, :]
         y_prescribed = self.coordinates_prescribed[2, :]
         z_prescribed = self.coordinates_prescribed[3, :]
-        R_prescribed = np.sqrt(y_prescribed ** 2 + z_prescribed ** 2)
+        R_prescribed = np.sqrt(y_prescribed**2 + z_prescribed**2)
 
         # Matched coordinates
         x_matched = np.real(self.coordinates_matched[0, :])
         y_matched = np.real(self.coordinates_matched[1, :])
         z_matched = np.real(self.coordinates_matched[2, :])
-        R_matched = np.sqrt(y_matched ** 2 + z_matched ** 2)
+        R_matched = np.sqrt(y_matched**2 + z_matched**2)
 
         # Plot the error lines
-        if self.plot_options['view_xy'] == 'yes':
+        if self.plot_options["view_xy"] == "yes":
             for i in range(self.N_points):
-                error_lines_1, = self.axes_1.plot([x_prescribed[i], x_matched[i]], [y_prescribed[i], y_matched[i]])
+                (error_lines_1,) = self.axes_1.plot(
+                    [x_prescribed[i], x_matched[i]], [y_prescribed[i], y_matched[i]]
+                )
                 error_lines_1.set_color("r")
                 error_lines_1.set_linewidth(0.50)
 
-        if self.plot_options['view_xR'] == 'yes':
+        if self.plot_options["view_xR"] == "yes":
             for i in range(self.N_points):
-                error_lines_2, = self.axes_2.plot([x_prescribed[i], x_matched[i]], [R_prescribed[i], R_matched[i]])
+                (error_lines_2,) = self.axes_2.plot(
+                    [x_prescribed[i], x_matched[i]], [R_prescribed[i], R_matched[i]]
+                )
                 error_lines_2.set_color("r")
                 error_lines_2.set_linewidth(0.50)
 
-        if self.plot_options['view_yz'] == 'yes':
+        if self.plot_options["view_yz"] == "yes":
             for i in range(self.N_points):
-                error_lines_3, = self.axes_3.plot([y_prescribed[i], y_matched[i]], [z_prescribed[i], z_matched[i]])
+                (error_lines_3,) = self.axes_3.plot(
+                    [y_prescribed[i], y_matched[i]], [z_prescribed[i], z_matched[i]]
+                )
                 error_lines_3.set_color("r")
                 error_lines_3.set_linewidth(0.50)
 
-        if self.plot_options['view_3D'] == 'yes':
+        if self.plot_options["view_3D"] == "yes":
             for i in range(self.N_points):
-                error_lines_4, = self.axes_4.plot([x_prescribed[i], x_matched[i]], [y_prescribed[i], y_matched[i]], [z_prescribed[i], z_matched[i]])
+                (error_lines_4,) = self.axes_4.plot(
+                    [x_prescribed[i], x_matched[i]],
+                    [y_prescribed[i], y_matched[i]],
+                    [z_prescribed[i], z_matched[i]],
+                )
                 error_lines_4.set_color("r")
                 error_lines_4.set_linewidth(0.50)
 
-
     def update_plots(self):
 
-        """ Update the plot with the current matched geometry """
+        """Update the plot with the current matched geometry"""
 
         # Rename coordinates
         x_matched = np.real(self.coordinates_matched[0, :])
         y_matched = np.real(self.coordinates_matched[1, :])
         z_matched = np.real(self.coordinates_matched[2, :])
-        R_matched = np.sqrt(y_matched ** 2 + z_matched ** 2)
+        R_matched = np.sqrt(y_matched**2 + z_matched**2)
 
         # Update the plot coordinates and re-draw the plot
-        if self.plot_options['view_xy'] == 'yes':
+        if self.plot_options["view_xy"] == "yes":
             self.points_1m.set_xdata(x_matched)
             self.points_1m.set_ydata(y_matched)
-            plt.pause(0.001)                       # Matplotlib needs a moment before re-drawing
+            plt.pause(0.001)  # Matplotlib needs a moment before re-drawing
             self.figure_1.canvas.draw()
             self.figure_1.canvas.flush_events()
 
-        if self.plot_options['view_xR'] == 'yes':
+        if self.plot_options["view_xR"] == "yes":
             self.points_2m.set_xdata(x_matched)
             self.points_2m.set_ydata(R_matched)
             plt.pause(0.001)
             self.figure_2.canvas.draw()
             self.figure_2.canvas.flush_events()
 
-        if self.plot_options['view_yz'] == 'yes':
+        if self.plot_options["view_yz"] == "yes":
             self.points_3m.set_xdata(y_matched)
             self.points_3m.set_ydata(z_matched)
             plt.pause(0.001)
             self.figure_3.canvas.draw()
             self.figure_3.canvas.flush_events()
 
-        if self.plot_options['view_3D'] == 'yes':
+        if self.plot_options["view_3D"] == "yes":
             self.points_4m.set_xdata(x_matched)
             self.points_4m.set_ydata(y_matched)
             self.points_4m.set_3d_properties(z_matched)
@@ -971,7 +1140,7 @@ class BladeMatch:
             self.figure_4.canvas.draw()
             self.figure_4.canvas.flush_events()
 
-        if self.plot_options['error_distribution'] == 'yes':
+        if self.plot_options["error_distribution"] == "yes":
             # if self.NDIM == 2: error = np.sum((self.coordinates_prescribed[1:-1, :] - self.coordinates_matched[0:-1,:])**2, axis=0)**(1/2)
             # else: error  = np.sum((self.coordinates_prescribed[1:, :] - self.coordinates_matched)**2, axis=0)**(1/2)
             error = np.real(self.error_distribution) * 1000
@@ -979,99 +1148,111 @@ class BladeMatch:
             kernel = stats.gaussian_kde(error)
             x_values = np.linspace(0, np.amax(error), 200)
             self.error_plot.set_xdata(x_values)
-            self.error_plot.set_ydata(kernel(x_values)/np.amax(kernel(x_values)))
+            self.error_plot.set_ydata(kernel(x_values) / np.amax(kernel(x_values)))
             self.error_mean.set_xdata([error_mean, error_mean])
-            self.error_mean.set_ydata([0, kernel(error_mean)/np.amax(kernel(x_values))])
+            self.error_mean.set_ydata(
+                [0, kernel(error_mean) / np.amax(kernel(x_values))]
+            )
             plt.pause(0.001)
             self.figure_5.canvas.draw()
             self.figure_5.canvas.flush_events()
-
 
     def save_plots(self):
 
         os.mkdir("output_matching/figures/")
 
-        if self.plot_options['view_xy'] == 'yes':
-            self.figure_1.savefig('output_matching/figures/view_xy.pdf', bbox_inches='tight')
-        if self.plot_options['view_xR'] == 'yes':
-            self.figure_2.savefig('output_matching/figures/view_xR.pdf', bbox_inches='tight')
-        if self.plot_options['view_yz'] == 'yes':
-            self.figure_3.savefig('output_matching/figures/view_yz.pdf', bbox_inches='tight')
-        if self.plot_options['view_3D'] == 'yes':
-            self.figure_4.savefig('output_matching/figures/view_3D.pdf', bbox_inches='tight')
-        if self.plot_options['error_distribution'] == 'yes':
-            self.figure_5.savefig('output_matching/figures/error_distribution.pdf', bbox_inches='tight')
-
+        if self.plot_options["view_xy"] == "yes":
+            self.figure_1.savefig(
+                "output_matching/figures/view_xy.pdf", bbox_inches="tight"
+            )
+        if self.plot_options["view_xR"] == "yes":
+            self.figure_2.savefig(
+                "output_matching/figures/view_xR.pdf", bbox_inches="tight"
+            )
+        if self.plot_options["view_yz"] == "yes":
+            self.figure_3.savefig(
+                "output_matching/figures/view_yz.pdf", bbox_inches="tight"
+            )
+        if self.plot_options["view_3D"] == "yes":
+            self.figure_4.savefig(
+                "output_matching/figures/view_3D.pdf", bbox_inches="tight"
+            )
+        if self.plot_options["error_distribution"] == "yes":
+            self.figure_5.savefig(
+                "output_matching/figures/error_distribution.pdf", bbox_inches="tight"
+            )
 
     def do_interactive_matching(self):
 
-        """ Create an iteractive plot that updates the geometry in real time when the .cfg file is changed """
+        """Create an iteractive plot that updates the geometry in real time when the .cfg file is changed"""
 
         print("\n")
         print("Opening the interactive plot...\n")
         print("Instructions: \n")
         print("\t - Edit the .cfg file to modify the geometry in real time")
         print("\t - Try to get a good matching manually by trial and error")
-        print("\t - The manual match will be used as initial guess for the optimization")
+        print(
+            "\t - The manual match will be used as initial guess for the optimization"
+        )
         print("\t - Close the figures when you are done to continue execution")
         print("\n")
 
-        if self.plot_options['view_xy'] == 'yes':
+        if self.plot_options["view_xy"] == "yes":
             # This calls the function animate with a refresh time of "interval" miliseconds
             ani_1 = animation.FuncAnimation(self.figure_1, self.animate, interval=500)
 
-        if self.plot_options['view_xR'] == 'yes':
+        if self.plot_options["view_xR"] == "yes":
             ani_2 = animation.FuncAnimation(self.figure_2, self.animate, interval=500)
 
-        if self.plot_options['view_yz'] == 'yes':
+        if self.plot_options["view_yz"] == "yes":
             ani_3 = animation.FuncAnimation(self.figure_3, self.animate, interval=500)
 
-        if self.plot_options['view_3D'] == 'yes':
+        if self.plot_options["view_3D"] == "yes":
             ani_4 = animation.FuncAnimation(self.figure_4, self.animate, interval=500)
 
         plt.show()
         print("Closing the interactive plot...")
 
-
     def animate(self, i):
 
-        """ Update the geometry of the interactive plot """
+        """Update the geometry of the interactive plot"""
 
         # print("Interactive mode is running...")
 
         # Read the .cfg file and update the geometry
         while True:
             try:
-                self.IN = ReadUserInput(self.IN['Config_Path'])
+                self.IN = ReadUserInput(self.IN["Config_Path"])
                 self.blade_matched = Blade3D(self.IN)
                 self.blade_matched.make_blade()
-                self.coordinates_matched = self.blade_matched.get_surface_coordinates(self.u, self.v)
+                self.coordinates_matched = self.blade_matched.get_surface_coordinates(
+                    self.u, self.v
+                )
                 break
             except:
                 print("The .cfg file could not be loaded, trying again...")
-                time.sleep(1.5)     # Wait a moment in case the .cfg file is not found
+                time.sleep(1.5)  # Wait a moment in case the .cfg file is not found
 
         # Rename coordinates
         x_matched = np.real(self.coordinates_matched[0, :])
         y_matched = np.real(self.coordinates_matched[1, :])
         z_matched = np.real(self.coordinates_matched[2, :])
-        R_matched = np.sqrt(y_matched ** 2 + z_matched ** 2)
+        R_matched = np.sqrt(y_matched**2 + z_matched**2)
 
         # Update the plot coordinates
-        if self.plot_options['view_xy'] == 'yes':
+        if self.plot_options["view_xy"] == "yes":
             self.points_1m.set_xdata(x_matched)
             self.points_1m.set_ydata(y_matched)
 
-        if self.plot_options['view_xR'] == 'yes':
+        if self.plot_options["view_xR"] == "yes":
             self.points_2m.set_xdata(x_matched)
             self.points_2m.set_ydata(R_matched)
 
-        if self.plot_options['view_yz'] == 'yes':
+        if self.plot_options["view_yz"] == "yes":
             self.points_3m.set_xdata(y_matched)
             self.points_3m.set_ydata(z_matched)
 
-        if self.plot_options['view_3D'] == 'yes':
+        if self.plot_options["view_3D"] == "yes":
             self.points_4m.set_xdata(x_matched)
             self.points_4m.set_ydata(y_matched)
             self.points_4m.set_3d_properties(z_matched)
-
