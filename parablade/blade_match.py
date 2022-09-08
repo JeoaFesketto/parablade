@@ -152,13 +152,13 @@ class BladeMatch:
     # ---------------------------------------------------------------------------------------------------------------- #
     # Blade matching main function
     # ---------------------------------------------------------------------------------------------------------------- #
-    def match_blade(self, matching_mode="auto"):
+    def match_blade(self, matching_mode="manual"):
 
         """Match a blade parametrization to a prescribed blade
 
         This function contains three matching modes:
 
-        1) Manual mode: matching_mode='auto'
+        1) Manual mode: matching_mode='manual'
 
             - Plots the prescribed and fitted blades in an interactive way (read instruction on screen)
             - The geometry of the matched blade can be updated in real time editing the .cfg file
