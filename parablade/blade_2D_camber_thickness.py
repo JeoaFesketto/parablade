@@ -45,6 +45,7 @@ except:
 # Import user-defined packages
 #----------------------------------------------------------------------------------------------------------------------#
 from parablade.CAD_functions import *
+from parablade.common.config import ConfigPasser
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -82,10 +83,11 @@ class Blade2DCamberThickness:
 
     def __init__(self, section_variables):
 
-        # Convert each singleton ndarray into a standard-python scalar
-        section_variables = copy.deepcopy(section_variables)
-        for i in section_variables:
-            section_variables[i] = section_variables[i].item()
+        # removed the weird singleton stuff, weird structure and utilisation overall...
+        # the path to the file can be passed in directly. 
+        section_variables = copy.deepcopy(ConfigPasser(section_variables))
+        for key, value in section_variables.items():
+            section_variables[key] = value[0] if value else None
 
         # Load the blade section variables
         self.stagger = section_variables["stagger"] * np.pi / 180

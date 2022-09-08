@@ -100,3 +100,14 @@ def WriteBladeConfigFile(name,IN):
         output = input.replace('[','')
         output1 = output.replace(']', '')
         name.write("%s=%s\n"%(key,output1))
+
+def ConfigPasser(config):
+    '''Takes in a path to a config file or directly the parsed dict and returns the parsed dict'''
+    if type(config) == str:
+        return ReadUserInput(config)
+    elif type(config) == dict:
+        return config
+    else:
+        raise TypeError(
+            'Inappropriate argument type: input must be path to cfg or the corresponding dictionary itself'
+            )

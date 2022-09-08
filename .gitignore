@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 output_matching
-q.py
+my_tests/q.py
