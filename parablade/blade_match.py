@@ -46,7 +46,7 @@ import warnings
 # ---------------------------------------------------------------------------------------------#
 from parablade.blade_3D import Blade3D
 from parablade.common.common import printProgress
-from parablade.common.config import ReadUserInput, WriteBladeConfigFile
+from parablade.common.config import ReadUserInput, WriteBladeConfigFile, ConfigPasser
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -96,7 +96,7 @@ class BladeMatch:
     ):
 
         # Declare input variables as instance variables
-        self.IN = IN
+        self.IN = ConfigPasser(IN)
         self.NDIM = int(self.IN["NDIM"][0])
         self.N_SECTIONS = self.IN["N_SECTIONS"][0]
         self.PRESCRIBED_BLADE_FILENAME = self.IN["PRESCRIBED_BLADE_FILENAME"]
