@@ -132,3 +132,9 @@ output_matching
 my_tests/q.py
 my_tests/p.py
 my_tests/q.py
+my_tests/plotter.py
+my_tests/test.txt
+my_tests/test2.txt
+my_tests/test3.txt
+.gitignore
+my_tests/testing.geomTurbo

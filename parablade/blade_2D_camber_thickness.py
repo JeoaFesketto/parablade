@@ -82,12 +82,19 @@ class Blade2DCamberThickness:
     """
 
     def __init__(self, section_variables):
-
+        #TODO make something that works  in all the cases.
         # removed the weird singleton stuff, weird structure and utilisation overall...
         # the path to the file can be passed in directly. 
-        section_variables = copy.deepcopy(ConfigPasser(section_variables))
-        for key, value in section_variables.items():
-            section_variables[key] = value[0] if value else None
+
+        # print(type(section_variables))
+        # section_variables = copy.deepcopy(ConfigPasser(section_variables))
+        # for key, value in section_variables.items():
+        #     section_variables[key] = value[0] if value else 0.0
+        section_variables = copy.deepcopy(section_variables)
+        for i in section_variables:
+            section_variables[i] = section_variables[i].item()
+        
+        
 
         # Load the blade section variables
         self.stagger = section_variables["stagger"] * np.pi / 180
