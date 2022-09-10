@@ -36,6 +36,7 @@ try:
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.animation as animation
+    from matplotlib.widgets import Slider, Button
 except:
     pass
 from scipy import stats
@@ -188,6 +189,10 @@ class BladeMatch:
             # Plot the prescribed and matched blades in interactive mode
             self.plot_blade_matching()
             self.do_interactive_matching()
+        
+        elif matching_mode == "manual_sliders":
+
+            self.plot_blade_matching_slider()
 
         elif matching_mode == "uv":
 
@@ -764,13 +769,13 @@ class BladeMatch:
         z_matched = np.real(self.coordinates_matched[2, :])
         R_matched = np.sqrt(y_matched**2 + z_matched**2)
 
-        # Get minimum axes values
+        # Get maximum axes values
         x_max = np.max(x_prescribed)
         y_max = np.max(y_prescribed)
         z_max = np.max(z_prescribed)
         R_max = np.max(R_prescribed)
 
-        # Get maximum axes values
+        # Get minimum axes values
         x_min = np.min(x_prescribed)
         y_min = np.min(y_prescribed)
         z_min = np.min(z_prescribed)
@@ -1256,3 +1261,292 @@ class BladeMatch:
             self.points_4m.set_xdata(x_matched)
             self.points_4m.set_ydata(y_matched)
             self.points_4m.set_3d_properties(z_matched)
+
+    def slider_interactive_matching(self):
+
+        """Create an iteractive plot that updates the geometry in real time using sliders on the plot."""
+
+        print("\n")
+        print("Opening the interactive plot...\n")
+        print("Instructions: \n")
+        print("\t - Use the sliders to adjust the geometry")
+        print(
+            "\t - The manual match will be used as initial guess for the optimization"
+        )
+        print("\t - Close the figures when you are done to continue execution")
+        #TODO add a way to save/cancel a manual geometry change.
+        print("\n")
+
+
+        while True:
+            try:
+                # self.IN = ReadUserInput(self.IN["Config_Path"])
+                self.blade_matched = Blade3D(self.IN)
+                self.blade_matched.make_blade()
+                self.coordinates_matched = self.blade_matched.get_surface_coordinates(
+                    self.u, self.v
+                )
+                break
+            except:
+                print("There is a problem, code needs troubleshooting.")
+                time.sleep(1.5)  # Wait a moment in case the .cfg file is not found
+
+        # Rename coordinates
+        x_matched = np.real(self.coordinates_matched[0, :])
+        y_matched = np.real(self.coordinates_matched[1, :])
+        z_matched = np.real(self.coordinates_matched[2, :])
+        R_matched = np.sqrt(y_matched**2 + z_matched**2)
+
+        # Update the plot coordinates
+        if self.plot_options["view_xy"] == "yes":
+            self.points_1m.set_xdata(x_matched)
+            self.points_1m.set_ydata(y_matched)
+
+        if self.plot_options["view_xR"] == "yes":
+            self.points_2m.set_xdata(x_matched)
+            self.points_2m.set_ydata(R_matched)
+
+        if self.plot_options["view_yz"] == "yes":
+            self.points_3m.set_xdata(y_matched)
+            self.points_3m.set_ydata(z_matched)
+
+        if self.plot_options["view_3D"] == "yes":
+            self.points_4m.set_xdata(x_matched)
+            self.points_4m.set_ydata(y_matched)
+            self.points_4m.set_3d_properties(z_matched)
+
+    def plot_blade_matching_slider(self):
+
+        """Plot of the prescribed and the matched blades
+
+        The figures plotted can be controlled with the "options" dictionary
+        The plotting possibilities include:
+
+            1) 2D view of the (z,y)-plane (airfoil sections)
+            2) 2D view of the (z,R)-plane (meridional channel)
+            3) 2D view of the (y,x)-plane (front view of the blade)
+            4) 3D view of the blade
+
+        """
+        print(self.IN)
+        # if self.IN['PARAMETRIZATION_TYPE'][0] != 'CAMBER_THICKNESS':
+        #     raise Exception('Please activate camber thickness parametrization instead.')
+
+        # Prescribed coordinates
+        x_prescribed = self.coordinates_prescribed[1, :]
+        y_prescribed = self.coordinates_prescribed[2, :]
+        z_prescribed = self.coordinates_prescribed[3, :]
+        R_prescribed = np.sqrt(y_prescribed**2 + z_prescribed**2)
+
+        # Matched coordinates
+        x_matched = np.real(self.coordinates_matched[0, :])
+        y_matched = np.real(self.coordinates_matched[1, :])
+        z_matched = np.real(self.coordinates_matched[2, :])
+        R_matched = np.sqrt(y_matched**2 + z_matched**2)
+
+        # Get maximum axes values
+        x_max = np.max(x_prescribed)
+        y_max = np.max(y_prescribed)
+        z_max = np.max(z_prescribed)
+        R_max = np.max(R_prescribed)
+
+        # Get minimum axes values
+        x_min = np.min(x_prescribed)
+        y_min = np.min(y_prescribed)
+        z_min = np.min(z_prescribed)
+        R_min = np.min(R_prescribed)
+
+        # Get the arithmetic centre of the blade
+        x_mid = (x_min + x_max) / 2
+        y_mid = (y_min + y_max) / 2
+        z_mid = (z_min + z_max) / 2
+        R_mid = (R_min + R_max) / 2
+
+        # Activate interactive mode plotting for the animations (not necessary)
+        # plt.ion()
+
+        if self.plot_options["view_xy"] == "yes":
+
+            # Plot the prescribed and the matched blades
+            self.figure_1, self.axes_1 = plt.subplots()
+
+            # adjust the main plot to make room for the sliders
+            plt.subplots_adjust(bottom=0.35)
+
+            self.axes_1.set_aspect(1.00)
+            self.axes_1.set_xlabel("$x$ - axis", fontsize=12, color="k", labelpad=12)
+            self.axes_1.set_ylabel("$y$ - axis", fontsize=12, color="k", labelpad=12)
+            # self.axes_1.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
+            # self.axes_1.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
+            for t in self.axes_1.xaxis.get_major_ticks():
+                t.label.set_fontsize(12)
+            for t in self.axes_1.yaxis.get_major_ticks():
+                t.label.set_fontsize(12)
+            plt.tight_layout(pad=1.0, w_pad=None, h_pad=None)
+
+            # Set the axes for the plot
+            L = np.max((x_max - x_min, y_max - y_min)) / 2
+            self.axes_1.set_xlim([x_mid - 1.25 * L, x_mid + 1.25 * L])
+            self.axes_1.set_ylim([y_mid - 1.25 * L, y_mid + 1.25 * L])
+
+            # Plot prescribed coordinates
+            (self.points_1p,) = self.axes_1.plot(x_prescribed, y_prescribed)
+            self.points_1p.set_marker("o")
+            self.points_1p.set_markersize(2.5)
+            self.points_1p.set_markeredgewidth(0.5)
+            self.points_1p.set_markeredgecolor("k")
+            self.points_1p.set_markerfacecolor("w")
+            self.points_1p.set_linestyle(" ")
+            self.points_1p.set_color("k")
+            self.points_1p.set_linewidth(0.50)
+            self.points_1p.set_label("Blade prescribed")
+
+            # Plot matched coordinates
+            (self.points_1m,) = self.axes_1.plot(x_matched, y_matched)
+            self.points_1m.set_marker("o")
+            self.points_1m.set_markersize(2.5)
+            self.points_1m.set_markeredgewidth(0.5)
+            self.points_1m.set_markeredgecolor("b")
+            self.points_1m.set_markerfacecolor("w")
+            self.points_1m.set_linestyle(" ")
+            self.points_1m.set_color("k")
+            self.points_1m.set_linewidth(0.50)
+            self.points_1m.set_label("Blade matched")
+
+
+            left = 0.1
+            width = 0.1
+            height = 0.02
+            bottom = 0.05
+            spacing = 0.05
+
+            upper_thickness_sliders = []
+            lower_thickness_sliders = []
+            for i in range(6):
+                upper_thickness_sliders.append(
+                    Slider(
+                        ax = plt.axes([left, bottom+i*spacing, width, height]),
+                        label = f't_u_{i+1}',
+                        valmin = -0.2,
+                        valmax = 0.2,
+                        valinit=self.IN[f'thickness_upper_{i+1}'][0]
+                    )
+                )
+            for i in range(6):
+                lower_thickness_sliders.append(
+                    Slider(
+                        ax = plt.axes([left, bottom+(i+6)*spacing, width, height]),
+                        label = f't_l_{i+1}',
+                        valmin = -0.2,
+                        valmax = 0.2,
+                        valinit=self.IN[f'thickness_lower_{i+1}'][0]
+                    )
+                )
+
+            stagger_slider = Slider(
+                ax=plt.axes([left, bottom+12*spacing, width, height]),
+                label='stagger',
+                valmin=0,
+                valmax=40,
+                valinit=self.IN['stagger'][0],
+            )
+
+            theta_in_slider = Slider(
+                ax=plt.axes([left, bottom+13*spacing, width, height]),
+                label='Theta leading edge',
+                valmin=-90,
+                valmax=90,
+                valinit=self.IN['theta_in'][0],
+            )
+
+            theta_out_slider = Slider(
+                ax=plt.axes([left, bottom+14*spacing, width, height]),
+                label='theta_out',
+                valmin=-90,
+                valmax=90,
+                valinit=self.IN['theta_out'][0],
+            )
+            radius_in_slider = Slider(
+                ax=plt.axes([left, bottom+15*spacing, width, height]),
+                label='rad_in',
+                valmin=0,
+                valmax=0.1,
+                valinit=self.IN['radius_in'][0],
+            )
+            radius_out_slider = Slider(
+                ax=plt.axes([left, bottom+16*spacing, width, height]),
+                label='rad_out',
+                valmin=0,
+                valmax=0.1,
+                valinit=self.IN['radius_out'][0],
+            )
+            dist_in_slider = Slider(
+                ax=plt.axes([left, bottom+17*spacing, width, height]),
+                label='dist_in',
+                valmin=0,
+                valmax=0.1,
+                valinit=self.IN['dist_in'][0],
+            )
+            dist_out_slider = Slider(
+                ax=plt.axes([left, bottom+18*spacing, width, height]),
+                label='dist_out',
+                valmin=0,
+                valmax=0.1,
+                valinit=self.IN['dist_out'][0],
+            )
+
+            # The function to be called anytime a slider's value changes
+            def update(val):
+
+                self.IN['stagger'][0] = stagger_slider.val
+                self.IN['theta_in'][0] = theta_in_slider.val
+                self.IN['theta_out'][0] = theta_out_slider.val
+                self.IN['radius_in'][0] = radius_in_slider.val
+                self.IN['radius_out'][0] = radius_out_slider.val
+                self.IN['dist_in'][0] = dist_in_slider.val
+                self.IN['dist_out'][0] = dist_out_slider.val
+                for i in range(6):
+                    self.IN[f'thickness_upper_{i+1}'][0] = upper_thickness_sliders[i].val
+                    self.IN[f'thickness_lower_{i+1}'][0] = lower_thickness_sliders[i].val
+
+
+                self.blade_matched = Blade3D(self.IN)
+                self.blade_matched.make_blade()
+                self.coordinates_matched = self.blade_matched.get_surface_coordinates(
+                    self.u, self.v
+                )
+                x_matched = np.real(self.coordinates_matched[0, :])
+                y_matched = np.real(self.coordinates_matched[1, :])
+                z_matched = np.real(self.coordinates_matched[2, :])
+                R_matched = np.sqrt(y_matched**2 + z_matched**2)
+
+                self.points_1m.set_xdata(x_matched)
+                self.points_1m.set_ydata(y_matched)
+                self.figure_1.canvas.draw_idle()
+
+
+            # register the update function with each slider
+            stagger_slider.on_changed(update)
+            theta_in_slider.on_changed(update)
+            theta_out_slider.on_changed(update)
+            radius_in_slider.on_changed(update)
+            radius_out_slider.on_changed(update)
+            dist_in_slider.on_changed(update)
+            dist_out_slider.on_changed(update)
+            for i in range(6):
+                upper_thickness_sliders[i].on_changed(update)
+                lower_thickness_sliders[i].on_changed(update)
+
+            saveax = plt.axes([0.8, 0.025, 0.1, 0.04])
+            button = Button(saveax, 'Save', hovercolor='0.975')
+
+
+            def save(event):
+                file = open(self.IN['Config_Path'], 'w') 
+                WriteBladeConfigFile(file, self.IN)
+                file.close()
+                print(f'Parameters saved in {self.IN["Config_Path"]}.')
+
+            button.on_clicked(save)
+
+            plt.show()
