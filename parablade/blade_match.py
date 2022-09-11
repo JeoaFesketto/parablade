@@ -389,7 +389,7 @@ class BladeMatch:
         # Optimization algorithm options
         my_options = {
             "disp": False,
-            "ftol": 1e-8,
+            "ftol": 1e-20,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
             "maxiter": 1000,
@@ -1262,58 +1262,6 @@ class BladeMatch:
             self.points_4m.set_ydata(y_matched)
             self.points_4m.set_3d_properties(z_matched)
 
-    def slider_interactive_matching(self):
-
-        """Create an iteractive plot that updates the geometry in real time using sliders on the plot."""
-
-        print("\n")
-        print("Opening the interactive plot...\n")
-        print("Instructions: \n")
-        print("\t - Use the sliders to adjust the geometry")
-        print(
-            "\t - The manual match will be used as initial guess for the optimization"
-        )
-        print("\t - Close the figures when you are done to continue execution")
-        #TODO add a way to save/cancel a manual geometry change.
-        print("\n")
-
-
-        while True:
-            try:
-                # self.IN = ReadUserInput(self.IN["Config_Path"])
-                self.blade_matched = Blade3D(self.IN)
-                self.blade_matched.make_blade()
-                self.coordinates_matched = self.blade_matched.get_surface_coordinates(
-                    self.u, self.v
-                )
-                break
-            except:
-                print("There is a problem, code needs troubleshooting.")
-                time.sleep(1.5)  # Wait a moment in case the .cfg file is not found
-
-        # Rename coordinates
-        x_matched = np.real(self.coordinates_matched[0, :])
-        y_matched = np.real(self.coordinates_matched[1, :])
-        z_matched = np.real(self.coordinates_matched[2, :])
-        R_matched = np.sqrt(y_matched**2 + z_matched**2)
-
-        # Update the plot coordinates
-        if self.plot_options["view_xy"] == "yes":
-            self.points_1m.set_xdata(x_matched)
-            self.points_1m.set_ydata(y_matched)
-
-        if self.plot_options["view_xR"] == "yes":
-            self.points_2m.set_xdata(x_matched)
-            self.points_2m.set_ydata(R_matched)
-
-        if self.plot_options["view_yz"] == "yes":
-            self.points_3m.set_xdata(y_matched)
-            self.points_3m.set_ydata(z_matched)
-
-        if self.plot_options["view_3D"] == "yes":
-            self.points_4m.set_xdata(x_matched)
-            self.points_4m.set_ydata(y_matched)
-            self.points_4m.set_3d_properties(z_matched)
 
     def plot_blade_matching_slider(self):
 
