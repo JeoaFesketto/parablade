@@ -26,9 +26,9 @@ from parablade.interpolation_functions import TransfiniteInterpolation
 # West boundary parametrization
 P = np.zeros((2,4), dtype=complex)
 P[:, 0] = [0.00, 0.00]
-P[:, 1] = [0.10, 0.33]
-P[:, 2] = [0.15, 0.66]
-P[:, 3] = [0.05, 1.00]
+P[:, 1] = [0, 0.5808]
+P[:, 2] = [0, 1.1616]
+P[:, 3] = [0, 1.76]
 nn = np.shape(P)[1]
 n = nn-1
 p = n
@@ -40,9 +40,9 @@ P1 = c1.P
 # South boundary parametrization
 P = np.zeros((2,4), dtype=complex)
 P[:, 0] = P1[:, 0]
-P[:, 1] = [0.33, 0.00]
-P[:, 2] = [0.66, 0.10]
-P[:, 3] = [1.00, 0.20]
+P[:, 1] = [0.33, 0.5]
+P[:, 2] = [0.66, 0.6]
+P[:, 3] = [1.00, 0.65]
 nn = np.shape(P)[1]
 n = nn-1
 p = n
@@ -54,9 +54,9 @@ P2 = c2.P
 # East boundary parametrization
 P = np.zeros((2,4), dtype=complex)
 P[:, 0] = P2[:, -1]
-P[:, 1] = [1.15, 0.33+0.25]
-P[:, 2] = [1.15, 0.66+0.25]
-P[:, 3] = [1.05, 1.00+0.25]
+P[:, 1] = [1, 0.33+0.25]
+P[:, 2] = [1, 0.66+0.25]
+P[:, 3] = [1, 1.00+0.25]
 nn = np.shape(P)[1]
 n = nn-1
 p = n

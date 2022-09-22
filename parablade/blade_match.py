@@ -1276,9 +1276,6 @@ class BladeMatch:
             4) 3D view of the blade
 
         """
-        print(self.IN)
-        # if self.IN['PARAMETRIZATION_TYPE'][0] != 'CAMBER_THICKNESS':
-        #     raise Exception('Please activate camber thickness parametrization instead.')
 
         # Prescribed coordinates
         x_prescribed = self.coordinates_prescribed[1, :]
@@ -1375,8 +1372,8 @@ class BladeMatch:
                     Slider(
                         ax = plt.axes([left, bottom+i*spacing, width, height]),
                         label = f't_u_{i+1}',
-                        valmin = -0.2,
-                        valmax = 0.2,
+                        valmin = -0.5,
+                        valmax = 0.5,
                         valinit=self.IN[f'thickness_upper_{i+1}'][0]
                     )
                 )
@@ -1385,8 +1382,8 @@ class BladeMatch:
                     Slider(
                         ax = plt.axes([left, bottom+(i+6)*spacing, width, height]),
                         label = f't_l_{i+1}',
-                        valmin = -0.2,
-                        valmax = 0.2,
+                        valmin = -0.5,
+                        valmax = 0.5,
                         valinit=self.IN[f'thickness_lower_{i+1}'][0]
                     )
                 )
@@ -1394,8 +1391,8 @@ class BladeMatch:
             stagger_slider = Slider(
                 ax=plt.axes([left, bottom+12*spacing, width, height]),
                 label='stagger',
-                valmin=0,
-                valmax=40,
+                valmin=-90,
+                valmax=90,
                 valinit=self.IN['stagger'][0],
             )
 
@@ -1418,28 +1415,28 @@ class BladeMatch:
                 ax=plt.axes([left, bottom+15*spacing, width, height]),
                 label='rad_in',
                 valmin=0,
-                valmax=0.1,
+                valmax=0.3,
                 valinit=self.IN['radius_in'][0],
             )
             radius_out_slider = Slider(
                 ax=plt.axes([left, bottom+16*spacing, width, height]),
                 label='rad_out',
                 valmin=0,
-                valmax=0.1,
+                valmax=0.3,
                 valinit=self.IN['radius_out'][0],
             )
             dist_in_slider = Slider(
                 ax=plt.axes([left, bottom+17*spacing, width, height]),
                 label='dist_in',
-                valmin=0,
-                valmax=0.1,
+                valmin=0.0001,
+                valmax=0.3,
                 valinit=self.IN['dist_in'][0],
             )
             dist_out_slider = Slider(
                 ax=plt.axes([left, bottom+18*spacing, width, height]),
                 label='dist_out',
-                valmin=0,
-                valmax=0.1,
+                valmin=0.0001,
+                valmax=0.3,
                 valinit=self.IN['dist_out'][0],
             )
 

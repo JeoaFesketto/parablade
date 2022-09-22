@@ -56,21 +56,21 @@ design_variables = ConfigPasser(r'/home/daep/j.fesquet/git_repos/parablade/my_te
 u = np.linspace(0.00, 1.00, 1000)
 my_blade = Blade2DCamberThickness(design_variables)
 my_blade.get_section_coordinates(u)
-my_blade.check_analytic_curvature() # it breaks vscode but not the code...
+# my_blade.check_analytic_curvature() # it breaks vscode but not the code...
 
 
-#----------------------------------------------------------------------------------------------------------------------#
-# Plot the 2D section
-#----------------------------------------------------------------------------------------------------------------------#
-# Plot a single blade
-my_blade.plot_blade_section(upper_side='yes', upper_side_control_points='no',
-                            lower_side='yes', lower_side_control_points='no',
-                            camberline='yes', camberline_control_points='no', camberline_sample_points='no',
-                            leading_edge_radius='no', trailing_edge_radius='no')
+# #----------------------------------------------------------------------------------------------------------------------#
+# # Plot the 2D section
+# #----------------------------------------------------------------------------------------------------------------------#
+# # Plot a single blade
+# my_blade.plot_blade_section(upper_side='yes', upper_side_control_points='no',
+#                             lower_side='yes', lower_side_control_points='no',
+#                             camberline='yes', camberline_control_points='no', camberline_sample_points='no',
+#                             leading_edge_radius='no', trailing_edge_radius='no')
 
 
 
-# Show the figure
-plt.show()
+# # Show the figure
+# plt.show()
 
 

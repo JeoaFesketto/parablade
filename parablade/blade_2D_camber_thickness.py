@@ -83,16 +83,13 @@ class Blade2DCamberThickness:
 
     def __init__(self, section_variables):
         #TODO make something that works  in all the cases.
-        # removed the weird singleton stuff, weird structure and utilisation overall...
-        # the path to the file can be passed in directly. 
 
-        # print(type(section_variables))
-        section_variables = copy.deepcopy(ConfigPasser(section_variables))
-        for key, value in section_variables.items():
-            section_variables[key] = value[0] if value else 0.0
-        # section_variables = copy.deepcopy(section_variables)
-        # for i in section_variables:
-        #     section_variables[i] = section_variables[i].item()
+        # section_variables = copy.deepcopy(ConfigPasser(section_variables))
+        # for key, value in section_variables.items():
+        #     section_variables[key] = value[0] if value else 0.0
+        section_variables = copy.deepcopy(section_variables)
+        for i in section_variables:
+            section_variables[i] = section_variables[i].item()
         
         
 
@@ -197,11 +194,14 @@ class Blade2DCamberThickness:
         upper_surface_coordinates = self.get_upper_side_coordinates(u_upper)
         lower_surface_coordinates = self.get_lower_side_coordinates(u_lower)
 
+        self.suction_coordinates = upper_surface_coordinates
+        self.pressure_coordinates = lower_surface_coordinates
+
         # Concatenate the arcs to obtain the blade section
         section_coordinates = np.concatenate((lower_surface_coordinates, upper_surface_coordinates), axis=1)
 
         # Retrieve the original parametrization order
-        self.section_coordinates = section_coordinates[:, my_order2]
+        self.section_coordinates = np.asarray(section_coordinates[:, my_order2], dtype='float32')
 
         return self.section_coordinates
 

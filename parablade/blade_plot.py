@@ -304,7 +304,6 @@ class BladePlot:
         # self.ax_3D.set_yticks([])
         # self.ax_3D.set_zticks([])
         # self.ax_3D.axis('off')
-
         # Blade coordinates
         x_blade = self.surface_coordinates[0, :]
         y_blade = self.surface_coordinates[1, :]

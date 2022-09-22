@@ -98,7 +98,7 @@ print('The elapsed time is %(my_time).3f seconds' % {'my_time': time.time() - t}
 # -------------------------------------------------------------------------------------------------------------------- #
 # Plot the B-Spline surface
 # -------------------------------------------------------------------------------------------------------------------- #
-options = {'point_cloud': 'no',
+options = {'point_cloud': 'yes',
            'control_points': 'yes',
            'surface': 'yes',
            'surface_Nu': Nu,
