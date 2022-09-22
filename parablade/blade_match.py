@@ -32,7 +32,7 @@ from scipy.optimize import *  # Optimization library
 import numpy as np  # Scientific computing library
 
 try:
-    import matplotlib as mpl  # Plotting library
+    import matplotlib as mpl  # plotting library
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.animation as animation
@@ -161,7 +161,7 @@ class BladeMatch:
 
         1) Manual mode: matching_mode='manual'
 
-            - Plots the prescribed and fitted blades in an interactive way (read instruction on screen)
+            - plots the prescribed and fitted blades in an interactive way (read instruction on screen)
             - The geometry of the matched blade can be updated in real time editing the .cfg file
             - The output from this matching mode is used as initial guess or the automatic matching
 
@@ -186,7 +186,7 @@ class BladeMatch:
 
         if matching_mode == "manual":
 
-            # Plot the prescribed and matched blades in interactive mode
+            # plot the prescribed and matched blades in interactive mode
             self.plot_blade_matching()
             self.do_interactive_matching()
         
@@ -199,7 +199,7 @@ class BladeMatch:
             # Run the (u,v) matching
             self.match_blade_uv()
 
-            # Plot the error lines and save the final solution
+            # plot the error lines and save the final solution
             self.plot_blade_matching()
             self.plot_error_distribution()
             self.plot_error_lines()
@@ -213,7 +213,7 @@ class BladeMatch:
             # Run the (u,v) matching one time first
             self.match_blade_uv()
 
-            # Plot the initial guess in a new figure
+            # plot the initial guess in a new figure
             self.plot_blade_matching()
             self.plot_error_distribution()
             self.update_plots()
@@ -221,7 +221,7 @@ class BladeMatch:
             # Run the design variable matching | The (u,v) matching is run each N iterations (see callback function)
             self.match_blade_DVs()
 
-            # Plot the error lines and save the final solution
+            # plot the error lines and save the final solution
             self.update_plots()
             self.plot_error_lines()
             self.save_plots()
@@ -792,7 +792,7 @@ class BladeMatch:
 
         if self.plot_options["view_xy"] == "yes":
 
-            # Plot the prescribed and the matched blades
+            # plot the prescribed and the matched blades
             self.figure_1, self.axes_1 = plt.subplots()
             self.axes_1.set_aspect(1.00)
             self.axes_1.set_xlabel("$x$ - axis", fontsize=12, color="k", labelpad=12)
@@ -810,7 +810,7 @@ class BladeMatch:
             self.axes_1.set_xlim([x_mid - 1.25 * L, x_mid + 1.25 * L])
             self.axes_1.set_ylim([y_mid - 1.25 * L, y_mid + 1.25 * L])
 
-            # Plot prescribed coordinates
+            # plot prescribed coordinates
             (self.points_1p,) = self.axes_1.plot(x_prescribed, y_prescribed)
             self.points_1p.set_marker("o")
             self.points_1p.set_markersize(2.5)
@@ -822,7 +822,7 @@ class BladeMatch:
             self.points_1p.set_linewidth(0.50)
             self.points_1p.set_label("Blade prescribed")
 
-            # Plot matched coordinates
+            # plot matched coordinates
             (self.points_1m,) = self.axes_1.plot(x_matched, y_matched)
             self.points_1m.set_marker("o")
             self.points_1m.set_markersize(2.5)
@@ -836,7 +836,7 @@ class BladeMatch:
 
         if self.plot_options["view_xR"] == "yes":
 
-            # Plot the prescribed and the matched blades
+            # plot the prescribed and the matched blades
             self.figure_2, self.axes_2 = plt.subplots()
             self.axes_2.set_aspect(1.00)
             self.axes_2.set_xlabel("$x$ - axis", fontsize=12, color="k", labelpad=12)
@@ -854,7 +854,7 @@ class BladeMatch:
             self.axes_2.set_xlim([x_mid - 1.25 * L, x_mid + 1.25 * L])
             self.axes_2.set_ylim([R_mid - 1.25 * L, R_mid + 1.25 * L])
 
-            # Plot prescribed coordinates
+            # plot prescribed coordinates
             (self.points_2p,) = self.axes_2.plot(x_prescribed, R_prescribed)
             self.points_2p.set_marker("o")
             self.points_2p.set_markersize(3.0)
@@ -866,7 +866,7 @@ class BladeMatch:
             self.points_2p.set_linewidth(0.50)
             self.points_2p.set_label("Blade prescribed")
 
-            # Plot matched coordinates
+            # plot matched coordinates
             (self.points_2m,) = self.axes_2.plot(x_matched, R_matched)
             self.points_2m.set_marker("o")
             self.points_2m.set_markersize(3.0)
@@ -880,7 +880,7 @@ class BladeMatch:
 
         if self.plot_options["view_yz"] == "yes":
 
-            # Plot the prescribed and the matched blades
+            # plot the prescribed and the matched blades
             self.figure_3, self.axes_3 = plt.subplots()
             self.axes_3.set_aspect(1.00)
             self.axes_3.set_xlabel("$y$ - axis", fontsize=12, color="k", labelpad=12)
@@ -898,7 +898,7 @@ class BladeMatch:
             self.axes_3.set_xlim([y_mid - 1.25 * L, y_mid + 1.25 * L])
             self.axes_3.set_ylim([z_mid - 1.25 * L, z_mid + 1.25 * L])
 
-            # Plot prescribed coordinates
+            # plot prescribed coordinates
             (self.points_3p,) = self.axes_3.plot(y_prescribed, z_prescribed)
             self.points_3p.set_marker("o")
             self.points_3p.set_markersize(3.0)
@@ -910,7 +910,7 @@ class BladeMatch:
             self.points_3p.set_linewidth(0.50)
             self.points_3p.set_label("Blade prescribed")
 
-            # Plot matched coordinates
+            # plot matched coordinates
             (self.points_3m,) = self.axes_3.plot(y_matched, z_matched)
             self.points_3m.set_marker("o")
             self.points_3m.set_markersize(3.0)
@@ -956,7 +956,7 @@ class BladeMatch:
             self.axes_4.set_ylim3d(y_mid - 1.1 * L, y_mid + 1.1 * L)
             self.axes_4.set_zlim3d(z_mid - 1.1 * L, z_mid + 1.1 * L)
 
-            # Plot prescribed coordinates
+            # plot prescribed coordinates
             (self.points_4p,) = self.axes_4.plot(
                 x_prescribed, y_prescribed, z_prescribed
             )
@@ -970,7 +970,7 @@ class BladeMatch:
             self.points_4p.set_linewidth(0.50)
             self.points_4p.set_label("Blade prescribed")
 
-            # Plot matched coordinates
+            # plot matched coordinates
             (self.points_4m,) = self.axes_4.plot(x_matched, y_matched, z_matched)
             self.points_4m.set_marker("o")
             self.points_4m.set_markersize(3)
@@ -1011,7 +1011,7 @@ class BladeMatch:
             kernel = stats.gaussian_kde(error)
             x_values = np.linspace(0, np.amax(error), 200)
 
-            # Plot error distribution
+            # plot error distribution
             (self.error_plot,) = self.axes_5.plot(
                 x_values, kernel(x_values) / np.amax(kernel(x_values))
             )
@@ -1025,7 +1025,7 @@ class BladeMatch:
             self.error_plot.set_linewidth(1.00)
             self.error_plot.set_label("Error distribution")
 
-            # Plot mean error line
+            # plot mean error line
             (self.error_mean,) = self.axes_5.plot(
                 [error_mean, error_mean],
                 [0, kernel(error_mean) / np.amax(kernel(x_values))],
@@ -1070,7 +1070,7 @@ class BladeMatch:
         z_matched = np.real(self.coordinates_matched[2, :])
         R_matched = np.sqrt(y_matched**2 + z_matched**2)
 
-        # Plot the error lines
+        # plot the error lines
         if self.plot_options["view_xy"] == "yes":
             for i in range(self.N_points):
                 (error_lines_1,) = self.axes_1.plot(
@@ -1312,7 +1312,7 @@ class BladeMatch:
 
         if self.plot_options["view_xy"] == "yes":
 
-            # Plot the prescribed and the matched blades
+            # plot the prescribed and the matched blades
             self.figure_1, self.axes_1 = plt.subplots()
 
             # adjust the main plot to make room for the sliders
@@ -1334,7 +1334,7 @@ class BladeMatch:
             self.axes_1.set_xlim([x_mid - 1.25 * L, x_mid + 1.25 * L])
             self.axes_1.set_ylim([y_mid - 1.25 * L, y_mid + 1.25 * L])
 
-            # Plot prescribed coordinates
+            # plot prescribed coordinates
             (self.points_1p,) = self.axes_1.plot(x_prescribed, y_prescribed)
             self.points_1p.set_marker("o")
             self.points_1p.set_markersize(2.5)
@@ -1346,7 +1346,7 @@ class BladeMatch:
             self.points_1p.set_linewidth(0.50)
             self.points_1p.set_label("Blade prescribed")
 
-            # Plot matched coordinates
+            # plot matched coordinates
             (self.points_1m,) = self.axes_1.plot(x_matched, y_matched)
             self.points_1m.set_marker("o")
             self.points_1m.set_markersize(2.5)
@@ -1365,95 +1365,53 @@ class BladeMatch:
             bottom = 0.05
             spacing = 0.05
 
-            upper_thickness_sliders = []
-            lower_thickness_sliders = []
-            for i in range(6):
-                upper_thickness_sliders.append(
-                    Slider(
-                        ax = plt.axes([left, bottom+i*spacing, width, height]),
-                        label = f't_u_{i+1}',
-                        valmin = -0.5,
-                        valmax = 0.5,
-                        valinit=self.IN[f'thickness_upper_{i+1}'][0]
-                    )
+            params = [
+                'thickness_upper_1',
+                'thickness_upper_2',
+                'thickness_upper_3',
+                'thickness_upper_4',
+                'thickness_upper_5',
+                'thickness_upper_6',
+                'thickness_lower_1',
+                'thickness_lower_2',
+                'thickness_lower_3',
+                'thickness_lower_4',
+                'thickness_lower_5',
+                'thickness_lower_6',
+                'theta_in',
+                'theta_out',
+                'dist_in',
+                'dist_out',
+                'radius_in',
+                'radius_out',
+                'stagger'
+            ]
+            sliders = {}
+
+            def _interval(case, value, coef = 0.5):
+                if value == 0:
+                    return 3 if case == max else -3
+                else:
+                    if value < 0:
+                        return value * (1+coef) if case == min else value * (1-coef)
+                    else:
+                        return value * (1+coef) if case == max else value * (1-coef)
+
+            for i, param in enumerate(params):
+                sliders[param] = Slider(
+                    ax = plt.axes([left, bottom+i*spacing, width, height]),
+                    label = param,
+                    valmin = _interval(min, self.IN[param][0]),
+                    valmax = _interval(max, self.IN[param][0]),
+                    valinit = self.IN[param][0]
                 )
-            for i in range(6):
-                lower_thickness_sliders.append(
-                    Slider(
-                        ax = plt.axes([left, bottom+(i+6)*spacing, width, height]),
-                        label = f't_l_{i+1}',
-                        valmin = -0.5,
-                        valmax = 0.5,
-                        valinit=self.IN[f'thickness_lower_{i+1}'][0]
-                    )
-                )
 
-            stagger_slider = Slider(
-                ax=plt.axes([left, bottom+12*spacing, width, height]),
-                label='stagger',
-                valmin=-90,
-                valmax=90,
-                valinit=self.IN['stagger'][0],
-            )
-
-            theta_in_slider = Slider(
-                ax=plt.axes([left, bottom+13*spacing, width, height]),
-                label='Theta leading edge',
-                valmin=-90,
-                valmax=90,
-                valinit=self.IN['theta_in'][0],
-            )
-
-            theta_out_slider = Slider(
-                ax=plt.axes([left, bottom+14*spacing, width, height]),
-                label='theta_out',
-                valmin=-90,
-                valmax=90,
-                valinit=self.IN['theta_out'][0],
-            )
-            radius_in_slider = Slider(
-                ax=plt.axes([left, bottom+15*spacing, width, height]),
-                label='rad_in',
-                valmin=0,
-                valmax=0.3,
-                valinit=self.IN['radius_in'][0],
-            )
-            radius_out_slider = Slider(
-                ax=plt.axes([left, bottom+16*spacing, width, height]),
-                label='rad_out',
-                valmin=0,
-                valmax=0.3,
-                valinit=self.IN['radius_out'][0],
-            )
-            dist_in_slider = Slider(
-                ax=plt.axes([left, bottom+17*spacing, width, height]),
-                label='dist_in',
-                valmin=0.0001,
-                valmax=0.3,
-                valinit=self.IN['dist_in'][0],
-            )
-            dist_out_slider = Slider(
-                ax=plt.axes([left, bottom+18*spacing, width, height]),
-                label='dist_out',
-                valmin=0.0001,
-                valmax=0.3,
-                valinit=self.IN['dist_out'][0],
-            )
 
             # The function to be called anytime a slider's value changes
             def update(val):
 
-                self.IN['stagger'][0] = stagger_slider.val
-                self.IN['theta_in'][0] = theta_in_slider.val
-                self.IN['theta_out'][0] = theta_out_slider.val
-                self.IN['radius_in'][0] = radius_in_slider.val
-                self.IN['radius_out'][0] = radius_out_slider.val
-                self.IN['dist_in'][0] = dist_in_slider.val
-                self.IN['dist_out'][0] = dist_out_slider.val
-                for i in range(6):
-                    self.IN[f'thickness_upper_{i+1}'][0] = upper_thickness_sliders[i].val
-                    self.IN[f'thickness_lower_{i+1}'][0] = lower_thickness_sliders[i].val
-
+                for param in params:
+                    self.IN[param][0] = sliders[param].val
 
                 self.blade_matched = Blade3D(self.IN)
                 self.blade_matched.make_blade()
@@ -1471,20 +1429,11 @@ class BladeMatch:
 
 
             # register the update function with each slider
-            stagger_slider.on_changed(update)
-            theta_in_slider.on_changed(update)
-            theta_out_slider.on_changed(update)
-            radius_in_slider.on_changed(update)
-            radius_out_slider.on_changed(update)
-            dist_in_slider.on_changed(update)
-            dist_out_slider.on_changed(update)
-            for i in range(6):
-                upper_thickness_sliders[i].on_changed(update)
-                lower_thickness_sliders[i].on_changed(update)
+            for param in params:
+                sliders[param].on_changed(update)
 
             saveax = plt.axes([0.8, 0.025, 0.1, 0.04])
-            button = Button(saveax, 'Save', hovercolor='0.975')
-
+            save_button = Button(saveax, 'Save', hovercolor='0.975')
 
             def save(event):
                 file = open(self.IN['Config_Path'], 'w') 
@@ -1492,6 +1441,40 @@ class BladeMatch:
                 file.close()
                 print(f'Parameters saved in {self.IN["Config_Path"]}.')
 
-            button.on_clicked(save)
+            save_button.on_clicked(save)
+
+            centerax = plt.axes([0.8, 0.125, 0.1, 0.04])
+            center_button = Button(centerax, 'Center_sliders', hovercolor='0.975')
+
+            def center(event):
+                for param in params:
+                    sliders[param].valmin = _interval(min, sliders[param].val)
+                    sliders[param].valmax = _interval(max, sliders[param].val)
+
+            def center(event):
+                for param in params:
+
+                    temp_ax = sliders[param].ax
+
+                    valmin = _interval(min, sliders[param].val)
+                    valmax = _interval(max, sliders[param].val)
+                    valinit = sliders[param].val
+
+                    sliders[param].ax.clear()
+
+                    sliders[param].__init__(
+                        ax = temp_ax, 
+                        label = param, 
+                        valmin = valmin,
+                        valmax = valmax,
+                        valinit = valinit
+                    )
+                    sliders[param].on_changed(update)
+
+                # plt.gcf().canvas.draw_idle()
+
+            center_button.on_clicked(center)
+
+
 
             plt.show()
