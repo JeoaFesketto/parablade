@@ -1078,7 +1078,54 @@ class Blade2DCamberThickness:
 
         return fig, ax
 
+    def scale(self, factor):
+        params = [
+            "thickness_upper_1",
+            "thickness_upper_2",
+            "thickness_upper_3",
+            "thickness_upper_4",
+            "thickness_upper_5",
+            "thickness_upper_6",
+            "thickness_lower_1",
+            "thickness_lower_2",
+            "thickness_lower_3",
+            "thickness_lower_4",
+            "thickness_lower_5",
+            "thickness_lower_6",
+            "dist_in",
+            "dist_out",
+            "radius_in",
+            "radius_out",
+        ]
+        for param in params:
+            self.IN[param][0] = factor * self.IN[param][0]
+        self.IN["x_trailing"][0] = factor * (
+            self.IN["x_trailing"][0] - self.IN["x_leading"][0]
+        )
 
+
+    def tilt(self, angle):
+        """Changes the blade anlge by an amount in degrees."""
+        self.IN["stagger"][0] = self.IN["stagger"][0] + angle
+        self.IN["theta_in"][0] = self.IN["theta_in"][0] - angle
+        self.IN["theta_out"][0] = self.IN["theta_out"][0] + angle
+
+
+    def set_blade_angle(self, angle):
+        angle_to_tilt = angle - self.IN["stagger"][0]
+        self.tilt(angle_to_tilt)
+
+    def set_scale(self, chord_length):
+
+        x_2 = self.IN['x_trailing'][0]
+        x_1 = self.IN['x_leading'][0]
+        blade_angle = self.IN['stagger'][0]
+
+        c = (x_2-x_1)/np.cos(blade_angle)
+        
+        factor_to_scale = chord_length - c
+
+        self.scale(factor_to_scale)
 
 
 

@@ -111,7 +111,8 @@ class BladePlot:
 
         if self.PLOT_FORMAT == 'MATPLOTLIB':
             self.make_python_plot()
-            plt.show()
+            # plt.show()
+            plt.grid()
         elif self.PLOT_FORMAT == 'INTERACTIVE':
             self.make_interactive_plot()
             plt.show()

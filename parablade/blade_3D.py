@@ -8,7 +8,7 @@
 ###############################################################################################
 
 ################################# FILE NAME: MakeBlade.py #####################################
-#=============================================================================================#
+# =============================================================================================#
 # author: Roberto, Nitish Anand                                                               |
 #    :PhD Candidates,                                                                         |
 #    :Power and Propulsion, Energy Technology,                                                |
@@ -18,11 +18,11 @@
 #                                                                                             |
 # Description:                                                                                |
 #                                                                                             |
-#=============================================================================================#
+# =============================================================================================#
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # Importing general packages
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 import os
 import sys
 import pdb
@@ -32,10 +32,9 @@ import numpy as np
 import scipy.integrate as integrate
 
 
-
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 # Importing ParaBlade classes and functions
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 from parablade.common.common import printProgress
 from parablade.common.config import ReadUserInput, ConfigPasser
 from parablade.CAD_functions import *
@@ -44,9 +43,9 @@ from parablade.blade_2D_connecting_arcs import Blade2DConnectingArcs
 from parablade.blade_2D_camber_thickness import Blade2DCamberThickness
 
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # "Cluster mode" imports
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 try:
     import matplotlib as mpl
     import matplotlib.pyplot as plt
@@ -59,7 +58,7 @@ except:
 # -------------------------------------------------------------------------------------------------------------------- #
 class Blade3D:
 
-    """ Create a 3D blade object from configuration file
+    """Create a 3D blade object from configuration file
 
     Parameters
     ----------
@@ -143,86 +142,95 @@ class Blade3D:
     """
 
     # Array of variable names for the meridional channel
-    meridional_channel_names = ['x_leading',
-                                'y_leading',
-                                'z_leading',
-                                'x_trailing',
-                                'z_trailing',
-                                'x_hub',
-                                'z_hub',
-                                'x_shroud',
-                                'z_shroud']
+    meridional_channel_names = [
+        "x_leading",
+        "y_leading",
+        "z_leading",
+        "x_trailing",
+        "z_trailing",
+        "x_hub",
+        "z_hub",
+        "x_shroud",
+        "z_shroud",
+    ]
 
     # Array of variable names for blade sections (connecting arcs parametrization)
-    blade_section_connecting_arcs = ['stagger',
-                                   'theta_in',
-                                   'theta_out',
-                                   'wedge_in',
-                                   'wedge_out',
-                                   'radius_in',
-                                   'radius_out',
-                                   'dist_1',
-                                   'dist_2',
-                                   'dist_3',
-                                   'dist_4']
+    blade_section_connecting_arcs = [
+        "stagger",
+        "theta_in",
+        "theta_out",
+        "wedge_in",
+        "wedge_out",
+        "radius_in",
+        "radius_out",
+        "dist_1",
+        "dist_2",
+        "dist_3",
+        "dist_4",
+    ]
 
     # Array of variable names for blade sections (camber thickness parametrization)
-    blade_section_camber_thickness = ['stagger',
-                                       'theta_in',
-                                       'theta_out',
-                                       'radius_in',
-                                       'radius_out',
-                                       'dist_in',
-                                       'dist_out',
-                                       'thickness_upper_1',
-                                       'thickness_upper_2',
-                                       'thickness_upper_3',
-                                       'thickness_upper_4',
-                                       'thickness_upper_5',
-                                       'thickness_upper_6',
-                                       'thickness_lower_1',
-                                       'thickness_lower_2',
-                                       'thickness_lower_3',
-                                       'thickness_lower_4',
-                                       'thickness_lower_5',
-                                       'thickness_lower_6']
+    blade_section_camber_thickness = [
+        "stagger",
+        "theta_in",
+        "theta_out",
+        "radius_in",
+        "radius_out",
+        "dist_in",
+        "dist_out",
+        "thickness_upper_1",
+        "thickness_upper_2",
+        "thickness_upper_3",
+        "thickness_upper_4",
+        "thickness_upper_5",
+        "thickness_upper_6",
+        "thickness_lower_1",
+        "thickness_lower_2",
+        "thickness_lower_3",
+        "thickness_lower_4",
+        "thickness_lower_5",
+        "thickness_lower_6",
+    ]
 
     # Declare additional variables as instance variables
-    DVs_names                   = None
-    DVs_names_2D                = None
-    DVs_names_meridional        = None
-    DVs_number                  = None
-    DVs_functions               = None
-    DVs_control_points          = None
-    surface_interpolant         = None
-    surface_coordinates         = None
-    surface_normals             = None
-    surface_sensitivity         = None
-    u_hub                       = None
-    u_shroud                    = None
-    hub_coordinates             = None
-    shroud_coordinates          = None
-    get_meridional_channel_x    = None
-    get_meridional_channel_z    = None
-    meanline_length             = None
-    Nu                          = None
-    Nv                          = None
+    DVs_names = None
+    DVs_names_2D = None
+    DVs_names_meridional = None
+    DVs_number = None
+    DVs_functions = None
+    DVs_control_points = None
+    surface_interpolant = None
+    surface_coordinates = None
+    surface_normals = None
+    surface_sensitivity = None
+    u_hub = None
+    u_shroud = None
+    hub_coordinates = None
+    shroud_coordinates = None
+    get_meridional_channel_x = None
+    get_meridional_channel_z = None
+    meanline_length = None
+    Nu = None
+    Nv = None
 
     def __init__(self, IN, UV=None):
 
         # Declare input variables as instance variables
         IN = ConfigPasser(IN)
         self.IN = IN
-        self.N_BLADES               = int(IN["N_BLADES"][0])
-        self.NDIM                   = int(IN["NDIM"][0])
-        self.N_SECTIONS             = int(IN["N_SECTIONS"][0])
-        self.CASCADE_TYPE           = IN["CASCADE_TYPE"]
-        self.PARAMETRIZATION_TYPE   = IN["PARAMETRIZATION_TYPE"]
-        self.OPERATION_TYPE         = IN['OPERATION_TYPE']
-        self.PLOT_FORMAT            = IN["PLOT_FORMAT"]
+        self.N_BLADES = int(IN["N_BLADES"][0])
+        self.NDIM = int(IN["NDIM"][0])
+        self.N_SECTIONS = int(IN["N_SECTIONS"][0])
+        self.CASCADE_TYPE = IN["CASCADE_TYPE"]
+        self.PARAMETRIZATION_TYPE = IN["PARAMETRIZATION_TYPE"]
+        self.OPERATION_TYPE = IN["OPERATION_TYPE"]
+        self.PLOT_FORMAT = IN["PLOT_FORMAT"]
 
         # Check the number of sections
-        if self.N_SECTIONS < 2: raise Exception('It is necessary to use at least 2 sections to generate the blade')
+        if self.N_SECTIONS < 2:
+            raise Exception(
+                "It is necessary to use at least 2 sections to generate the blade"
+            )
 
         # Initialize design variables
         self.initialize_DVs_names()
@@ -237,16 +245,16 @@ class Blade3D:
             self.v = UV[1, :]
             self.N_points = np.shape(UV)[1]
 
-        self.make_surface_interpolant(interp_method='bilinear')
+        self.make_surface_interpolant(interp_method="bilinear")
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Generate the blade geometry and/or sensitities
     # ---------------------------------------------------------------------------------------------------------------- #
     def make_blade(self):
 
-        """ Compute the blade surface coordinates and the sensitivity with respect to the design variables """
+        """Compute the blade surface coordinates and the sensitivity with respect to the design variables"""
 
-        if self.OPERATION_TYPE == 'GEOMETRY':
+        if self.OPERATION_TYPE == "GEOMETRY":
 
             # Compute the coordinates of the blade surface
             # self.make_surface_interpolant(interp_method='bilinear')   # TODO bicubic interpolation is not ready
@@ -254,10 +262,10 @@ class Blade3D:
             self.make_hub_surface()
             self.make_shroud_surface()
 
-        elif self.OPERATION_TYPE == 'SENSITIVITY':
+        elif self.OPERATION_TYPE == "SENSITIVITY":
 
             # Compute the coordinates of the blade surface
-            print("\nStarting coordinates computation...", end='     ')
+            print("\nStarting coordinates computation...", end="     ")
             # self.make_surface_interpolant(interp_method='bilinear')
             self.surface_coordinates = self.get_surface_coordinates(self.u, self.v)
             self.make_hub_surface()
@@ -265,33 +273,44 @@ class Blade3D:
             print("Done!")
 
             # Compute the unitary vectors normal to the blade surface
-            print("Starting normals computation...", end='         ')
-            self.surface_normals = self.get_surface_normals(self.u, self.v, method='complex_step')
+            print("Starting normals computation...", end="         ")
+            self.surface_normals = self.get_surface_normals(
+                self.u, self.v, method="complex_step"
+            )
             print("Done!")
 
             # Compute the derivative of the blade coordinates with respect to the design variables
             print("Starting sensitivity computation...\n")
-            self.surface_sensitivity = self.get_surface_sensitivity(self.u, self.v, method='complex_step')
-            print('Sensitivity computation is finished!\n')
+            self.surface_sensitivity = self.get_surface_sensitivity(
+                self.u, self.v, method="complex_step"
+            )
+            print("Sensitivity computation is finished!\n")
 
         else:
-            raise Exception('Choose a valid option for OPERATION_TYPE: "GEOMETRY" or "SENSITIVITY"')
-
+            raise Exception(
+                'Choose a valid option for OPERATION_TYPE: "GEOMETRY" or "SENSITIVITY"'
+            )
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Initialize the design variable names
     # ---------------------------------------------------------------------------------------------------------------- #
     def initialize_DVs_names(self):
 
-        """ Initialize the names of the design variables """
+        """Initialize the names of the design variables"""
         if self.PARAMETRIZATION_TYPE == "CONNECTING_ARCS":
-            self.DVs_names = self.meridional_channel_names + self.blade_section_connecting_arcs
+            self.DVs_names = (
+                self.meridional_channel_names + self.blade_section_connecting_arcs
+            )
             self.DVs_names_2D = self.blade_section_connecting_arcs
         elif self.PARAMETRIZATION_TYPE == "CAMBER_THICKNESS":
-            self.DVs_names = self.meridional_channel_names + self.blade_section_camber_thickness
+            self.DVs_names = (
+                self.meridional_channel_names + self.blade_section_camber_thickness
+            )
             self.DVs_names_2D = self.blade_section_camber_thickness
         else:
-            raise Exception('Choose a valid option for PARAMETRIZATION_TYPE: "CONNECTING_ARCS" or "CAMBER_THICKNESS"')
+            raise Exception(
+                'Choose a valid option for PARAMETRIZATION_TYPE: "CONNECTING_ARCS" or "CAMBER_THICKNESS"'
+            )
 
         # Combine the lists of design variables
         self.DVs_names_meridional = self.meridional_channel_names
@@ -302,7 +321,7 @@ class Blade3D:
     # ---------------------------------------------------------------------------------------------------------------- #
     def update_DVs_control_points(self, IN):
 
-        """ Create a dictionary with the control points of each design variable """
+        """Create a dictionary with the control points of each design variable"""
 
         # Use a deepcopy to avoid angle conversion problems when calling this method from the BladeFit class
         IN = copy.deepcopy(IN)
@@ -313,10 +332,18 @@ class Blade3D:
             self.DVs_control_points[k] = IN[k]
 
         # Adjust the hub and shroud control points so that the shared points match exactly
-        self.DVs_control_points['x_hub'] = [IN['x_leading'][0]] + IN['x_hub'] + [IN['x_trailing'][0]]
-        self.DVs_control_points['z_hub'] = [IN['z_leading'][0]] + IN['z_hub'] + [IN['z_trailing'][0]]
-        self.DVs_control_points['x_shroud'] = [IN['x_leading'][-1]] + IN['x_shroud'] + [IN['x_trailing'][-1]]
-        self.DVs_control_points['z_shroud'] = [IN['z_leading'][-1]] + IN['z_shroud'] + [IN['z_trailing'][-1]]
+        self.DVs_control_points["x_hub"] = (
+            [IN["x_leading"][0]] + IN["x_hub"] + [IN["x_trailing"][0]]
+        )
+        self.DVs_control_points["z_hub"] = (
+            [IN["z_leading"][0]] + IN["z_hub"] + [IN["z_trailing"][0]]
+        )
+        self.DVs_control_points["x_shroud"] = (
+            [IN["x_leading"][-1]] + IN["x_shroud"] + [IN["x_trailing"][-1]]
+        )
+        self.DVs_control_points["z_shroud"] = (
+            [IN["z_leading"][-1]] + IN["z_shroud"] + [IN["z_trailing"][-1]]
+        )
 
         self.make_surface_interpolant()
 
@@ -325,10 +352,10 @@ class Blade3D:
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_DVs_functions(self):
 
-        """ Create the design variable functions
+        """Create the design variable functions
 
-            Each design variable is described by a law of evolution given by a B-Spline curve of, at most, degree 3
-            The design variable functions can be constructed with an arbitrary number of control points (from 1 to N)
+        Each design variable is described by a law of evolution given by a B-Spline curve of, at most, degree 3
+        The design variable functions can be constructed with an arbitrary number of control points (from 1 to N)
 
         """
 
@@ -340,30 +367,29 @@ class Blade3D:
 
             # Maximum index of the control points (counting from zero)
             nn = np.shape(P)[1]
-            n = nn-1
+            n = nn - 1
 
             # Define the order of the basis polynomials
             # Linear (p = 1), Quadratic (p = 2), Cubic (p = 3), etc.
             # Set p = n (number of control points minus one) to obtain a Bezier
-            p = min(n, 3)   # Set at most p = 3 (cubic B-Spline)
+            p = min(n, 3)  # Set at most p = 3 (cubic B-Spline)
 
             # # Weight of the control points
             # W = np.ones((n+1,))    # Unitary weight for B-Splines
 
             # Definition of the knot vectors (clamped spline)
             # p+1 zeros, n minus p equispaced points between 0 and 1, and p+1 ones.  In total r+1 points where r=n+p+1
-            U = np.concatenate((np.zeros(p), np.linspace(0, 1, n-p+2), np.ones(p)))
+            U = np.concatenate((np.zeros(p), np.linspace(0, 1, n - p + 2), np.ones(p)))
 
             # Get the design variable function object
             self.DVs_functions[k] = BSplineCurve(P, p, U).get_BSplineCurve_value
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Initialize the (u,v) parametrization
     # ---------------------------------------------------------------------------------------------------------------- #
-    def initialize_uv_values(self, Nu = 500, Nv = 25):
+    def initialize_uv_values(self, Nu=500, Nv=25):
 
-        """ Set a default (u,v) parametrization with the desired number of u- and v-points """
+        """Set a default (u,v) parametrization with the desired number of u- and v-points"""
 
         # print('Using a default (u,v) parametrization...')
 
@@ -373,27 +399,26 @@ class Blade3D:
         # Define a default (u,v) parametrization from a meshgrid
         if self.NDIM == 2:
             self.Nu, self.Nv = Nu, 1
-            u = np.linspace(0.00+h, 1.00-h, self.Nu)
+            u = np.linspace(0.00 + h, 1.00 - h, self.Nu)
             v = 0.50
         elif self.NDIM == 3:
             self.Nu, self.Nv = Nu, Nv
-            u = np.linspace(0.00+h, 1.00-h, self.Nu)
-            v = np.linspace(0.00+h, 1.00-h, self.Nv)
+            u = np.linspace(0.00 + h, 1.00 - h, self.Nu)
+            v = np.linspace(0.00 + h, 1.00 - h, self.Nv)
         else:
             raise Exception('The number of dimensions must be "2" or "3"')
 
         [u, v] = np.meshgrid(u, v)
         self.u = u.flatten()
         self.v = v.flatten()
-        self.N_points = self.Nu*self.Nv
-
+        self.N_points = self.Nu * self.Nv
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Update the (u,v) parametrization
     # ---------------------------------------------------------------------------------------------------------------- #
     def update_uv_values(self, u, v):
 
-        """ Update the (u,v) parameters with new values given as input """
+        """Update the (u,v) parameters with new values given as input"""
 
         Nu = np.size(u)
         Nv = np.size(v)
@@ -402,15 +427,14 @@ class Blade3D:
             self.v = v
             self.N_points = Nu
         else:
-            raise Exception('the u- and v-arrays must have the same number of points')
-
+            raise Exception("the u- and v-arrays must have the same number of points")
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute the coordinates of the blade surface
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_surface_coordinates(self, u, v):
 
-        """ Compute the blade surface coordinates for the current (u,v) parametrization by interpolation
+        """Compute the blade surface coordinates for the current (u,v) parametrization by interpolation
 
         Parameters
         ----------
@@ -431,17 +455,18 @@ class Blade3D:
 
         # Check that the query (u,v) parametrization is within the interpolation range
         if np.any(u < 0) or np.any(u > 1) or np.any(v < 0) or np.any(v > 1):
-            raise ValueError('Extrapolation of the (u,v) parametrization is not supported')
+            raise ValueError(
+                "Extrapolation of the (u,v) parametrization is not supported"
+            )
 
         # Compute the surface coordinates by interpolation
         surface_coordinates = self.surface_interpolant(u, v)
 
         return surface_coordinates
 
+    def make_surface_interpolant(self, interp_method="bilinear"):
 
-    def make_surface_interpolant(self, interp_method='bilinear'):
-
-        """ Create a surface interpolant using the coordinates of several blade sections
+        """Create a surface interpolant using the coordinates of several blade sections
 
         Set interp_method='bilinear' to create a bilinear interpolator
         Set interp_method='bicubic' to create a bicubic interpolator
@@ -452,8 +477,8 @@ class Blade3D:
         """
 
         # Update the geometry before creating the interpolant
-        self.get_DVs_functions()            # First update the functions that return design variables
-        self.make_meridional_channel()      # Then update the functions that return the meridional channel coordinates
+        self.get_DVs_functions()  # First update the functions that return design variables
+        self.make_meridional_channel()  # Then update the functions that return the meridional channel coordinates
 
         # Compute the coordinates of several blade sections
         # The (u,v) parametrization used to compute the blade sections must be regular (necessary for interpolation)
@@ -465,27 +490,30 @@ class Blade3D:
             S_interp[..., k] = self.get_section_coordinates(u_interp, v_interp[k])
 
         # Create the interpolator objects for the (x,y,z) coordinates
-        if interp_method == 'bilinear':
+        if interp_method == "bilinear":
             x_function = BilinearInterpolation(u_interp, v_interp, S_interp[0, ...])
             y_function = BilinearInterpolation(u_interp, v_interp, S_interp[1, ...])
             z_function = BilinearInterpolation(u_interp, v_interp, S_interp[2, ...])
 
-        elif interp_method == 'bicubic':
+        elif interp_method == "bicubic":
             # There seems to be a problem with bicubic interpolation, the output is wiggly
             x_function = BicubicInterpolation(u_interp, v_interp, S_interp[0, ...])
             y_function = BicubicInterpolation(u_interp, v_interp, S_interp[1, ...])
             z_function = BicubicInterpolation(u_interp, v_interp, S_interp[2, ...])
 
         else:
-            raise Exception('Choose a valid interpolation method: "bilinear" or "bicubic"')
+            raise Exception(
+                'Choose a valid interpolation method: "bilinear" or "bicubic"'
+            )
 
         # Create the surface interpolant using a lambda function to combine the (x,y,z) interpolants
-        self.surface_interpolant = lambda u, v: np.asarray((x_function(u, v), y_function(u, v), z_function(u, v)))
-
+        self.surface_interpolant = lambda u, v: np.asarray(
+            (x_function(u, v), y_function(u, v), z_function(u, v))
+        )
 
     def make_meridional_channel(self):
 
-        """ Create the functions used to compute the (x,z) cooordinates at any point of the meridional channel
+        """Create the functions used to compute the (x,z) cooordinates at any point of the meridional channel
 
         The coordinates at the interior of the meridional channel are computed by transfinite interpolation from the
         coordinates at the boundaries (leading edge, lower surface, trailing edge and upper surface)
@@ -498,24 +526,28 @@ class Blade3D:
         """
 
         # Define a function to compute the x-coordinate of the meridional channel as x(u,v)
-        self.get_meridional_channel_x = TransfiniteInterpolation(self.DVs_functions["x_leading"],
-                                                                 self.DVs_functions["x_hub"],
-                                                                 self.DVs_functions["x_trailing"],
-                                                                 self.DVs_functions["x_shroud"],
-                                                                 self.DVs_control_points["x_leading"][0],
-                                                                 self.DVs_control_points["x_trailing"][0],
-                                                                 self.DVs_control_points["x_trailing"][-1],
-                                                                 self.DVs_control_points["x_leading"][-1])
+        self.get_meridional_channel_x = TransfiniteInterpolation(
+            self.DVs_functions["x_leading"],
+            self.DVs_functions["x_hub"],
+            self.DVs_functions["x_trailing"],
+            self.DVs_functions["x_shroud"],
+            self.DVs_control_points["x_leading"][0],
+            self.DVs_control_points["x_trailing"][0],
+            self.DVs_control_points["x_trailing"][-1],
+            self.DVs_control_points["x_leading"][-1],
+        )
 
         # Define a function to compute the z-coordinate of the meridional channel as z(u,v)
-        self.get_meridional_channel_z = TransfiniteInterpolation(self.DVs_functions["z_leading"],
-                                                                 self.DVs_functions["z_hub"],
-                                                                 self.DVs_functions["z_trailing"],
-                                                                 self.DVs_functions["z_shroud"],
-                                                                 self.DVs_control_points["z_leading"][0],
-                                                                 self.DVs_control_points["z_trailing"][0],
-                                                                 self.DVs_control_points["z_trailing"][-1],
-                                                                 self.DVs_control_points["z_leading"][-1])
+        self.get_meridional_channel_z = TransfiniteInterpolation(
+            self.DVs_functions["z_leading"],
+            self.DVs_functions["z_hub"],
+            self.DVs_functions["z_trailing"],
+            self.DVs_functions["z_shroud"],
+            self.DVs_control_points["z_leading"][0],
+            self.DVs_control_points["z_trailing"][0],
+            self.DVs_control_points["z_trailing"][-1],
+            self.DVs_control_points["z_leading"][-1],
+        )
 
         # Compute the arc length of the blade meanline (secondary computation required for the BladeFit class)
         x_func = lambda u: self.get_meridional_channel_x(u, v=0.50)
@@ -523,10 +555,9 @@ class Blade3D:
         m_func = lambda u: np.concatenate((x_func(u), z_func(u)), axis=0)
         self.meanline_length = get_arc_length(m_func, 0.0 + 1e-6, 1.0 - 1e-6)
 
-
     def get_section_coordinates(self, u_section, v_section):
 
-        """ Compute the coordinates of the current blade section
+        """Compute the coordinates of the current blade section
 
         Parameters
         ----------
@@ -549,23 +580,33 @@ class Blade3D:
             section_variables[k] = self.DVs_functions[k](v_section)
 
         # Compute the coordinates of a blade section with an unitary meridional chord
-        if self.PARAMETRIZATION_TYPE == 'CONNECTING_ARCS':
-            section_coordinates = Blade2DConnectingArcs(section_variables).get_section_coordinates(u_section)
-        elif self.PARAMETRIZATION_TYPE == 'CAMBER_THICKNESS':
-            section_coordinates = Blade2DCamberThickness(section_variables).get_section_coordinates(u_section)
+        if self.PARAMETRIZATION_TYPE == "CONNECTING_ARCS":
+            section_coordinates = Blade2DConnectingArcs(
+                section_variables
+            ).get_section_coordinates(u_section)
+        elif self.PARAMETRIZATION_TYPE == "CAMBER_THICKNESS":
+            section_coordinates = Blade2DCamberThickness(
+                section_variables
+            ).get_section_coordinates(u_section)
         else:
-            raise Exception('Choose a valid option for PARAMETRIZATION_TYPE: "CONNECTING_ARCS" or "CAMBER_THICKNESS"')
+            raise Exception(
+                'Choose a valid option for PARAMETRIZATION_TYPE: "CONNECTING_ARCS" or "CAMBER_THICKNESS"'
+            )
 
         # Rename the section coordinates
-        x = section_coordinates[0, :]                   # x corresponds to the meridional direction
-        y = section_coordinates[1, :]                   # y corresponds to the tangential direction
+        x = section_coordinates[0, :]  # x corresponds to the meridional direction
+        y = section_coordinates[1, :]  # y corresponds to the tangential direction
 
         # Ensure that the x-coordinates are between zero and one (actually between zero+eps and one-eps)
-        uu_section = (x - np.amin(x) + 1e-12)/(np.amax(x) - np.amin(x) + 2e-12)
+        uu_section = (x - np.amin(x) + 1e-12) / (np.amax(x) - np.amin(x) + 2e-12)
 
         # Obtain the x-z coordinates by transfinite interpolation of the meridional channel contour
-        x = self.get_meridional_channel_x(uu_section, v_section)       # x corresponds to the axial direction
-        z = self.get_meridional_channel_z(uu_section, v_section)       # x corresponds to the radial direction
+        x = self.get_meridional_channel_x(
+            uu_section, v_section
+        )  # x corresponds to the axial direction
+        z = self.get_meridional_channel_z(
+            uu_section, v_section
+        )  # x corresponds to the radial direction
 
         # Create a single-variable function with the coordinates of the meridional channel
         x_func = lambda u: self.get_meridional_channel_x(u, v_section)
@@ -585,8 +626,8 @@ class Blade3D:
             Z = z
         elif self.CASCADE_TYPE == "ANNULAR":
             X = x
-            Y = z*np.sin(y/z)
-            Z = z*np.cos(y/z)
+            Y = z * np.sin(y / z)
+            Z = z * np.cos(y / z)
         else:
             raise Exception('Choose a valid cascade type: "LINEAR" or "ANNULAR"')
 
@@ -595,13 +636,12 @@ class Blade3D:
 
         return section_coordinates
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute the unitary vectors normal to the blade surface
     # ---------------------------------------------------------------------------------------------------------------- #
-    def get_surface_normals(self, u, v, method='complex_step', step=1e-12):
+    def get_surface_normals(self, u, v, method="complex_step", step=1e-12):
 
-        """ Compute unitary vectors normal to the blade surface
+        """Compute unitary vectors normal to the blade surface
 
          Parameters
         ----------
@@ -628,49 +668,70 @@ class Blade3D:
         """
 
         # Compute a pair of tangent vectors by differentiation of the surface coordinates with respect to (u,v)
-        if method == 'forward_finite_differences':
+        if method == "forward_finite_differences":
             C = self.get_surface_coordinates(u, v)
             C_u = self.get_surface_coordinates(u + step, v)
             C_v = self.get_surface_coordinates(u, v + step)
-            T_u = (C_u - C) / step                              # Forward finite differences in u
-            T_v = (C_v - C) / step                              # Forward finite differences in v
-            N = np.cross(T_u, T_v, axisa=0, axisb=0, axisc=0)   # Normal vector as cross product of two tangent vectors
-            norm = np.sum(N**2, axis=0)**(1/2)                  # 2-norm of the normal vectors
-            surface_normals = -N / norm                         # Unitary normal vector (fix sign to point outwards)
+            T_u = (C_u - C) / step  # Forward finite differences in u
+            T_v = (C_v - C) / step  # Forward finite differences in v
+            N = np.cross(
+                T_u, T_v, axisa=0, axisb=0, axisc=0
+            )  # Normal vector as cross product of two tangent vectors
+            norm = np.sum(N**2, axis=0) ** (1 / 2)  # 2-norm of the normal vectors
+            surface_normals = (
+                -N / norm
+            )  # Unitary normal vector (fix sign to point outwards)
 
-        elif method == 'central_finite_differences':
+        elif method == "central_finite_differences":
             C_u1 = self.get_surface_coordinates(u - step, v)
             C_u2 = self.get_surface_coordinates(u + step, v)
             C_v1 = self.get_surface_coordinates(u, v - step)
             C_v2 = self.get_surface_coordinates(u, v + step)
-            T_u = (C_u2 - C_u1) / (2*step)                      # Central finite differences in u
-            T_v = (C_v2 - C_v1) / (2*step)                      # Central finite differences in v
-            N = np.cross(T_u, T_v, axisa=0, axisb=0, axisc=0)   # Normal vector as cross product of two tangent vectors
-            norm = np.sum(N**2, axis=0)**(1/2)                  # 2-norm of the normal vectors
-            surface_normals = -N / norm                         # Unitary normal vector (fix sign to point outwards)
+            T_u = (C_u2 - C_u1) / (2 * step)  # Central finite differences in u
+            T_v = (C_v2 - C_v1) / (2 * step)  # Central finite differences in v
+            N = np.cross(
+                T_u, T_v, axisa=0, axisb=0, axisc=0
+            )  # Normal vector as cross product of two tangent vectors
+            norm = np.sum(N**2, axis=0) ** (1 / 2)  # 2-norm of the normal vectors
+            surface_normals = (
+                -N / norm
+            )  # Unitary normal vector (fix sign to point outwards)
 
-        elif method == 'complex_step':
-            C_u = self.get_surface_coordinates(u + step*1j, v)
-            C_v = self.get_surface_coordinates(u, v + step*1j)
-            T_u = np.imag(C_u) / step                           # Complex step in u
-            T_v = np.imag(C_v) / step                           # Complex step in v
-            N = np.cross(T_u, T_v, axisa=0, axisb=0, axisc=0)   # Normal vector as cross product of two tangent vectors
-            norm = np.sum(N**2, axis=0)**(1/2)                  # 2-norm of the normal vectors
-            surface_normals = -N / norm                         # Unitary normal vector (fix sign to point outwards)
+        elif method == "complex_step":
+            C_u = self.get_surface_coordinates(u + step * 1j, v)
+            C_v = self.get_surface_coordinates(u, v + step * 1j)
+            T_u = np.imag(C_u) / step  # Complex step in u
+            T_v = np.imag(C_v) / step  # Complex step in v
+            N = np.cross(
+                T_u, T_v, axisa=0, axisb=0, axisc=0
+            )  # Normal vector as cross product of two tangent vectors
+            norm = np.sum(N**2, axis=0) ** (1 / 2)  # 2-norm of the normal vectors
+            surface_normals = (
+                -N / norm
+            )  # Unitary normal vector (fix sign to point outwards)
 
         else:
-            raise Exception('Choose a valid differentiation method: '
-                            '"forward_finite_differences", "central_finite_differences", or "complex_step"')
+            raise Exception(
+                "Choose a valid differentiation method: "
+                '"forward_finite_differences", "central_finite_differences", or "complex_step"'
+            )
 
         return surface_normals
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute the derivatives of the surface coordinates with respect to the design variables
     # ---------------------------------------------------------------------------------------------------------------- #
-    def get_surface_sensitivity(self, u, v, method='complex_step', step=1e-12, variable='all', display_progress='yes'):
+    def get_surface_sensitivity(
+        self,
+        u,
+        v,
+        method="complex_step",
+        step=1e-12,
+        variable="all",
+        display_progress="yes",
+    ):
 
-        """ Compute derivative of the blade coordinates with respect to the design variables
+        """Compute derivative of the blade coordinates with respect to the design variables
 
          Parameters
         ----------
@@ -711,7 +772,7 @@ class Blade3D:
         my_numbers = {}
 
         # Get the name of the variable to compute derivatives and the number of control points
-        if variable == 'all':
+        if variable == "all":
             my_keys = self.DVs_names
             for key in my_keys:
                 my_numbers[key] = range(len(self.DVs_control_points[key]))
@@ -728,47 +789,57 @@ class Blade3D:
             count = count + 1
             for number in my_numbers[key]:
 
-                if method == 'forward_finite_differences':
+                if method == "forward_finite_differences":
                     self.DVs_control_points[key][number] = control_points[key][number]
                     self.make_surface_interpolant()
                     C_1 = self.get_surface_coordinates(u, v)
-                    self.DVs_control_points[key][number] = control_points[key][number] + step
+                    self.DVs_control_points[key][number] = (
+                        control_points[key][number] + step
+                    )
                     self.make_surface_interpolant()
                     C_2 = self.get_surface_coordinates(u, v)
-                    surface_sensitivity[key + '_' + str(number)] = (C_2 - C_1) / step
+                    surface_sensitivity[key + "_" + str(number)] = (C_2 - C_1) / step
 
-                elif method == 'central_finite_differences':
-                    self.DVs_control_points[key][number] = control_points[key][number] - step
+                elif method == "central_finite_differences":
+                    self.DVs_control_points[key][number] = (
+                        control_points[key][number] - step
+                    )
                     self.make_surface_interpolant()
                     C_1 = self.get_surface_coordinates(u, v)
-                    self.DVs_control_points[key][number] = control_points[key][number] + step
+                    self.DVs_control_points[key][number] = (
+                        control_points[key][number] + step
+                    )
                     self.make_surface_interpolant()
                     C_2 = self.get_surface_coordinates(u, v)
-                    surface_sensitivity[key + '_' + str(number)] = (C_2 - C_1) / (2 * step)
+                    surface_sensitivity[key + "_" + str(number)] = (C_2 - C_1) / (
+                        2 * step
+                    )
 
-                elif method == 'complex_step':
-                    self.DVs_control_points[key][number] = control_points[key][number] + step * 1j
+                elif method == "complex_step":
+                    self.DVs_control_points[key][number] = (
+                        control_points[key][number] + step * 1j
+                    )
                     self.make_surface_interpolant()
                     C = self.get_surface_coordinates(u, v)
-                    surface_sensitivity[key + '_' + str(number)] = np.imag(C) / step
+                    surface_sensitivity[key + "_" + str(number)] = np.imag(C) / step
 
                 else:
-                    raise Exception('Choose a valid differentiation method: '
-                                    '"forward_finite_differences", "central_finite_differences", or "complex_step"')
-
+                    raise Exception(
+                        "Choose a valid differentiation method: "
+                        '"forward_finite_differences", "central_finite_differences", or "complex_step"'
+                    )
 
                 # Retrieve the original set of control points
                 self.DVs_control_points = copy.deepcopy(control_points)
 
             # Print progress bar
-            if display_progress == 'yes':
+            if display_progress == "yes":
                 printProgress(count, total)
 
         # Retrieve the original interpolant
         self.make_surface_interpolant()
 
         return surface_sensitivity
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute the coordinates of the hub surface
@@ -779,7 +850,7 @@ class Blade3D:
 
     def get_extended_hub_coordinates(self, u):
 
-        """ Compute the coordinates of the hub surface in the (x,z) plane
+        """Compute the coordinates of the hub surface in the (x,z) plane
 
         The hub surface is is extended to the inlet and outlet regions by linear extrapolation (G1 continuity)
         The hub surface is extended one-fourth of the meridional channel arc length at midspan
@@ -793,8 +864,8 @@ class Blade3D:
         # Define the parameter for each arc (split the vector u in 3 pieces)
         # This is reordering, and we cannot reorder during matching. We retrieve the original order later
         u_inlet = np.sort((u[(u >= 0.00) & (u < 0.25)] - 0.00) / (0.25 - 0.00))
-        u_main  = np.sort((u[(u >= 0.25) & (u < 0.75)] - 0.25) / (0.75 - 0.25))
-        u_exit  = np.sort((u[(u >= 0.75) & (u <= 1.00)] - 0.75) / (1.00 - 0.75))
+        u_main = np.sort((u[(u >= 0.25) & (u < 0.75)] - 0.25) / (0.75 - 0.25))
+        u_exit = np.sort((u[(u >= 0.75) & (u <= 1.00)] - 0.75) / (1.00 - 0.75))
 
         # Get blade arc length at the mean section
         x_func = lambda uu: self.get_meridional_channel_x(uu, 0.50)
@@ -806,16 +877,28 @@ class Blade3D:
         step = 1e-12
         dxdu = np.imag(self.DVs_functions["x_hub"](0 + step * 1j)[0, 0]) / step
         dzdu = np.imag(self.DVs_functions["z_hub"](0 + step * 1j)[0, 0]) / step
-        slope_inlet = np.arctan2(dzdu,dxdu)
-        x_inlet = self.DVs_control_points["x_hub"][0] + (u_inlet - 1) * np.cos(slope_inlet) * arc_length / 4
-        z_inlet = self.DVs_control_points["z_hub"][0] + (u_inlet - 1) * np.sin(slope_inlet) * arc_length / 4
+        slope_inlet = np.arctan2(dzdu, dxdu)
+        x_inlet = (
+            self.DVs_control_points["x_hub"][0]
+            + (u_inlet - 1) * np.cos(slope_inlet) * arc_length / 4
+        )
+        z_inlet = (
+            self.DVs_control_points["z_hub"][0]
+            + (u_inlet - 1) * np.sin(slope_inlet) * arc_length / 4
+        )
 
         # Tangent line extending the hub surface to the outlet region
         dxdu = -np.imag(self.DVs_functions["x_hub"](1 - step * 1j)[0, 0]) / step
         dzdu = -np.imag(self.DVs_functions["z_hub"](1 - step * 1j)[0, 0]) / step
-        slope_exit = np.arctan2(dzdu,dxdu)
-        x_exit = self.DVs_control_points["x_hub"][-1] + u_exit * np.cos(slope_exit) * arc_length / 4
-        z_exit = self.DVs_control_points["z_hub"][-1] + u_exit * np.sin(slope_exit) * arc_length / 4
+        slope_exit = np.arctan2(dzdu, dxdu)
+        x_exit = (
+            self.DVs_control_points["x_hub"][-1]
+            + u_exit * np.cos(slope_exit) * arc_length / 4
+        )
+        z_exit = (
+            self.DVs_control_points["z_hub"][-1]
+            + u_exit * np.sin(slope_exit) * arc_length / 4
+        )
 
         # Region of the hub surface occupied by the blades
         x_main = self.DVs_functions["x_hub"](u_main).flatten()
@@ -828,7 +911,6 @@ class Blade3D:
 
         return hub_coordinates
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute the coordinates of the shroud
     # ---------------------------------------------------------------------------------------------------------------- #
@@ -838,7 +920,7 @@ class Blade3D:
 
     def get_extended_shroud_coordinates(self, u):
 
-        """ Compute the coordinates of the hub surface in the (x,z) plane
+        """Compute the coordinates of the hub surface in the (x,z) plane
 
         The shroud surface is is extended to the inlet and outlet regions by linear extrapolation (G1 continuity)
         The shroud surface is extended one-fourth of the meridional channel arc length at midspan
@@ -866,15 +948,27 @@ class Blade3D:
         dxdu = np.imag(self.DVs_functions["x_shroud"](0 + step * 1j)[0, 0]) / step
         dzdu = np.imag(self.DVs_functions["z_shroud"](0 + step * 1j)[0, 0]) / step
         slope_inlet = np.arctan2(dzdu, dxdu)
-        x_inlet = self.DVs_control_points["x_shroud"][0] + (u_inlet - 1) * np.cos(slope_inlet) * arc_length / 4
-        z_inlet = self.DVs_control_points["z_shroud"][0] + (u_inlet - 1) * np.sin(slope_inlet) * arc_length / 4
+        x_inlet = (
+            self.DVs_control_points["x_shroud"][0]
+            + (u_inlet - 1) * np.cos(slope_inlet) * arc_length / 4
+        )
+        z_inlet = (
+            self.DVs_control_points["z_shroud"][0]
+            + (u_inlet - 1) * np.sin(slope_inlet) * arc_length / 4
+        )
 
         # Tangent line extending the hub surface to the outlet region
         dxdu = -np.imag(self.DVs_functions["x_shroud"](1 - step * 1j)[0, 0]) / step
         dzdu = -np.imag(self.DVs_functions["z_shroud"](1 - step * 1j)[0, 0]) / step
         slope_exit = np.arctan2(dzdu, dxdu)
-        x_exit = self.DVs_control_points["x_shroud"][-1] + u_exit * np.cos(slope_exit) * arc_length / 4
-        z_exit = self.DVs_control_points["z_shroud"][-1] + u_exit * np.sin(slope_exit) * arc_length / 4
+        x_exit = (
+            self.DVs_control_points["x_shroud"][-1]
+            + u_exit * np.cos(slope_exit) * arc_length / 4
+        )
+        z_exit = (
+            self.DVs_control_points["z_shroud"][-1]
+            + u_exit * np.sin(slope_exit) * arc_length / 4
+        )
 
         # Region of the hub surface occupied by the blades
         x_main = self.DVs_functions["x_shroud"](u_main).flatten()
@@ -886,3 +980,77 @@ class Blade3D:
         shroud_coordinates = np.asarray((x_hub, z_hub))
 
         return shroud_coordinates
+
+    def translate(self, dx, dy):
+        self.IN['x_leading'][0] += dx
+        self.IN['x_trailing'][0] += dx
+        self.IN['y_leading'][0] += dy
+
+        self.__init__(self.IN)
+        self.make_blade()
+
+    def scale(self, factor):
+        params = [
+            "thickness_upper_1",
+            "thickness_upper_2",
+            "thickness_upper_3",
+            "thickness_upper_4",
+            "thickness_upper_5",
+            "thickness_upper_6",
+            "thickness_lower_1",
+            "thickness_lower_2",
+            "thickness_lower_3",
+            "thickness_lower_4",
+            "thickness_lower_5",
+            "thickness_lower_6",
+            "dist_in",
+            "dist_out",
+            "radius_in",
+            "radius_out",
+        ]
+        for param in params:
+            self.IN[param][0] = factor * self.IN[param][0]
+
+        self.IN["x_trailing"][0] = factor * (
+            self.IN["x_trailing"][0] - self.IN["x_leading"][0]
+        ) + self.IN["x_leading"][0] 
+
+        self.__init__(self.IN)
+        self.make_blade()
+
+    def rotate(self, angle):
+        """Changes the blade anlge by an amount in degrees."""
+        chord = (self.IN["x_trailing"][0] - self.IN["x_leading"][0])/np.cos(self.IN["stagger"][0])
+        self.IN["stagger"][0] = self.IN["stagger"][0] - angle
+        self.IN["theta_in"][0] = self.IN["theta_in"][0] - angle
+        self.IN["theta_out"][0] = self.IN["theta_out"][0] - angle
+        self.IN["x_trailing"][0] = chord * np.cos(self.IN["stagger"][0])
+
+        self.__init__(self.IN)
+        self.make_blade()
+
+    def set_leading_edge(self, x, y):
+        length = self.IN['x_trailing'][0] - self.IN['x_leading'][0]
+        self.IN['x_leading'][0] = x
+        self.IN['x_trailing'][0] = length + x
+        self.IN['y_leading'][0] = y
+
+        self.__init__(self.IN)
+        self.make_blade()
+
+    def set_scale(self, chord_length):
+
+        x_2 = self.IN['x_trailing'][0]
+        x_1 = self.IN['x_leading'][0]
+        blade_angle = self.IN['stagger'][0]
+
+        c = (x_2-x_1)/np.cos(blade_angle)
+        
+        factor_to_scale = chord_length - c
+
+        self.scale(factor_to_scale)
+
+    def set_blade_angle(self, angle):
+        angle_to_rotate = angle - self.IN["stagger"][0]
+        self.rotate(angle_to_rotate)
+
