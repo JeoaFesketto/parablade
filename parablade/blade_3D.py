@@ -213,7 +213,7 @@ class Blade3D:
     Nu = None
     Nv = None
 
-    def __init__(self, IN, UV=None):
+    def __init__(self, IN, UV=None, _transformations = None):
 
         # Declare input variables as instance variables
         IN = ConfigPasser(IN)
@@ -225,6 +225,7 @@ class Blade3D:
         self.PARAMETRIZATION_TYPE = IN["PARAMETRIZATION_TYPE"]
         self.OPERATION_TYPE = IN["OPERATION_TYPE"]
         self.PLOT_FORMAT = IN["PLOT_FORMAT"]
+        self._transformations = _transformations
 
         # Check the number of sections
         if self.N_SECTIONS < 2:
@@ -240,6 +241,7 @@ class Blade3D:
         self.CFG_VERSION = int(self.IN["CFG_VERSION"][0])
 
         if self.CFG_VERSION == 2:
+            
             self.IN["chord"] = np.array(
                 [
                     (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
@@ -1042,16 +1044,47 @@ class Blade3D:
         self.IN["x_trailing"] += dx
         self.IN["y_leading"] += dy
 
-        self.__init__(self.IN)
-        self.make_blade(rotate=rotate, scale=scale)
+
+        if self._transformations is not None:
+            self._transformations[:3] += [dx, dy, rotate]
+            self._transformations[3] *= scale
+            self.__init__(
+                self.IN, 
+                _transformations = self._transformations
+            )
+
+        else:
+            self._transformations = np.array(
+                [dx, dy, rotate, scale], 
+                dtype='float32'
+            )
+            self.__init__(
+                self.IN, 
+                _transformations = self._transformations
+            )
+
+        self.make_blade(rotate=self._transformations[2], scale=self._transformations[3])
 
     def set_origin(self, x, y):
-
         self.transform(
             dx = x-self.IN['x_leading'][0],
             dy = y-self.IN['y_leading'][0]
         )
+    
+    def set_pitch(self, beta):
+        """The pitch angle beta is defined as the angle between the x axis
+        and the chord of the blade. Upon creation, beta is equal to the
+        stagger"""
 
+        self.transform(
+            rotate = beta + self.IN['stagger'][0]
+        )
+
+    def set_chord(self, chord):
+        self.transform(
+            scale = chord/self.IN["chord"][0]
+        )
+        
 
     # def translate(self, dx, dy):
     #     self.IN["x_leading"][0] += dx
