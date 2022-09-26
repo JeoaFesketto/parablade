@@ -201,7 +201,7 @@ class Blade2DCamberThickness:
         section_coordinates = np.concatenate((lower_surface_coordinates, upper_surface_coordinates), axis=1)
 
         # Retrieve the original parametrization order
-        self.section_coordinates = np.asarray(section_coordinates[:, my_order2], dtype='float32')
+        self.section_coordinates = section_coordinates[:, my_order2]
 
         return self.section_coordinates
 
