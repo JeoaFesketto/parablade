@@ -213,7 +213,7 @@ class Blade3D:
     Nu = None
     Nv = None
 
-    def __init__(self, IN, UV=None, _transformations = None):
+    def __init__(self, IN, UV=None, _transformations=None):
 
         # Declare input variables as instance variables
         IN = ConfigPasser(IN)
@@ -241,7 +241,7 @@ class Blade3D:
         self.CFG_VERSION = int(self.IN["CFG_VERSION"][0])
 
         if self.CFG_VERSION == 2:
-            
+
             self.IN["chord"] = np.array(
                 [
                     (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
@@ -302,7 +302,7 @@ class Blade3D:
                     )
 
                     self.surface_coordinates = np.tensordot(
-                        self.surface_coordinates.T, rotation_matrix, axes = 1
+                        self.surface_coordinates.T, rotation_matrix, axes=1
                     ).T
 
                 self.surface_coordinates[0] += self.ORIGIN[0]
@@ -1044,120 +1044,30 @@ class Blade3D:
         self.IN["x_trailing"] += dx
         self.IN["y_leading"] += dy
 
-
         if self._transformations is not None:
             self._transformations[:3] += [dx, dy, rotate]
             self._transformations[3] *= scale
-            self.__init__(
-                self.IN, 
-                _transformations = self._transformations
-            )
+            self.__init__(self.IN, _transformations=self._transformations)
 
         else:
-            self._transformations = np.array(
-                [dx, dy, rotate, scale], 
-                dtype='float32'
-            )
-            self.__init__(
-                self.IN, 
-                _transformations = self._transformations
-            )
+            self._transformations = np.array([dx, dy, rotate, scale], dtype="float32")
+            self.__init__(self.IN, _transformations=self._transformations)
 
         self.make_blade(rotate=self._transformations[2], scale=self._transformations[3])
 
     def set_origin(self, x, y):
-        self.transform(
-            dx = x-self.IN['x_leading'][0],
-            dy = y-self.IN['y_leading'][0]
-        )
-    
+        self.transform(dx=x - self.IN["x_leading"][0], dy=y - self.IN["y_leading"][0])
+
     def set_pitch(self, beta):
         """The pitch angle beta is defined as the angle between the x axis
         and the chord of the blade. Upon creation, beta is equal to the
         stagger"""
 
-        self.transform(
-            rotate = beta + self.IN['stagger'][0]
-        )
+        self.transform(rotate=beta + self.IN["stagger"][0])
 
     def set_chord(self, chord):
-        self.transform(
-            scale = chord/self.IN["chord"][0]
-        )
-        
-
-    # def translate(self, dx, dy):
-    #     self.IN["x_leading"][0] += dx
-    #     self.IN["x_trailing"][0] += dx
-    #     self.IN["y_leading"][0] += dy
-
-    #     self.__init__(self.IN)
-    #     self.make_blade()
-
-    # def scale(self, factor):
-    #     params = [
-    #         "thickness_upper_1",
-    #         "thickness_upper_2",
-    #         "thickness_upper_3",
-    #         "thickness_upper_4",
-    #         "thickness_upper_5",
-    #         "thickness_upper_6",
-    #         "thickness_lower_1",
-    #         "thickness_lower_2",
-    #         "thickness_lower_3",
-    #         "thickness_lower_4",
-    #         "thickness_lower_5",
-    #         "thickness_lower_6",
-    #         "dist_in",
-    #         "dist_out",
-    #         "radius_in",
-    #         "radius_out",
-    #     ]
-    #     for param in params:
-    #         self.IN[param][0] = factor * self.IN[param][0]
-
-    #     self.IN["x_trailing"][0] = (
-    #         factor * (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
-    #         + self.IN["x_leading"][0]
-    #     )
-
-    #     self.__init__(self.IN)
-    #     self.make_blade()
-
-    # def rotate(self, angle):
-    #     """Changes the blade anlge by an amount in degrees."""
-    #     chord = (self.IN["x_trailing"][0] - self.IN["x_leading"][0]) / np.cos(
-    #         np.deg2rad(self.IN["stagger"][0])
-    #     )
-    #     self.IN["stagger"][0] = self.IN["stagger"][0] - angle
-    #     self.IN["theta_in"][0] = self.IN["theta_in"][0] - angle
-    #     self.IN["theta_out"][0] = self.IN["theta_out"][0] - angle
-    #     self.IN["x_trailing"][0] = chord * np.cos(np.deg2rad(self.IN["stagger"][0]))
-
-    #     self.__init__(self.IN)
-    #     self.make_blade()
-
-    # def set_leading_edge(self, x, y):
-    #     length = self.IN["x_trailing"][0] - self.IN["x_leading"][0]
-    #     self.IN["x_leading"][0] = x
-    #     self.IN["x_trailing"][0] = length + x
-    #     self.IN["y_leading"][0] = y
-
-    #     self.__init__(self.IN)
-    #     self.make_blade()
-
-    # def set_scale(self, chord_length):
-
-    #     x_2 = self.IN["x_trailing"][0]
-    #     x_1 = self.IN["x_leading"][0]
-    #     blade_angle = self.IN["stagger"][0]
-
-    #     c = (x_2 - x_1) / np.cos(np.deg2rad(blade_angle))
-
-    #     factor_to_scale = chord_length - c
-
-    #     self.scale(factor_to_scale)
-
-    # def set_blade_angle(self, angle):
-    #     angle_to_rotate = angle - self.IN["stagger"][0]
-    #     self.rotate(angle_to_rotate)
+        if self.CFG_VERSION != 2:
+            raise NotImplementedError(
+                "This method is not implemented for cfg version 1."
+            )
+        self.transform(scale=chord / self.IN["chord"][0])
