@@ -77,8 +77,6 @@ options = {'view_xy'            : 'yes',    # 2D Recommended
 # Create BladeMatch object
 matched_blade_object = BladeMatch(IN, coarseness=1, plot_options=options)
 
-# Match the blade manually (interactive mode)
-matched_blade_object.match_blade(matching_mode='manual')
 
 # Match the blade automatically (optimization mode)
 matched_blade_object.match_blade(matching_mode='DVs')

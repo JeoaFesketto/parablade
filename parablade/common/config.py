@@ -91,7 +91,7 @@ def ReadUserInput(name):
         elif len(words[1::1]) == 1 and isinstance(words[1], str):
             IN[words[0]] = words[1]
         else:
-            IN[words[0]] = np.array(words[1::1])
+            IN[words[0]] = words[1::1]
     IN['Config_Path'] = name
     return IN
 

@@ -5,7 +5,7 @@ import sys
 
 from parablade.common.config import ReadUserInput
 
-details_dict = ReadUserInput('/home/daep/j.fesquet/git_repos/parablade/testing/scale_testing/Aachen_2D.cfg')
+details_dict = ReadUserInput('')
 o = pb.BladeMatch(details_dict, 
         plot_options={
             "view_xy": "yes",

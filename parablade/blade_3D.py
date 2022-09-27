@@ -227,6 +227,13 @@ class Blade3D:
         self.PLOT_FORMAT = IN["PLOT_FORMAT"]
         self._transformations = _transformations
 
+        self.IN["chord"] = np.array(
+            [
+                (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
+                / np.cos(np.deg2rad(self.IN["stagger"][0]))
+            ]
+        )
+
         # Check the number of sections
         if self.N_SECTIONS < 2:
             raise Exception(
@@ -1062,6 +1069,7 @@ class Blade3D:
         """The pitch angle beta is defined as the angle between the x axis
         and the chord of the blade. Upon creation, beta is equal to the
         stagger"""
+        self._transformations[2] = 0
 
         self.transform(rotate=beta + self.IN["stagger"][0])
 
@@ -1070,4 +1078,5 @@ class Blade3D:
             raise NotImplementedError(
                 "This method is not implemented for cfg version 1."
             )
+        self._transformations[3] = 1
         self.transform(scale=chord / self.IN["chord"][0])
