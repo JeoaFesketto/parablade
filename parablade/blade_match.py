@@ -232,7 +232,7 @@ class BladeMatch:
         else:
 
             raise Exception(
-                "Choose a valid option for matching_mode: 'manual', 'uv', or 'DVs'"
+                "Choose a valid option for matching_mode: 'manual_sliders', 'manual', 'uv', or 'DVs'"
             )
 
     # ---------------------------------------------------------------------------------------------------------------- #
@@ -319,11 +319,11 @@ class BladeMatch:
                 # Optimization algorithm options
                 my_options = {
                     "disp": False,
-                    "ftol": 1e-8,
+                    "ftol": 1e-6,
                     #'gtol': 1e-9,
                     #'eps': np.
                     # finfo(np.float64).eps ** (1 / 2),
-                    "maxiter": 1000,
+                    "maxiter": 20,
                 }
 
                 # Solve the optimization problem
@@ -331,7 +331,7 @@ class BladeMatch:
                     fun=self.my_objective_function,
                     x0=np.asarray([my_u0[k], my_v0[k]]),
                     args=("uv_parametrization", i),
-                    method="L-BFGS-B",  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
+                    method="SLSQP",  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
                     jac=None,
                     # hess=None,
                     # hessp=None,
@@ -389,10 +389,10 @@ class BladeMatch:
         # Optimization algorithm options
         my_options = {
             "disp": False,
-            "ftol": 1e-20,
+            "ftol": 1e-10,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
-            "maxiter": 1000,
+            "maxiter": 20,
         }
 
         # Solve the optimization problem
