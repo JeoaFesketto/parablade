@@ -319,7 +319,7 @@ class BladeMatch:
                 # Optimization algorithm options
                 my_options = {
                     "disp": False,
-                    "ftol": 1e-6,
+                    "ftol": 1e-10,
                     #'gtol': 1e-9,
                     #'eps': np.
                     # finfo(np.float64).eps ** (1 / 2),
