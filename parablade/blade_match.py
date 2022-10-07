@@ -323,7 +323,7 @@ class BladeMatch:
                     #'gtol': 1e-9,
                     #'eps': np.
                     # finfo(np.float64).eps ** (1 / 2),
-                    "maxiter": 250,
+                    "maxiter": 1000,
                 }
 
                 # Solve the optimization problem
@@ -389,7 +389,7 @@ class BladeMatch:
         # Optimization algorithm options
         my_options = {
             "disp": False,
-            "ftol": 1e-10,
+            "ftol": 0.6,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
             "maxiter": 250,
@@ -580,7 +580,7 @@ class BladeMatch:
         # Update number of function calls
         self.function_calls = self.function_calls + 1
 
-        return two_norm_error
+        return self.max_deviation_rel
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Optimization callback function
