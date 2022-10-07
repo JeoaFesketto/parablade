@@ -323,7 +323,7 @@ class BladeMatch:
                     #'gtol': 1e-9,
                     #'eps': np.
                     # finfo(np.float64).eps ** (1 / 2),
-                    "maxiter": 1000,
+                    # "maxiter": 1000,
                 }
 
                 # Solve the optimization problem
@@ -331,7 +331,7 @@ class BladeMatch:
                     fun=self.my_objective_function,
                     x0=np.asarray([my_u0[k], my_v0[k]]),
                     args=("uv_parametrization", i),
-                    method="SLSQP",  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
+                    method="L-BFGS-B",  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
                     jac=None,
                     # hess=None,
                     # hessp=None,
@@ -392,7 +392,7 @@ class BladeMatch:
             "ftol": 1e-100,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
-            "maxiter": 250,
+            "maxiter": 450,
         }
 
         # Solve the optimization problem
@@ -400,7 +400,7 @@ class BladeMatch:
             fun=self.my_objective_function,
             x0=my_x0,
             args="design_variables",
-            method="SLSQP",
+            method="L-BFGS-B",
             jac=None,
             # hess=None,
             # hessp=None,
@@ -575,8 +575,11 @@ class BladeMatch:
                     ** (1 / 2)
                 )
             )
-
+            
+            # TODO this is really bad but i couldn't find a better way
             self.max_deviation_rel = self.max_deviation / self.meanline_length * 100
+            if self.max_deviation_rel<0.35 and self.mean_deviation_rel<0.09:
+                return 0
 
         # Update number of function calls
         self.function_calls = self.function_calls + 1
@@ -1479,6 +1482,3 @@ class BladeMatch:
 
 
             plt.show()
-
-class ReachedGoal(Warning):
-    pass
