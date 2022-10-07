@@ -323,7 +323,7 @@ class BladeMatch:
                     #'gtol': 1e-9,
                     #'eps': np.
                     # finfo(np.float64).eps ** (1 / 2),
-                    "maxiter": 20,
+                    "maxiter": 250,
                 }
 
                 # Solve the optimization problem
@@ -392,7 +392,7 @@ class BladeMatch:
             "ftol": 1e-10,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
-            "maxiter": 20,
+            "maxiter": 250,
         }
 
         # Solve the optimization problem
