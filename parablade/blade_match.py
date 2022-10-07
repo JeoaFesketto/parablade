@@ -319,11 +319,11 @@ class BladeMatch:
                 # Optimization algorithm options
                 my_options = {
                     "disp": False,
-                    "ftol": 1e-10,
+                    # "ftol": 1e-1000,
                     #'gtol': 1e-9,
                     #'eps': np.
                     # finfo(np.float64).eps ** (1 / 2),
-                    "maxiter": 1000,
+                    # "maxiter": 1000,
                 }
 
                 # Solve the optimization problem
@@ -389,7 +389,7 @@ class BladeMatch:
         # Optimization algorithm options
         my_options = {
             "disp": False,
-            "ftol": 0.6,
+            # "ftol": 1e-100,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
             "maxiter": 250,
@@ -409,7 +409,7 @@ class BladeMatch:
             callback=self.callback_function,
             options=my_options,
         )
-
+        print(self.solution.message)
         self.coordinates_matched = self.blade_matched.get_surface_coordinates(
             self.u, self.v
         )
@@ -575,12 +575,14 @@ class BladeMatch:
                     ** (1 / 2)
                 )
             )
+
             self.max_deviation_rel = self.max_deviation / self.meanline_length * 100
 
         # Update number of function calls
         self.function_calls = self.function_calls + 1
+        
 
-        return self.max_deviation_rel
+        return two_norm_error
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Optimization callback function
@@ -592,7 +594,6 @@ class BladeMatch:
         In addition callback_function() performs the (u,v) parametrization matching every N-th iteration
 
         """
-
         # Update iteration number
         self.iteration = self.iteration + 1
 
@@ -1478,3 +1479,6 @@ class BladeMatch:
 
 
             plt.show()
+
+class ReachedGoal(Warning):
+    pass
