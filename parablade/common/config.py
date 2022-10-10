@@ -32,7 +32,7 @@ import cmath
 def WriteConfigFile(OUTFile,IN):
     #pdb.set_trace()
     for key in IN:
-        input = str(IN[key])
+        input = str(list(IN[key]))
         output = input.replace('[','')
         output1 = output.replace(']', '')
         try:
@@ -97,7 +97,7 @@ def ReadUserInput(name):
 
 def WriteBladeConfigFile(name,IN):
     for key in IN:
-        input = str(IN[key])
+        input = str(list(IN[key]))
         output = input.replace('[','')
         output1 = output.replace(']', '')
         name.write("%s=%s\n"%(key,output1))
@@ -112,3 +112,14 @@ def ConfigPasser(config):
         raise TypeError(
             'Inappropriate argument type: input must be path to cfg or the corresponding dictionary itself'
             )
+
+def ConfigCorrecter(input_file, output_file):
+    with open(input_file, 'r') as f:
+        data = f.readlines()
+        for i, elem in enumerate(data):
+            data[i] = elem.lstrip()
+            data[i] = ' '.join(elem.split())
+    # print(data)
+        
+    for elem in data:
+        print(elem)
