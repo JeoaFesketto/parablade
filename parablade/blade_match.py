@@ -400,7 +400,7 @@ class BladeMatch:
             fun=self.my_objective_function,
             x0=my_x0,
             args="design_variables",
-            method="L-BFGS-B",
+            method="SLSQP",
             jac=None,
             # hess=None,
             # hessp=None,
