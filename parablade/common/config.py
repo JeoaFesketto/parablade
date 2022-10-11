@@ -75,7 +75,7 @@ def WriteSU2ConfigFile(ConfigName,TYPE):
             pass
 
 
-def ReadUserInput(name):
+def ReadUserInput(name, section = None):
     IN = {}
     infile = open(name, 'r')
     for line in infile:
@@ -94,7 +94,14 @@ def ReadUserInput(name):
         else:
             IN[words[0]] = words[1::1]
     IN['Config_Path'] = name
-    return IN
+    if section is None:
+        return IN
+    else:
+        length = len(IN['x_leading']) 
+        for key, value in IN.items():
+            if type(value) == list and len(value)==length:
+                IN[key] = np.take(value, section)
+        return IN
 
 def WriteBladeConfigFile(name,IN):
     for key in IN:
@@ -114,7 +121,7 @@ def ConfigPasser(config):
             'Inappropriate argument type: input must be path to cfg or the corresponding dictionary itself'
             )
 
-def ConfigCorrecter(input_file, output_file):
+def ConfigCorrector(input_file, output_file):
     with open(input_file, 'r') as f:
         data = f.readlines()
     for i, elem in enumerate(data):
@@ -131,3 +138,58 @@ def ConfigCorrecter(input_file, output_file):
     data = data.replace(', \n', '\n')
     with open(output_file, 'w') as f:
         f.write(data)
+
+blade_section_camber_thickness = [
+    "stagger",
+    "theta_in",
+    "theta_out",
+    "radius_in",
+    "radius_out",
+    "dist_in",
+    "dist_out",
+    "thickness_upper_1",
+    "thickness_upper_2",
+    "thickness_upper_3",
+    "thickness_upper_4",
+    "thickness_upper_5",
+    "thickness_upper_6",
+    "thickness_lower_1",
+    "thickness_lower_2",
+    "thickness_lower_3",
+    "thickness_lower_4",
+    "thickness_lower_5",
+    "thickness_lower_6",
+]
+
+meridional_channel_names = [
+    "x_leading",
+    "y_leading",
+    "z_leading",
+    "x_trailing",
+    "z_trailing",
+    "x_hub",
+    "z_hub",
+    "x_shroud",
+    "z_shroud",
+]
+
+param_list = meridional_channel_names[:5]
+
+param_list.extend(blade_section_camber_thickness)
+
+
+def ConcatenateConfig(*configs, verbose = True):
+    """Concatenates config files in order."""
+
+    if len(configs) != 1:
+        for config in configs[1:]:
+            for key in param_list:
+                configs[0][key] = np.hstack((configs[0][key], config[key]))
+
+    if verbose:
+        print('\n\n')
+        for key in param_list:
+            print(f'\t{key}\t has {configs[0][key].shape[0]} parameters')
+        print('\n\n')
+
+    return configs[0]
