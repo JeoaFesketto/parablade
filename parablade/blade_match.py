@@ -553,8 +553,8 @@ class BladeMatch:
 
         # Ignore the z-coordinate for 2D problems
         if self.NDIM == 2:
-            coordinates_matched = coordinates_matched[[0, 1], :]
-            coordinates_prescribed = coordinates_prescribed[[0, 1], :]
+        #     coordinates_matched = coordinates_matched[[0, 1], :]
+            coordinates_prescribed = coordinates_prescribed[[0, 1, 2], :]
 
         # Compute the two-norm of the deviation between prescribed and matched blade
         two_norm_error = np.real(
