@@ -105,7 +105,7 @@ def ReadUserInput(name, section = None):
 
 def WriteBladeConfigFile(name,IN):
     for key in IN:
-        input = str(IN[key])
+        input = str(list(IN[key]))
         output = input.replace('[','')
         output1 = output.replace(']', '')
         name.write("%s=%s\n"%(key,output1))
