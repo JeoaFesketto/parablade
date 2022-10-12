@@ -105,7 +105,7 @@ def ReadUserInput(name, section = None):
 
 def WriteBladeConfigFile(name,IN):
     for key in IN:
-        input = str(list(IN[key]))
+        input = str(list(IN[key])) if type(IN[key]) == np.ndarray else str(IN[key])
         output = input.replace('[','')
         output1 = output.replace(']', '')
         name.write("%s=%s\n"%(key,output1))
@@ -121,23 +121,25 @@ def ConfigPasser(config):
             'Inappropriate argument type: input must be path to cfg or the corresponding dictionary itself'
             )
 
-def ConfigCorrector(input_file, output_file):
-    with open(input_file, 'r') as f:
-        data = f.readlines()
-    for i, elem in enumerate(data):
-        data[i] = elem.lstrip()
-        data[i] = ' '.join(elem.split())
+# NOTE Likely not needed anymore
 
-    for i, line in enumerate(data):
-        if '=' not in line:
-            data[i] = data[i]+' '
-        else:
-            data[i] = '\n\n'+data[i]+' '
-        data[i] = data[i].replace('= ', '=').replace(' ', ', ')
-    data = ''.join(data)
-    data = data.replace(', \n', '\n')
-    with open(output_file, 'w') as f:
-        f.write(data)
+# def ConfigCorrector(input_file, output_file):
+#     with open(input_file, 'r') as f:
+#         data = f.readlines()
+#     for i, elem in enumerate(data):
+#         data[i] = elem.lstrip()
+#         data[i] = ' '.join(elem.split())
+
+#     for i, line in enumerate(data):
+#         if '=' not in line:
+#             data[i] = data[i]+' '
+#         else:
+#             data[i] = '\n\n'+data[i]+' '
+#         data[i] = data[i].replace('= ', '=').replace(' ', ', ')
+#     data = ''.join(data)
+#     data = data.replace(', \n', '\n')
+#     with open(output_file, 'w') as f:
+#         f.write(data)
 
 blade_section_camber_thickness = [
     "stagger",
