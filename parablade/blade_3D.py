@@ -225,9 +225,14 @@ class Blade3D:
         self.PARAMETRIZATION_TYPE = IN["PARAMETRIZATION_TYPE"]
         self.OPERATION_TYPE = IN["OPERATION_TYPE"]
         self.PLOT_FORMAT = IN["PLOT_FORMAT"]
+        try:
+            self.SCALE_FACTOR = IN["SCALE_FACTOR"]
+        except:
+            self.SCALE_FACTOR, IN["SCALE_FACTOR"]= 1, 1
+
         self._transformations = _transformations
 
-        self.IN["chord"] = np.array(
+        self.IN["CHORD"] = np.array(
             [
                 (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
                 / np.cos(np.deg2rad(self.IN["stagger"][0]))
