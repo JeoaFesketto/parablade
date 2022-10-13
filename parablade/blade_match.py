@@ -650,6 +650,9 @@ class BladeMatch:
         full_path = path + "/output_matching/"
         file = open(full_path + filename + ".csv", "w")
 
+        matched_output = self.coordinates_matched/self.IN["SCALE_FACTOR"]
+        prescribed_output = self.coordinates_prescribed/self.IN["SCALE_FACTOR"]
+
         if self.NDIM == 2:
             file.write(
                 '"index",\t"x_prescribed",\t"y_prescribed",\t"x_match",\t"y_match",\t"u",\t"v"\n'
@@ -658,18 +661,18 @@ class BladeMatch:
                 file.write(
                     "%i,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%.15f,\t%.15f\n"
                     % (
-                        self.coordinates_prescribed[0, i],  # Mesh point index
-                        self.coordinates_prescribed[
+                        prescribed_output[0, i],  # Mesh point index
+                        prescribed_output[
                             1, i
                         ],  # Prescribed x coordinate (axial)
-                        self.coordinates_prescribed[
+                        prescribed_output[
                             2, i
                         ],  # Prescribed y coordinate (tangential)
                         np.real(
-                            self.coordinates_matched[0, i]
+                            matched_output[0, i]
                         ),  # Matched x-coordinate (axial)
                         np.real(
-                            self.coordinates_matched[1, i]
+                            matched_output[1, i]
                         ),  # Matched y-coordinate (tangential)
                         self.u[i],
                         self.v[i],
@@ -684,20 +687,20 @@ class BladeMatch:
                 file.write(
                     "%i,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%.15f,\t%.15f\n"
                     % (
-                        self.coordinates_prescribed[0, i],  # Mesh point index
-                        self.coordinates_prescribed[3, i],  # SU2 x coordinate (radial)
-                        self.coordinates_prescribed[
+                        prescribed_output[0, i],  # Mesh point index
+                        prescribed_output[3, i],  # SU2 x coordinate (radial)
+                        prescribed_output[
                             2, i
                         ],  # SU2 y coordinate (tangential)
-                        self.coordinates_prescribed[1, i],  # SU2 z coordinate (axial)
+                        prescribed_output[1, i],  # SU2 z coordinate (axial)
                         np.real(
-                            self.coordinates_matched[2, i]
+                            matched_output[2, i]
                         ),  # SU2 x coordinate (radial)
                         np.real(
-                            self.coordinates_matched[1, i]
+                            matched_output[1, i]
                         ),  # SU2 y coordinate (tangential)
                         np.real(
-                            self.coordinates_matched[0, i]
+                            matched_output[0, i]
                         ),  # SU2 z coordinate (axial)
                         self.u[i],
                         self.v[i],
@@ -713,9 +716,13 @@ class BladeMatch:
 
         """Print a configuration .cfg file for the current set of design variables"""
 
+        IN_output = copy.deepcopy(self.IN)
+        for key in Blade3D.meridional_channel_names[:5]:
+                IN_output[key] = self.IN[key]/self.IN["SCALE_FACTOR"]
+
         full_path = path + "/output_matching/"
         file = open(full_path + filename + ".cfg", "w")
-        WriteBladeConfigFile(file, self.IN)
+        WriteBladeConfigFile(file, IN_output)
         file.close()
 
     def print_optimization_progress(
