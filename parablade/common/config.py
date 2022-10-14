@@ -121,6 +121,12 @@ def ConfigPasser(config):
             'Inappropriate argument type: input must be path to cfg or the corresponding dictionary itself'
             )
 
+def Numpize(config):
+    if type(config['x_leading']) is not np.ndarray:
+        for key in param_list:
+            config[key] = np.array(config[key]) 
+    return config
+
 # NOTE Likely not needed anymore
 
 # def ConfigCorrector(input_file, output_file):
