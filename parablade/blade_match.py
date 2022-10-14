@@ -47,7 +47,7 @@ import warnings
 # ---------------------------------------------------------------------------------------------#
 from parablade.blade_3D import Blade3D
 from parablade.common.common import printProgress
-from parablade.common.config import ReadUserInput, WriteBladeConfigFile, ConfigPasser
+from parablade.common.config import ReadUserInput, WriteBladeConfigFile, ConfigPasser, Numpize
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -716,9 +716,10 @@ class BladeMatch:
 
         """Print a configuration .cfg file for the current set of design variables"""
 
+        self.IN = Numpize(self.IN)
         IN_output = copy.deepcopy(self.IN)
         for key in Blade3D.meridional_channel_names[:5]:
-                IN_output[key] = self.IN[key]/self.IN["SCALE_FACTOR"]
+            IN_output[key] = self.IN[key]/self.IN["SCALE_FACTOR"]
 
         full_path = path + "/output_matching/"
         file = open(full_path + filename + ".cfg", "w")
