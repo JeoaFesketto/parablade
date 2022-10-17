@@ -1400,7 +1400,7 @@ class BladeMatch:
             ]
             sliders = {}
 
-            def _interval(case, value, coef=0.5):
+            def _interval(case, value, coef=10):
                 if value == 0:
                     return 3 if case == max else -3
                 else:
