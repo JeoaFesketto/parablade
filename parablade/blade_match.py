@@ -47,7 +47,7 @@ import warnings
 # ---------------------------------------------------------------------------------------------#
 from parablade.blade_3D import Blade3D
 from parablade.common.common import printProgress
-from parablade.common.config import ReadUserInput, WriteBladeConfigFile, ConfigPasser, Numpize
+from parablade.common.config import ReadUserInput, DeScale, WriteBladeConfigFile, ConfigPasser, Numpize
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -717,9 +717,8 @@ class BladeMatch:
         """Print a configuration .cfg file for the current set of design variables"""
 
         self.IN = Numpize(self.IN)
-        IN_output = copy.deepcopy(self.IN)
-        for key in Blade3D.meridional_channel_names[:5]:
-            IN_output[key] = self.IN[key]/self.IN["SCALE_FACTOR"]
+
+        IN_output = DeScale(self.IN)
 
         full_path = path + "/output_matching/"
         file = open(full_path + filename + ".cfg", "w")
@@ -1242,7 +1241,7 @@ class BladeMatch:
         # Read the .cfg file and update the geometry
         while True:
             try:
-                self.IN = ReadUserInput(self.IN["Config_Path"])
+                # self.IN = ReadUserInput(self.IN["Config_Path"])
                 self.blade_matched = Blade3D(self.IN)
                 self.blade_matched.make_blade()
                 self.coordinates_matched = self.blade_matched.get_surface_coordinates(

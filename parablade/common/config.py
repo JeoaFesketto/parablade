@@ -127,6 +127,24 @@ def Numpize(config):
             config[key] = np.array(config[key]) 
     return config
 
+def Scale(IN, scale=1e-3, in_place=False):
+    config = IN if in_place else copy.deepcopy(IN)
+
+    config["SCALE_FACTOR"] = scale
+    for key in meridional_channel_names[:5]:
+        config[key] = config[key]*config["SCALE_FACTOR"]
+
+    return config
+
+def DeScale(IN, in_place=False):
+    config = IN if in_place else copy.deepcopy(IN)
+
+    for key in meridional_channel_names[:5]:
+        config[key] = config[key]/config["SCALE_FACTOR"]
+    config["SCALE_FACTOR"] = 1
+
+    return config
+
 # NOTE Likely not needed anymore
 
 # def ConfigCorrector(input_file, output_file):
