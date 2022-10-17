@@ -393,7 +393,7 @@ class BladeMatch:
         # Optimization algorithm options
         my_options = {
             "disp": False,
-            "ftol": 1e-100,
+            "ftol": 1e-1000,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
             "maxiter": 450,
@@ -582,7 +582,7 @@ class BladeMatch:
 
             # TODO this is really bad but i couldn't find a better way
             self.max_deviation_rel = self.max_deviation / self.meanline_length * 100
-            if self.max_deviation_rel < 0.35 and self.mean_deviation_rel < 0.09:
+            if self.max_deviation_rel < 0.40 and self.mean_deviation_rel < 0.10:
                 return 0
 
         # Update number of function calls
@@ -1241,7 +1241,7 @@ class BladeMatch:
         # Read the .cfg file and update the geometry
         while True:
             try:
-                # self.IN = ReadUserInput(self.IN["Config_Path"])
+                self.IN = ReadUserInput(self.IN["Config_Path"])
                 self.blade_matched = Blade3D(self.IN)
                 self.blade_matched.make_blade()
                 self.coordinates_matched = self.blade_matched.get_surface_coordinates(
