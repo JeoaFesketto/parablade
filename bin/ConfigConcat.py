@@ -13,6 +13,7 @@ for file in files:
     list_to_concat.append(ReadUserInput(DIR+file))
 
 final = ConcatenateConfig(*list_to_concat)
+final['NDIM'] = 3
 
 WriteBladeConfigFile(open(DIR+files[0][:-4]+'_concatenated.cfg', 'w'), final)
 

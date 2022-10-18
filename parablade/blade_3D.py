@@ -250,7 +250,10 @@ class Blade3D:
             self.IN["y_leading"][0],
         ]
 
-        self.CFG_VERSION = int(self.IN["CFG_VERSION"][0])
+        try:
+            self.CFG_VERSION = int(self.IN["CFG_VERSION"][0])
+        except:
+            self.CFG_VERSION = 1
 
         if self.CFG_VERSION == 2:
 
