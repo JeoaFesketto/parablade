@@ -145,6 +145,35 @@ def DeScale(IN, in_place=False):
 
     return config
 
+def Position(IN, le, te, in_place=False):
+    config = IN if in_place else copy.deepcopy(IN)
+
+    config["x_leading"] = np.array([le[2]])
+    config["y_leading"] = np.array([le[0]])
+    config["z_leading"] = np.array([le[1]])
+    config["x_trailing"]= np.array([te[2]])
+    config["z_trailing"]= np.array([te[1]])
+
+    return config
+
+def Angles(IN, le, te, in_place=False):
+    config = IN if in_place else copy.deepcopy(IN)
+
+    vect = te[[2, 0]]-le[[2, 0]]
+
+    config['stagger'] = -np.arccos(
+        np.dot([1, 0], vect)/np.linalg.norm(vect)
+    )
+    config['stagger'] = np.rad2deg(config['stagger'])
+    config['theta_in'] = config['stagger']-5
+    config['theta_out'] = config['stagger']+5
+
+    for key in ['stagger', 'theta_in', 'theta_out']:
+        config[key] = np.array([config[key]])
+
+    return config
+
+
 # NOTE Likely not needed anymore
 
 # def ConfigCorrector(input_file, output_file):
