@@ -93,7 +93,9 @@ class BladeMatch:
             "view_3D": "yes",
             "error_distribution": "yes",
         },
-        _output_path=None
+        _output_path=None,
+        _no_subfolder=False,
+        _optimization_max_iter=300
     ):
 
         # Declare input variables as instance variables
@@ -106,10 +108,11 @@ class BladeMatch:
 
         # Create output directory
         # os.system("rm -rf output_matching")
-        try:
-            os.mkdir(self._output_path+"/output_matching")
-        except:
-            print('\n\n\tOutput folder for parametrization results already exists, files might have been overwriten\n\n')
+        if not _no_subfolder:
+            try:
+                os.mkdir(self._output_path+"/output_matching")
+            except:
+                print('\n\n\tOutput folder for parametrization results already exists, files might have been overwriten\n\n')
 
         # Load prescribed blade coordinates
         if self.NDIM == 2:
@@ -139,6 +142,8 @@ class BladeMatch:
         self.function_calls = 0
         self.iteration = 0
 
+        self.optimization_max_iter = _optimization_max_iter
+
         # Initialize mismatch indicators
         self.mean_deviation = 0
         self.max_deviation = 0
@@ -153,6 +158,7 @@ class BladeMatch:
             self.u, self.v
         )
         self.error_distribution = None
+
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Blade matching main function
@@ -396,7 +402,7 @@ class BladeMatch:
             "ftol": 1e-1000,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
-            "maxiter": 300,
+            "maxiter": self.optimization_max_iter,
         }
 
         # Solve the optimization problem
@@ -626,7 +632,7 @@ class BladeMatch:
             self.update_plots()
 
         # Update the (u,v)-parametrization each N iterations
-        if self.iteration % N == 0:
+        if self.iteration % N == 0 and self.iteration>=40:
             self.match_blade_uv()
 
         # Update the matched coordinates
