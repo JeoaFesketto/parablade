@@ -95,7 +95,9 @@ class BladeMatch:
         },
         _output_path=None,
         _no_subfolder=False,
-        _optimization_max_iter=300
+        _optimization_max_iter=300,
+        _convergence_max_dev_rel=0.4,
+        _convergence_mean_dev_rel=0.1
     ):
 
         # Declare input variables as instance variables
@@ -105,6 +107,8 @@ class BladeMatch:
         self.PRESCRIBED_BLADE_FILENAME = self.IN["PRESCRIBED_BLADE_FILENAME"]
         self.plot_options = plot_options
         self._output_path = os.getcwd() if _output_path is None else _output_path
+        self.convergence_max_dev_rel = _convergence_max_dev_rel
+        self.convergence_mean_dev_rel = _convergence_mean_dev_rel
 
         # Create output directory
         # os.system("rm -rf output_matching")
@@ -588,7 +592,7 @@ class BladeMatch:
 
             # TODO this is really bad but i couldn't find a better way
             self.max_deviation_rel = self.max_deviation / self.meanline_length * 100
-            if self.max_deviation_rel < 0.40 and self.mean_deviation_rel < 0.10:
+            if self.max_deviation_rel < self.convergence_max_dev_rel and self.mean_deviation_rel < self.convergence_mean_dev_rel:
                 return 0
 
         # Update number of function calls
