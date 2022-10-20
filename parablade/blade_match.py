@@ -97,7 +97,9 @@ class BladeMatch:
         _no_subfolder=False,
         _optimization_max_iter=300,
         _convergence_max_dev_rel=0.4,
-        _convergence_mean_dev_rel=0.1
+        _convergence_mean_dev_rel=0.1,
+        _uv_optim_method="L-BFGS-B",
+        _dv_optim_method="SLSQP"
     ):
 
         # Declare input variables as instance variables
@@ -109,6 +111,8 @@ class BladeMatch:
         self._output_path = os.getcwd() if _output_path is None else _output_path
         self.convergence_max_dev_rel = _convergence_max_dev_rel
         self.convergence_mean_dev_rel = _convergence_mean_dev_rel
+        self.uv_optim_method = _uv_optim_method
+        self.dv_optim_method = _dv_optim_method
 
         # Create output directory
         # os.system("rm -rf output_matching")
@@ -345,7 +349,7 @@ class BladeMatch:
                     fun=self.my_objective_function,
                     x0=np.asarray([my_u0[k], my_v0[k]]),
                     args=("uv_parametrization", i),
-                    method="L-BFGS-B",  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
+                    method=self.uv_optim_method,  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
                     jac=None,
                     # hess=None,
                     # hessp=None,
@@ -414,7 +418,7 @@ class BladeMatch:
             fun=self.my_objective_function,
             x0=my_x0,
             args="design_variables",
-            method="SLSQP",
+            method=self.dv_optim_method,
             jac=None,
             # hess=None,
             # hessp=None,
