@@ -431,7 +431,7 @@ class BladeMatch:
 
         if self.dv_optim_method == 'SLSQP':
             while self.solution.status == 4 and bool(self.max_retries_slsqp):
-                print(f'Retrying to get better result, adding {self.optimization_max_iter} iterations to max.')
+                print(f'Retrying to get better result, new itermax is {self.optimization_max_iter+self.iteration}.')
                 self.solution = minimize(
                     fun=self.my_objective_function,
                     x0=my_x0,
@@ -442,6 +442,7 @@ class BladeMatch:
                     callback=self.callback_function,
                     options=my_options,
                 )
+                print(self.solution.message)
                 self.max_retries_slsqp -= 1
 
 
