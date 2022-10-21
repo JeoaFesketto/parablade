@@ -99,7 +99,8 @@ class BladeMatch:
         _convergence_max_dev_rel=0.4,
         _convergence_mean_dev_rel=0.1,
         _uv_optim_method="L-BFGS-B",
-        _dv_optim_method="SLSQP"
+        _dv_optim_method="SLSQP",
+        _max_retries_slsqp=1
     ):
 
         # Declare input variables as instance variables
@@ -113,6 +114,7 @@ class BladeMatch:
         self.convergence_mean_dev_rel = _convergence_mean_dev_rel
         self.uv_optim_method = _uv_optim_method
         self.dv_optim_method = _dv_optim_method
+        self.max_retries_slsqp = _max_retries_slsqp
 
         # Create output directory
         # os.system("rm -rf output_matching")
@@ -420,14 +422,29 @@ class BladeMatch:
             args="design_variables",
             method=self.dv_optim_method,
             jac=None,
-            # hess=None,
-            # hessp=None,
             bounds=my_bounds,
-            # constraints=None,
             callback=self.callback_function,
             options=my_options,
         )
+
         print(self.solution.message)
+
+        if self.dv_optim_method == 'SLSQP':
+            while self.solution.status == 4 and bool(self.max_retries_slsqp):
+                print(f'Retrying to get better result, adding {self.optimization_max_iter} iterations to max.')
+                self.solution = minimize(
+                    fun=self.my_objective_function,
+                    x0=my_x0,
+                    args="design_variables",
+                    method=self.dv_optim_method,
+                    jac=None,
+                    bounds=my_bounds,
+                    callback=self.callback_function,
+                    options=my_options,
+                )
+                self.max_retries_slsqp -= 1
+
+
         self.coordinates_matched = self.blade_matched.get_surface_coordinates(
             self.u, self.v
         )
