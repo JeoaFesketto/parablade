@@ -161,15 +161,23 @@ def Angles(IN, le, te, in_place=False):
 
     vect = te[[2, 0]]-le[[2, 0]]
 
-    config['stagger'] = -np.arccos(
+    config['stagger'] = np.arccos(
         np.dot([1, 0], vect)/np.linalg.norm(vect)
     )
     config['stagger'] = np.rad2deg(config['stagger'])
-    config['theta_in'] = config['stagger']-5
-    config['theta_out'] = config['stagger']+5
 
-    for key in ['stagger', 'theta_in', 'theta_out']:
+    for key in ['stagger']:
         config[key] = np.array([config[key]])
+
+    return config
+
+def Fatten(IN, in_place=False):
+    config = IN if in_place else copy.deepcopy(IN)
+
+    for key in ['radius_in', 'radius_out']:
+        config[key] = np.array([0.01])
+    for key in blade_section_camber_thickness[7:]:
+        config[key] = np.array(config[key])*2
 
     return config
 
