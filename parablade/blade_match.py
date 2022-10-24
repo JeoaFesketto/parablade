@@ -1409,27 +1409,27 @@ class BladeMatch:
             bottom = 0.05
             spacing = 0.05
 
-            params = [
-                "thickness_upper_1",
-                "thickness_upper_2",
-                "thickness_upper_3",
-                "thickness_upper_4",
-                "thickness_upper_5",
-                "thickness_upper_6",
-                "thickness_lower_1",
-                "thickness_lower_2",
-                "thickness_lower_3",
-                "thickness_lower_4",
-                "thickness_lower_5",
-                "thickness_lower_6",
-                "theta_in",
-                "theta_out",
-                "dist_in",
-                "dist_out",
-                "radius_in",
-                "radius_out",
-                "stagger",
-            ]
+            params = {
+                "thickness_upper_1": (0.0001, 1),
+                "thickness_upper_2": (0.0001, 1),
+                "thickness_upper_3": (0.0001, 1),
+                "thickness_upper_4": (0.0001, 1),
+                "thickness_upper_5": (0.0001, 1),
+                "thickness_upper_6": (0.0001, 1),
+                "thickness_lower_1": (0.0001, 1),
+                "thickness_lower_2": (0.0001, 1),
+                "thickness_lower_3": (0.0001, 1),
+                "thickness_lower_4": (0.0001, 1),
+                "thickness_lower_5": (0.0001, 1),
+                "thickness_lower_6": (0.0001, 1),
+                "theta_in": (-89.99, 89.99),
+                "theta_out": (-89.99, 89.99),
+                "dist_in": (0.0001, 2),
+                "dist_out": (0.0001, 2),
+                "radius_in": (0.0001, 1),
+                "radius_out": (0.0001, 1),
+                "stagger": (-89.99, 89.99),
+            }
             sliders = {}
 
             def _interval(case, value, coef=10):
@@ -1445,8 +1445,8 @@ class BladeMatch:
                 sliders[param] = Slider(
                     ax=plt.axes([left, bottom + i * spacing, width, height]),
                     label=param,
-                    valmin=_interval(min, self.IN[param][0]),
-                    valmax=_interval(max, self.IN[param][0]),
+                    valmin=params[param][0],
+                    valmax=params[param][1],
                     valinit=self.IN[param][0],
                 )
 
