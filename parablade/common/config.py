@@ -132,7 +132,7 @@ def Scale(IN, scale=1e-3, in_place=False):
 
     config["SCALE_FACTOR"] = scale
     for key in meridional_channel_names[:5]:
-        config[key] = config[key]*config["SCALE_FACTOR"]
+        config[key] = np.array(config[key])*config["SCALE_FACTOR"]
 
     return config
 
