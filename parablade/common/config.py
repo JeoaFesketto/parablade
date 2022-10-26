@@ -159,11 +159,11 @@ def Position(IN, le, te, in_place=False):
 def Angles(IN, le, te, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
 
-    vect = te[[2, 0]]-le[[2, 0]]
 
-    config['stagger'] = np.arccos(
-        np.dot([1, 0], vect)/np.linalg.norm(vect)
+    config['stagger'] = np.arctan(
+        (te[0]-le[0])/(te[2]-le[2])
     )
+
     config['stagger'] = np.rad2deg(config['stagger'])
 
     for key in ['stagger']:
