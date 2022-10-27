@@ -150,9 +150,9 @@ def Position(IN, le, te, in_place=False):
 
     config["x_leading"] = np.array([le[2]])
     config["y_leading"] = np.array([le[0]])
-    config["z_leading"] = np.array([le[1]])
+    config["z_leading"] = np.array([np.linalg.norm((le[0], le[1]))])
     config["x_trailing"]= np.array([te[2]])
-    config["z_trailing"]= np.array([te[1]])
+    config["z_trailing"]= np.array([np.linalg.norm((te[0], te[1]))])
 
     return config
 
