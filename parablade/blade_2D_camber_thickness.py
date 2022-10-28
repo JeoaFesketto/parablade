@@ -8,7 +8,7 @@
 ###############################################################################################
 
 ################################# FILE NAME: MakeBlade.py #####################################
-#=============================================================================================#
+# =============================================================================================#
 # author: Roberto, Nitish Anand                                                               |
 #    :PhD Candidates,                                                                         |
 #    :Power and Propulsion, Energy Technology,                                                |
@@ -18,7 +18,7 @@
 #                                                                                             |
 # Description:                                                                                |
 #                                                                                             |
-#=============================================================================================#
+# =============================================================================================#
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # Import general packages
@@ -31,9 +31,9 @@ import copy
 import numpy as np
 
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # "Cluster mode" imports
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 try:
     import matplotlib as mpl
     import matplotlib.pyplot as plt
@@ -41,9 +41,9 @@ except:
     pass
 
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # Import user-defined packages
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 from parablade.CAD_functions import *
 from parablade.common.config import ConfigPasser
 
@@ -53,7 +53,7 @@ from parablade.common.config import ConfigPasser
 # -------------------------------------------------------------------------------------------------------------------- #
 class Blade2DCamberThickness:
 
-    """ Create a 2D blade section object
+    """Create a 2D blade section object
 
     The parametrization is based on two arcs (upper surface and lower surface)
     The arcs are constructed imposing a thickness distribution normal to the camberline
@@ -82,7 +82,7 @@ class Blade2DCamberThickness:
     """
 
     def __init__(self, section_variables):
-        #TODO make something that works  in all the cases.
+        # TODO make something that works  in all the cases.
 
         # section_variables = copy.deepcopy(ConfigPasser(section_variables))
         # for key, value in section_variables.items():
@@ -90,8 +90,6 @@ class Blade2DCamberThickness:
         section_variables = copy.deepcopy(section_variables)
         for i in section_variables:
             section_variables[i] = section_variables[i].item()
-        
-        
 
         # Load the blade section variables
         self.stagger = section_variables["stagger"] * np.pi / 180
@@ -102,23 +100,27 @@ class Blade2DCamberThickness:
         self.dist_in = section_variables["dist_in"]
         self.dist_out = section_variables["dist_out"]
 
-        self.thickness_upper = [self.radius_in,
-                                section_variables['thickness_upper_1'],
-                                section_variables['thickness_upper_2'],
-                                section_variables['thickness_upper_3'],
-                                section_variables['thickness_upper_4'],
-                                section_variables['thickness_upper_5'],
-                                section_variables['thickness_upper_6'],
-                                self.radius_out]
+        self.thickness_upper = [
+            self.radius_in,
+            section_variables["thickness_upper_1"],
+            section_variables["thickness_upper_2"],
+            section_variables["thickness_upper_3"],
+            section_variables["thickness_upper_4"],
+            section_variables["thickness_upper_5"],
+            section_variables["thickness_upper_6"],
+            self.radius_out,
+        ]
 
-        self.thickness_lower = [self.radius_in,
-                                section_variables['thickness_lower_1'],
-                                section_variables['thickness_lower_2'],
-                                section_variables['thickness_lower_3'],
-                                section_variables['thickness_lower_4'],
-                                section_variables['thickness_lower_5'],
-                                section_variables['thickness_lower_6'],
-                                self.radius_out]
+        self.thickness_lower = [
+            self.radius_in,
+            section_variables["thickness_lower_1"],
+            section_variables["thickness_lower_2"],
+            section_variables["thickness_lower_3"],
+            section_variables["thickness_lower_4"],
+            section_variables["thickness_lower_5"],
+            section_variables["thickness_lower_6"],
+            self.radius_out,
+        ]
 
         # Declare additional variables as instance variables
         self.u = None
@@ -148,19 +150,18 @@ class Blade2DCamberThickness:
 
         # Get the sampling points to impose the thickness distribution
         self.N_sample = 10
-        self.u_sample_points = self.get_sampling_points(sampling_mode='uniform')
+        self.u_sample_points = self.get_sampling_points(sampling_mode="uniform")
 
         # Create blade surfaces
         self.make_upper_side()
         self.make_lower_side()
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute the coodinates of the blade section
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_section_coordinates(self, u):
 
-        """ Compute the coordinates of the blade section for input parameter u
+        """Compute the coordinates of the blade section for input parameter u
 
         The u-parameter is divided such that
 
@@ -198,20 +199,21 @@ class Blade2DCamberThickness:
         self.pressure_coordinates = lower_surface_coordinates
 
         # Concatenate the arcs to obtain the blade section
-        section_coordinates = np.concatenate((lower_surface_coordinates, upper_surface_coordinates), axis=1)
+        section_coordinates = np.concatenate(
+            (lower_surface_coordinates, upper_surface_coordinates), axis=1
+        )
 
         # Retrieve the original parametrization order
         self.section_coordinates = section_coordinates[:, my_order2]
 
         return self.section_coordinates
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Create the camberline
     # ---------------------------------------------------------------------------------------------------------------- #
     def make_camberline(self):
 
-        """ Create the camberline curve (B-Spline of degree 3) """
+        """Create the camberline curve (B-Spline of degree 3)"""
 
         # Control point coordintes
         x0 = self.x_in
@@ -245,39 +247,35 @@ class Blade2DCamberThickness:
         # Get the B-Spline curve object
         self.camberline = BSplineCurve(P, p, U)
 
-
     def get_camberline_coordinates(self, u):
 
-        """ Evaluate and return the coordinates of the camberline for input u """
+        """Evaluate and return the coordinates of the camberline for input u"""
         camberline_coordinates = self.camberline.get_BSplineCurve_value(u)
 
         return camberline_coordinates
 
-
     def get_camberline_slope(self, u):
 
-        """ Evaluate and return the slope of the camberline for input u """
+        """Evaluate and return the slope of the camberline for input u"""
         camberline_slope = self.camberline.get_BSplineCurve_derivative(u, order=1)
 
         return camberline_slope
 
-
     def get_camberline_normal(self, u):
 
-        """ Evaluate and return the unitary vector normal to the camber line """
+        """Evaluate and return the unitary vector normal to the camber line"""
         dr_sample = self.camberline.get_BSplineCurve_derivative(u, order=1)
-        tangent = dr_sample / np.sum(dr_sample ** 2, axis=0) ** (1 / 2)
+        tangent = dr_sample / np.sum(dr_sample**2, axis=0) ** (1 / 2)
         camberline_normal = np.asarray([-tangent[1, :], tangent[0, :]])
 
         return camberline_normal
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Create the upper and lower thickness distributions
     # ---------------------------------------------------------------------------------------------------------------- #
     def make_upper_thickness_distribution(self):
 
-        """ Create the upper thickness distribution (B-Spline of degree 3) """
+        """Create the upper thickness distribution (B-Spline of degree 3)"""
 
         # Array of control points
         P = np.asarray([self.thickness_upper])
@@ -301,10 +299,9 @@ class Blade2DCamberThickness:
         # Get the B-Spline curve object
         self.upper_thickness_distribution = BSplineCurve(P, p, U)
 
-
     def make_lower_thickness_distribution(self):
 
-        """ Create the thickness distribution (B-Spline of degree 3) """
+        """Create the thickness distribution (B-Spline of degree 3)"""
 
         # Array of control points
         P = np.asarray([self.thickness_lower])
@@ -328,26 +325,27 @@ class Blade2DCamberThickness:
         # Get the B-Spline curve object
         self.lower_thickness_distribution = BSplineCurve(P, p, U)
 
-
     def get_upper_thickness_distribution_values(self, u):
 
-        """ Evaluate and return the coordinates of the camberline for input u """
-        upper_thickness_distribution = self.upper_thickness_distribution.get_BSplineCurve_value(u)
+        """Evaluate and return the coordinates of the camberline for input u"""
+        upper_thickness_distribution = (
+            self.upper_thickness_distribution.get_BSplineCurve_value(u)
+        )
 
         return upper_thickness_distribution
 
-
     def get_lower_thickness_distribution_values(self, u):
 
-        """ Evaluate and return the coordinates of the camberline for input u """
-        lower_thickness_distribution = self.lower_thickness_distribution.get_BSplineCurve_value(u)
+        """Evaluate and return the coordinates of the camberline for input u"""
+        lower_thickness_distribution = (
+            self.lower_thickness_distribution.get_BSplineCurve_value(u)
+        )
 
         return lower_thickness_distribution
 
+    def get_sampling_points(self, sampling_mode="uniform"):
 
-    def get_sampling_points(self, sampling_mode='uniform'):
-
-        """ Distribute the sampling points along the camberline
+        """Distribute the sampling points along the camberline
 
         Parameters
         ----------
@@ -368,23 +366,24 @@ class Blade2DCamberThickness:
 
         """
 
-        if sampling_mode == 'uniform':
+        if sampling_mode == "uniform":
             u_sample = np.linspace(0, 1, self.N_sample)
 
-        elif sampling_mode == 'cosine':
+        elif sampling_mode == "cosine":
             u = np.linspace(0, 1, self.N_sample)
             u_sample = np.cos(np.pi / 2 * (1 - u)) ** 2
 
-        elif sampling_mode == 'cluster':
+        elif sampling_mode == "cluster":
             u = np.linspace(1e-6, 1 - 1e-6, self.N_sample)
             beta = 3 / 2  # Set beta > 0  | Larger values of beta increase clustering
             u_sample = 1 / (1 + (u / (1 - u)) ** (-beta))
 
         else:
-            raise Exception("Choose a valid option for the sampling distribution: 'uniform', 'cosine', 'cluster'")
+            raise Exception(
+                "Choose a valid option for the sampling distribution: 'uniform', 'cosine', 'cluster'"
+            )
 
         return u_sample
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Create the upper surface
@@ -410,8 +409,12 @@ class Blade2DCamberThickness:
         # Get the camberline coordinates, thickness, and normal vector at the sampling points
         camberline_sample = self.get_camberline_coordinates(self.u_sample_points)
         self.camberline_sample_points = camberline_sample
-        normal_sample = self.get_camberline_normal(self.u_sample_points)  # Positive sign for upper surface
-        thickness_sample = self.get_upper_thickness_distribution_values(self.u_sample_points)
+        normal_sample = self.get_camberline_normal(
+            self.u_sample_points
+        )  # Positive sign for upper surface
+        thickness_sample = self.get_upper_thickness_distribution_values(
+            self.u_sample_points
+        )
 
         # Get the upper surface set of control points
         P = camberline_sample + normal_sample * thickness_sample
@@ -421,11 +424,17 @@ class Blade2DCamberThickness:
         P[:, -1] = camberline_sample[:, -1]
 
         # Get additional control points to ensure metal angles an G2 continuity
-        P1 = self.get_start_G2_control_point(P, p, U, normal_sample[:, 0], 1 / self.radius_in)
-        P2 = self.get_end_G2_control_point(P, p, U, normal_sample[:, -1], 1 / self.radius_out)
+        P1 = self.get_start_G2_control_point(
+            P, p, U, normal_sample[:, 0], 1 / self.radius_in
+        )
+        P2 = self.get_end_G2_control_point(
+            P, p, U, normal_sample[:, -1], 1 / self.radius_out
+        )
 
         # Concatenate all the control points
-        P = np.concatenate((P[:, 0, np.newaxis], P1, P[:, 1:-1], P2, P[:, -1, np.newaxis]), axis=1)
+        P = np.concatenate(
+            (P[:, 0, np.newaxis], P1, P[:, 1:-1], P2, P[:, -1, np.newaxis]), axis=1
+        )
 
         # Reverse the order of the control points such that the surface is parametrized counter-clockwise for u in [0,1]
         P = P[:, ::-1]
@@ -433,14 +442,12 @@ class Blade2DCamberThickness:
         # Get the B-Spline curve object
         self.upper_side = BSplineCurve(P, p, U)
 
-
     def get_upper_side_coordinates(self, u):
 
-        """ Evaluate and return the coordinates of the upper_surface for input u """
+        """Evaluate and return the coordinates of the upper_surface for input u"""
         upper_side_coordinates = self.upper_side.get_BSplineCurve_value(u)
 
         return upper_side_coordinates
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Create the lower surface
@@ -465,8 +472,12 @@ class Blade2DCamberThickness:
 
         # Get the camberline coordinates, thickness, and normal vector at the sampling points
         camberline_sample = self.get_camberline_coordinates(self.u_sample_points)
-        normal_sample = self.get_camberline_normal(self.u_sample_points) * (-1)  # Negative sign for lower surface
-        thickness_sample = self.get_lower_thickness_distribution_values(self.u_sample_points)
+        normal_sample = self.get_camberline_normal(self.u_sample_points) * (
+            -1
+        )  # Negative sign for lower surface
+        thickness_sample = self.get_lower_thickness_distribution_values(
+            self.u_sample_points
+        )
 
         # Get the upper surface array initial set of control points
         P = camberline_sample + normal_sample * thickness_sample
@@ -476,30 +487,34 @@ class Blade2DCamberThickness:
         P[:, -1] = camberline_sample[:, -1]
 
         # Get additional control points to ensure metal angles an G2 continuity
-        P1 = self.get_start_G2_control_point(P, p, U, normal_sample[:, 0], 1 / self.radius_in)
-        P2 = self.get_end_G2_control_point(P, p, U, normal_sample[:, -1], 1 / self.radius_out)
+        P1 = self.get_start_G2_control_point(
+            P, p, U, normal_sample[:, 0], 1 / self.radius_in
+        )
+        P2 = self.get_end_G2_control_point(
+            P, p, U, normal_sample[:, -1], 1 / self.radius_out
+        )
 
         # Concatenate all the control points
-        P = np.concatenate((P[:, 0, np.newaxis], P1, P[:, 1:-1], P2, P[:, -1, np.newaxis]), axis=1)
+        P = np.concatenate(
+            (P[:, 0, np.newaxis], P1, P[:, 1:-1], P2, P[:, -1, np.newaxis]), axis=1
+        )
 
         # Get the B-Spline curve object
         self.lower_side_BSpline = BSplineCurve(P, p, U)
 
-
     def get_lower_side_coordinates(self, u):
 
-        """ Evaluate and return the coordinates of the lower_surface for input u """
+        """Evaluate and return the coordinates of the lower_surface for input u"""
         lower_side_coordinates = self.lower_side_BSpline.get_BSplineCurve_value(u)
 
         return lower_side_coordinates
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Define functions to ensure G2 continuity
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_start_G2_control_point(self, P, p, U, normal, curvature):
 
-        """ Get the location of the additional control point that imposes the desired curvature at ´u=0´
+        """Get the location of the additional control point that imposes the desired curvature at ´u=0´
 
         Compute the coordinates of the control point ´P1´ such that the B-Spline defined
         by the set of control points ´P´ has the specified curvature at ´u=0´
@@ -545,18 +560,17 @@ class Blade2DCamberThickness:
         P0 = P[:, 0]
         P2 = P[:, 1]
         # dist_02 = np.linalg.norm(P2 - P0)
-        dist_02 = np.sum((P2-P0)**2)**(1/2)
+        dist_02 = np.sum((P2 - P0) ** 2) ** (1 / 2)
         alpha = np.arccos(np.dot(P2 - P0, normal) / dist_02)
-        dist_01 = np.sqrt(b_2 / a_1 ** 2 / curvature * dist_02 * np.sin(alpha))
+        dist_01 = np.sqrt(b_2 / a_1**2 / curvature * dist_02 * np.sin(alpha))
         P1 = P0 + normal * dist_01
         P1 = P1[:, np.newaxis]
 
         return P1
 
-
     def get_end_G2_control_point(self, P, p, U, normal, curvature):
 
-        """ Get the location of the additional control point that imposes the desired curvature at ´u=1´
+        """Get the location of the additional control point that imposes the desired curvature at ´u=1´
 
         Compute the coordinates of the control point ´P1´ such that the B-Spline defined
         by the set of control points ´P´ has the specified curvature at ´u=1´
@@ -606,19 +620,18 @@ class Blade2DCamberThickness:
         # dist_02 = np.linalg.norm(P2 - P0)
         dist_02 = np.sum((P2 - P0) ** 2) ** (1 / 2)
         alpha = np.arccos(np.dot(P2 - P0, normal) / dist_02)
-        dist_01 = np.sqrt(b_2 / a_1 ** 2 / curvature * dist_02 * np.sin(alpha))
+        dist_01 = np.sqrt(b_2 / a_1**2 / curvature * dist_02 * np.sin(alpha))
         P1 = P0 + normal * dist_01
         P1 = P1[:, np.newaxis]
 
         return P1
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute section curvature
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_section_curvature(self, u, h=1e-5):
 
-        """ Compute the curvature of the blade section by central finite differences
+        """Compute the curvature of the blade section by central finite differences
 
         Parameters
         ----------
@@ -638,16 +651,21 @@ class Blade2DCamberThickness:
         """
 
         # Compute curvature by central finite differences
-        dr = (self.get_section_coordinates(u+h) - self.get_section_coordinates(u))/h
-        ddr = (self.get_section_coordinates(u+h) - 2*self.get_section_coordinates(u) + self.get_section_coordinates(u-h))/(h**2)
-        section_curvature = np.abs(np.cross(ddr, dr, axisa=0, axisb=0)) / (np.sum(dr ** 2, axis=0)) ** (3 / 2)
+        dr = (self.get_section_coordinates(u + h) - self.get_section_coordinates(u)) / h
+        ddr = (
+            self.get_section_coordinates(u + h)
+            - 2 * self.get_section_coordinates(u)
+            + self.get_section_coordinates(u - h)
+        ) / (h**2)
+        section_curvature = np.abs(np.cross(ddr, dr, axisa=0, axisb=0)) / (
+            np.sum(dr**2, axis=0)
+        ) ** (3 / 2)
 
         return section_curvature
 
-
     def check_analytic_curvature(self):
 
-        """ Compute the curvature at the leading/trailing edges analytically and compare it with the input value """
+        """Compute the curvature at the leading/trailing edges analytically and compare it with the input value"""
 
         # Leading and trailing edge u-values
         u = np.linspace(0, 1, 2)
@@ -655,30 +673,61 @@ class Blade2DCamberThickness:
         # Upper surface curvature
         dr = self.upper_side.get_BSplineCurve_derivative(u, order=1)
         ddr = self.upper_side.get_BSplineCurve_derivative(u, order=2)
-        upper_curvature = np.real(np.abs(np.cross(ddr, dr, axisa=0, axisb=0)) / (np.sum(dr ** 2, axis=0)) ** (3 / 2))
+        upper_curvature = np.real(
+            np.abs(np.cross(ddr, dr, axisa=0, axisb=0))
+            / (np.sum(dr**2, axis=0)) ** (3 / 2)
+        )
 
         # Lower surface curvature
         dr = self.lower_side_BSpline.get_BSplineCurve_derivative(u, order=1)
         ddr = self.lower_side_BSpline.get_BSplineCurve_derivative(u, order=2)
-        lower_curvature = np.real(np.abs(np.cross(ddr, dr, axisa=0, axisb=0)) / (np.sum(dr ** 2, axis=0)) ** (3 / 2))
+        lower_curvature = np.real(
+            np.abs(np.cross(ddr, dr, axisa=0, axisb=0))
+            / (np.sum(dr**2, axis=0)) ** (3 / 2)
+        )
 
         # Print curvature mismatch
-        print('\tCheck the the curvature given as a design variable matches with the output curvature:')
-        print('{:>20} \t {:>20}    \t {:>20}    \t {:>20}'.format('Point', 'Design variable', 'Upper surface analytic', 'Lower surface analytic'))
-        print('{:>20} \t {:>20.5e} \t {:>20.5e} \t {:>20.5e}'.format('Start', 1/self.radius_in,  upper_curvature[1], lower_curvature[0]))
-        print('{:>20} \t {:>20.5e} \t {:>20.5e} \t {:>20.5e}'.format('End',   1/self.radius_out, upper_curvature[0], lower_curvature[1]))
-
+        print(
+            "\tCheck the the curvature given as a design variable matches with the output curvature:"
+        )
+        print(
+            "{:>20} \t {:>20}    \t {:>20}    \t {:>20}".format(
+                "Point",
+                "Design variable",
+                "Upper surface analytic",
+                "Lower surface analytic",
+            )
+        )
+        print(
+            "{:>20} \t {:>20.5e} \t {:>20.5e} \t {:>20.5e}".format(
+                "Start", 1 / self.radius_in, upper_curvature[1], lower_curvature[0]
+            )
+        )
+        print(
+            "{:>20} \t {:>20.5e} \t {:>20.5e} \t {:>20.5e}".format(
+                "End", 1 / self.radius_out, upper_curvature[0], lower_curvature[1]
+            )
+        )
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Plotting functions
     # ---------------------------------------------------------------------------------------------------------------- #
-    def plot_blade_section(self, fig=None, ax=None,
-                           upper_side='yes', upper_side_control_points='no',
-                           lower_side='yes', lower_side_control_points='no',
-                           camberline='no', camberline_control_points='no', camberline_sample_points='no',
-                           leading_edge_radius='no', trailing_edge_radius='no'):
+    def plot_blade_section(
+        self,
+        fig=None,
+        ax=None,
+        upper_side="yes",
+        upper_side_control_points="no",
+        lower_side="yes",
+        lower_side_control_points="no",
+        camberline="no",
+        camberline_control_points="no",
+        camberline_sample_points="no",
+        leading_edge_radius="no",
+        trailing_edge_radius="no",
+    ):
 
-        """ Plot of the 2D blade section (control appearance using the options dictionary) """
+        """Plot of the 2D blade section (control appearance using the options dictionary)"""
 
         # Create the figure
         if fig is None:
@@ -686,22 +735,26 @@ class Blade2DCamberThickness:
             ax = fig.add_subplot(111)
 
         fontsize = 12
-        ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=12)
-        ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=12)
+        ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=12)
+        ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=12)
         # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
         # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-        for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+        for t in ax.xaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.yaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
         # ax.set_xticks([])
         # ax.set_yticks([])
-        ax.axis('off')
+        ax.axis("off")
         h = 0
-        u_plot = np.linspace(0.00+h, 1-h, 300)
+        u_plot = np.linspace(0.00 + h, 1 - h, 300)
 
         # Plot camber line
-        if camberline == 'yes':
+        if camberline == "yes":
             camberline_coordinates = np.real(self.get_camberline_coordinates(u_plot))
-            line, = ax.plot(camberline_coordinates[0, :], camberline_coordinates[1, :])
+            (line,) = ax.plot(
+                camberline_coordinates[0, :], camberline_coordinates[1, :]
+            )
             line.set_linewidth(0.75)
             line.set_linestyle("--")
             line.set_color("k")
@@ -710,12 +763,14 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("k")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Draw upper side
-        if upper_side == 'yes':
+        if upper_side == "yes":
             upper_surface_coordinates = np.real(self.get_upper_side_coordinates(u_plot))
-            line, = ax.plot(upper_surface_coordinates[0, :], upper_surface_coordinates[1, :])
+            (line,) = ax.plot(
+                upper_surface_coordinates[0, :], upper_surface_coordinates[1, :]
+            )
             line.set_linewidth(1.25)
             line.set_linestyle("-")
             line.set_color("k")
@@ -724,12 +779,14 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("k")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Draw lower side
-        if lower_side == 'yes':
+        if lower_side == "yes":
             lower_surface_coordinates = np.real(self.get_lower_side_coordinates(u_plot))
-            line, = ax.plot(lower_surface_coordinates[0, :], lower_surface_coordinates[1, :])
+            (line,) = ax.plot(
+                lower_surface_coordinates[0, :], lower_surface_coordinates[1, :]
+            )
             line.set_linewidth(1.25)
             line.set_linestyle("-")
             line.set_color("k")
@@ -738,11 +795,13 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("k")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Draw upper side control points
-        if upper_side_control_points == 'yes':
-            line, = ax.plot(np.real(self.upper_side.P[0, :]), np.real(self.upper_side.P[1, :]))
+        if upper_side_control_points == "yes":
+            (line,) = ax.plot(
+                np.real(self.upper_side.P[0, :]), np.real(self.upper_side.P[1, :])
+            )
             line.set_linewidth(0.75)
             line.set_linestyle("-.")
             line.set_color("r")
@@ -751,11 +810,14 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("r")
             line.set_markerfacecolor("w")
-            line.set_label('o')
+            line.set_label("o")
 
         # Draw lower side control points
-        if lower_side_control_points == 'yes':
-            line, = ax.plot(np.real(self.lower_side_BSpline.P[0, :]), np.real(self.lower_side_BSpline.P[1, :]))
+        if lower_side_control_points == "yes":
+            (line,) = ax.plot(
+                np.real(self.lower_side_BSpline.P[0, :]),
+                np.real(self.lower_side_BSpline.P[1, :]),
+            )
             line.set_linewidth(0.75)
             line.set_linestyle("-.")
             line.set_color("r")
@@ -764,11 +826,14 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("r")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Draw the sample points on the camber line
-        if camberline_sample_points == 'yes':
-            line, = ax.plot(np.real(self.camberline_sample_points[0, :]), np.real(self.camberline_sample_points[1, :]))
+        if camberline_sample_points == "yes":
+            (line,) = ax.plot(
+                np.real(self.camberline_sample_points[0, :]),
+                np.real(self.camberline_sample_points[1, :]),
+            )
             line.set_linewidth(1.0)
             line.set_linestyle(" ")
             line.set_color("k")
@@ -777,11 +842,13 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("k")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Draw the control points defining the camber line
-        if camberline_control_points == 'yes':
-            line, = ax.plot(np.real(self.camberline.P[1, :]), np.real(self.camberline.P[1, :]))
+        if camberline_control_points == "yes":
+            (line,) = ax.plot(
+                np.real(self.camberline.P[1, :]), np.real(self.camberline.P[1, :])
+            )
             line.set_linewidth(0.75)
             line.set_linestyle("-.")
             line.set_color("r")
@@ -790,10 +857,10 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("r")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Draw the osculating center at the leading edge
-        if leading_edge_radius == 'yes':
+        if leading_edge_radius == "yes":
             # Get the circle coordinates
             theta = np.linspace(0, 2 * np.pi, 250)
             x_c = self.x_in + self.radius_in * np.cos(self.theta_in)
@@ -802,7 +869,7 @@ class Blade2DCamberThickness:
             y_circle = y_c + self.radius_in * np.sin(theta)
 
             # Draw the circle
-            line, = ax.plot(x_circle, y_circle)
+            (line,) = ax.plot(x_circle, y_circle)
             line.set_linewidth(1.25)
             line.set_linestyle("-")
             line.set_color("b")
@@ -811,19 +878,27 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("r")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Draw the osculating circle at the trailing edge
-        if trailing_edge_radius == 'yes':
+        if trailing_edge_radius == "yes":
             # Get the circle coordinates
             theta = np.linspace(0, 2 * np.pi, 250)
-            x_c = self.x_in + self.chord * np.cos(self.stagger) - self.radius_out * np.cos(self.theta_out)
-            y_c = self.y_in + self.chord * np.sin(self.stagger) - self.radius_out * np.sin(self.theta_out)
+            x_c = (
+                self.x_in
+                + self.chord * np.cos(self.stagger)
+                - self.radius_out * np.cos(self.theta_out)
+            )
+            y_c = (
+                self.y_in
+                + self.chord * np.sin(self.stagger)
+                - self.radius_out * np.sin(self.theta_out)
+            )
             x_circle = x_c + self.radius_out * np.cos(theta)
             y_circle = y_c + self.radius_out * np.sin(theta)
 
             # Draw the circle
-            line, = ax.plot(x_circle, y_circle)
+            (line,) = ax.plot(x_circle, y_circle)
             line.set_linewidth(1.25)
             line.set_linestyle("-")
             line.set_color("b")
@@ -832,7 +907,7 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("r")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Set the aspect ratio of the data
         ax.set_aspect(1.0)
@@ -850,7 +925,7 @@ class Blade2DCamberThickness:
 
     def plot_blade_cascade(self, fig=None, ax=None):
 
-        """ Plot the cascade of blades """
+        """Plot the cascade of blades"""
 
         # Create the figure
         if fig is None:
@@ -858,22 +933,27 @@ class Blade2DCamberThickness:
             ax = fig.add_subplot(111)
 
         fontsize = 12
-        ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=12)
-        ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=12)
+        ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=12)
+        ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=12)
         # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
         # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-        for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+        for t in ax.xaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.yaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
         # ax.set_xticks([])
         # ax.set_yticks([])
-        ax.axis('off')
+        ax.axis("off")
         u_plot = np.linspace(0.00, 1.00, 500)
 
         for k in range(3):
 
             # Draw upper surface
             section_coordinates = np.real(self.get_section_coordinates(u_plot))
-            line, = ax.plot(section_coordinates[0, :], section_coordinates[1, :] + self.spacing * (k - 1))
+            (line,) = ax.plot(
+                section_coordinates[0, :],
+                section_coordinates[1, :] + self.spacing * (k - 1),
+            )
             line.set_linewidth(1.25)
             line.set_linestyle("-")
             line.set_color("k")
@@ -882,7 +962,7 @@ class Blade2DCamberThickness:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("k")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Set the aspect ratio of the data
         ax.set_aspect(1.0)
@@ -897,14 +977,13 @@ class Blade2DCamberThickness:
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
         # Hide axes
-        plt.axis('off')
+        plt.axis("off")
 
         return fig, ax
 
-
     def plot_curvature_distribution(self, fig=None, ax=None):
 
-        """ Plot the curvature distribution of the 2D parametrization """
+        """Plot the curvature distribution of the 2D parametrization"""
 
         # Create the figure
         if fig is None:
@@ -912,12 +991,14 @@ class Blade2DCamberThickness:
             ax = fig.add_subplot(111)
 
         fontsize = 12
-        ax.set_xlabel('$u$ parameter', fontsize=fontsize, color='k', labelpad=12)
-        ax.set_ylabel('$\kappa$ - Curvature', fontsize=fontsize, color='k', labelpad=12)
+        ax.set_xlabel("$u$ parameter", fontsize=fontsize, color="k", labelpad=12)
+        ax.set_ylabel("$\kappa$ - Curvature", fontsize=fontsize, color="k", labelpad=12)
         # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
         # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-        for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+        for t in ax.xaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.yaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
         # ax.set_xticks([])
         # ax.set_yticks([])
         # ax.axis('off')
@@ -929,7 +1010,7 @@ class Blade2DCamberThickness:
         u_lower = np.linspace(0.50 + hh, 1.00 - hh, 1000)
 
         # Plot upper surface curvature
-        line, = ax.plot(2*u_upper, np.real(self.get_section_curvature(u_upper)))
+        (line,) = ax.plot(2 * u_upper, np.real(self.get_section_curvature(u_upper)))
         line.set_linewidth(1.25)
         line.set_linestyle("-")
         line.set_color("b")
@@ -938,10 +1019,12 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label('Upper surface')
+        line.set_label("Upper surface")
 
         # Plot lower surface curvature
-        line, = ax.plot(2*u_upper[::-1], np.real(self.get_section_curvature(u_lower)))
+        (line,) = ax.plot(
+            2 * u_upper[::-1], np.real(self.get_section_curvature(u_lower))
+        )
         line.set_linewidth(1.25)
         line.set_linestyle("-")
         line.set_color("r")
@@ -950,7 +1033,7 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label('Lower surface')
+        line.set_label("Lower surface")
 
         # # Set the aspect ratio of the data
         # ax.set_aspect(1.0)
@@ -959,7 +1042,7 @@ class Blade2DCamberThickness:
         ratio = 1.00
         x1, x2 = ax.get_xlim()
         y1, y2 = ax.get_ylim()
-        ax.set_aspect(np.abs((x2-x1)/(y2-y1))*ratio)
+        ax.set_aspect(np.abs((x2 - x1) / (y2 - y1)) * ratio)
 
         # Adjust pad
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
@@ -969,10 +1052,9 @@ class Blade2DCamberThickness:
 
         return fig, ax
 
-
     def plot_thickness_distribution(self, fig=None, ax=None):
 
-        """ Plot of the 2D thickness distribution """
+        """Plot of the 2D thickness distribution"""
 
         # Create the figure
         if fig is None:
@@ -980,19 +1062,23 @@ class Blade2DCamberThickness:
             ax = fig.add_subplot(111)
 
         fontsize = 12
-        ax.set_xlabel('Blade thickness', fontsize=fontsize, color='k', labelpad=12)
-        ax.set_ylabel('$u$ parameter', fontsize=fontsize, color='k', labelpad=12)
+        ax.set_xlabel("Blade thickness", fontsize=fontsize, color="k", labelpad=12)
+        ax.set_ylabel("$u$ parameter", fontsize=fontsize, color="k", labelpad=12)
         # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
         # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
-        for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+        for t in ax.xaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.yaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
         # ax.set_xticks([])
         # ax.set_yticks([])
         # ax.axis('off')
         u_plot = np.linspace(0.00, 1.00, 500)
 
         # Draw thickness distribution
-        line, = ax.plot(u_plot, np.real(self.get_upper_thickness_distribution_values(u_plot)[0, :]))
+        (line,) = ax.plot(
+            u_plot, np.real(self.get_upper_thickness_distribution_values(u_plot)[0, :])
+        )
         line.set_linewidth(0.75)
         line.set_linestyle("-")
         line.set_color("k")
@@ -1001,9 +1087,11 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
-        line, = ax.plot(u_plot, -np.real(self.get_lower_thickness_distribution_values(u_plot)[0, :]))
+        (line,) = ax.plot(
+            u_plot, -np.real(self.get_lower_thickness_distribution_values(u_plot)[0, :])
+        )
         line.set_linewidth(0.75)
         line.set_linestyle("-")
         line.set_color("k")
@@ -1012,12 +1100,14 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
         # Draw the control polyline
         n = np.shape(self.upper_thickness_distribution.P)[1]
         u_thickness = np.linspace(0, 1, n)
-        line, = ax.plot(u_thickness, np.real(self.upper_thickness_distribution.P[0, :]))
+        (line,) = ax.plot(
+            u_thickness, np.real(self.upper_thickness_distribution.P[0, :])
+        )
         line.set_linewidth(1.25)
         line.set_linestyle("-.")
         line.set_color("r")
@@ -1026,11 +1116,13 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
         n = np.shape(self.lower_thickness_distribution.P)[1]
         u_thickness = np.linspace(0, 1, n)
-        line, = ax.plot(u_thickness, -np.real(self.lower_thickness_distribution.P[0, :]))
+        (line,) = ax.plot(
+            u_thickness, -np.real(self.lower_thickness_distribution.P[0, :])
+        )
         line.set_linewidth(1.25)
         line.set_linestyle("-.")
         line.set_color("r")
@@ -1039,10 +1131,15 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
         # Draw thickness distribution at the sample points
-        line, = ax.plot(self.u_sample_points, np.real(self.get_upper_thickness_distribution_values(self.u_sample_points)[0, :]))
+        (line,) = ax.plot(
+            self.u_sample_points,
+            np.real(
+                self.get_upper_thickness_distribution_values(self.u_sample_points)[0, :]
+            ),
+        )
         line.set_linewidth(0.75)
         line.set_linestyle(" ")
         line.set_color("k")
@@ -1051,9 +1148,14 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("b")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
-        line, = ax.plot(self.u_sample_points, -np.real(self.get_lower_thickness_distribution_values(self.u_sample_points)[0, :]))
+        (line,) = ax.plot(
+            self.u_sample_points,
+            -np.real(
+                self.get_lower_thickness_distribution_values(self.u_sample_points)[0, :]
+            ),
+        )
         line.set_linewidth(0.75)
         line.set_linestyle(" ")
         line.set_color("k")
@@ -1062,7 +1164,7 @@ class Blade2DCamberThickness:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("b")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
         # # Set the aspect ratio of the data
         # ax.set_aspect(1.0)
@@ -1071,7 +1173,7 @@ class Blade2DCamberThickness:
         ratio = 1.00
         x1, x2 = ax.get_xlim()
         y1, y2 = ax.get_ylim()
-        ax.set_aspect(np.abs((x2-x1)/(y2-y1))*ratio)
+        ax.set_aspect(np.abs((x2 - x1) / (y2 - y1)) * ratio)
 
         # Adjust pad
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
@@ -1103,13 +1205,11 @@ class Blade2DCamberThickness:
             self.IN["x_trailing"][0] - self.IN["x_leading"][0]
         )
 
-
     def tilt(self, angle):
         """Changes the blade anlge by an amount in degrees."""
         self.IN["stagger"][0] = self.IN["stagger"][0] + angle
         self.IN["theta_in"][0] = self.IN["theta_in"][0] - angle
         self.IN["theta_out"][0] = self.IN["theta_out"][0] + angle
-
 
     def set_blade_angle(self, angle):
         angle_to_tilt = angle - self.IN["stagger"][0]
@@ -1117,18 +1217,15 @@ class Blade2DCamberThickness:
 
     def set_scale(self, chord_length):
 
-        x_2 = self.IN['x_trailing'][0]
-        x_1 = self.IN['x_leading'][0]
-        blade_angle = self.IN['stagger'][0]
+        x_2 = self.IN["x_trailing"][0]
+        x_1 = self.IN["x_leading"][0]
+        blade_angle = self.IN["stagger"][0]
 
-        c = (x_2-x_1)/np.cos(blade_angle)
-        
+        c = (x_2 - x_1) / np.cos(blade_angle)
+
         factor_to_scale = chord_length - c
 
         self.scale(factor_to_scale)
-
-
-
 
     # # ---------------------------------------------------------------------------------------------------------------- #
     # # Cascade opening functions (deprecated code)

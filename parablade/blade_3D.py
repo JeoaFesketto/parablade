@@ -228,7 +228,7 @@ class Blade3D:
         try:
             self.SCALE_FACTOR = IN["SCALE_FACTOR"]
         except:
-            self.SCALE_FACTOR, IN["SCALE_FACTOR"]= 1, 1
+            self.SCALE_FACTOR, IN["SCALE_FACTOR"] = 1, 1
 
         self._transformations = _transformations
 

@@ -31,9 +31,9 @@ import numpy as np
 from scipy import integrate
 
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # "Cluster mode" imports
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 try:
     import matplotlib as mpl
     import matplotlib.pyplot as plt
@@ -42,13 +42,12 @@ except:
     pass
 
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 # Compute the arc length of a parametric curve in n-dimensions
 # -------------------------------------------------------------------------------------------------------------------- #
 def get_arc_length(C_func, t1, t2):
 
-    """ Compute the arc length of a parametric curve ´C(t) = (x_0(t),..., x_n(t))´ using numerical integration
+    """Compute the arc length of a parametric curve ´C(t) = (x_0(t),..., x_n(t))´ using numerical integration
 
     Parameters
     ----------
@@ -73,8 +72,12 @@ def get_arc_length(C_func, t1, t2):
     # It is not possible to use the complex step is the result of the arc-length computation is further differentiated
     def get_arc_legth_differential(t, step=1e-3):
         # dCdt = np.imag(C_func(t + 1j * step)) / step              # dC/dt = (dx_0/dt, ..., dx_n/dt)
-        dCdt = (C_func(t + step) - C_func(t - step))/(2*step)       # dC/dt = (dx_0/dt, ..., dx_n/dt)
-        dLdt = np.sqrt(np.sum(dCdt**2, axis=0))                     # dL/dt = [(dx_0/dt)^2 + ... + (dx_n/dt)^2]^(1/2)
+        dCdt = (C_func(t + step) - C_func(t - step)) / (
+            2 * step
+        )  # dC/dt = (dx_0/dt, ..., dx_n/dt)
+        dLdt = np.sqrt(
+            np.sum(dCdt**2, axis=0)
+        )  # dL/dt = [(dx_0/dt)^2 + ... + (dx_n/dt)^2]^(1/2)
         return dLdt
 
     # Compute the arc length of C(t) in the interval [t1, t2] by numerical integration
@@ -83,33 +86,32 @@ def get_arc_length(C_func, t1, t2):
     return L
 
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 # Define the B-spline curve class
 # -------------------------------------------------------------------------------------------------------------------- #
 class BSplineCurve:
 
-    """ Create a B-Spline curve object
+    """Create a B-Spline curve object
 
-        Parameters
-        ----------
-        P : ndarray with shape (ndim, n+1)
-            Array containing the coordinates of the control points
-            The first dimension of ´P´ spans the coordinates of the control points (1D, 2D, 3D, etc)
-            The second dimension of ´P´ spans the u-direction control points (0, 1, ..., n)
+    Parameters
+    ----------
+    P : ndarray with shape (ndim, n+1)
+        Array containing the coordinates of the control points
+        The first dimension of ´P´ spans the coordinates of the control points (1D, 2D, 3D, etc)
+        The second dimension of ´P´ spans the u-direction control points (0, 1, ..., n)
 
-        p : int
-            Degree of the B-Spline curve
+    p : int
+        Degree of the B-Spline curve
 
-        U : ndarray with shape (r+1=n+p+2,)
-            The knot vector in the u-direction
-            Set the multiplicity of the first and last entries equal to ´p+1´ to obtain a clamped B-Spline
+    U : ndarray with shape (r+1=n+p+2,)
+        The knot vector in the u-direction
+        Set the multiplicity of the first and last entries equal to ´p+1´ to obtain a clamped B-Spline
 
-        References
-        ----------
-        The NURBS book. Chapters 2 and 3
-        L. Piegl and W. Tiller
-        Springer, second edition
+    References
+    ----------
+    The NURBS book. Chapters 2 and 3
+    L. Piegl and W. Tiller
+    Springer, second edition
 
     """
 
@@ -127,13 +129,12 @@ class BSplineCurve:
         self.dC = {}
         self.dP = {}
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute B-Spline curve coordinates
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_BSplineCurve_value(self, u):
 
-        """ Evaluate the coordinates of the B-Spline curve corresponding to the u-parametrization
+        """Evaluate the coordinates of the B-Spline curve corresponding to the u-parametrization
 
         Parameters
         ----------
@@ -158,15 +159,14 @@ class BSplineCurve:
         # Evaluate the spline curve for input u-parametrization
         self.u = u
         self.C = self.evaluate_BSplineCurve(self.P, self.p, self.U, u)
-        self.dC[str(0) + '-derivative'] = self.C
-        self.dP[str(0) + '-derivative'] = self.P
+        self.dC[str(0) + "-derivative"] = self.C
+        self.dP[str(0) + "-derivative"] = self.P
 
         return self.C
 
-
     def evaluate_BSplineCurve(self, P, p, U, u):
 
-        """ Evaluate the coordinates of the B-Spline curve corresponding to the u-parametrization
+        """Evaluate the coordinates of the B-Spline curve corresponding to the u-parametrization
 
         Parameters
         ----------
@@ -194,20 +194,20 @@ class BSplineCurve:
 
         """
 
-         # Check the shape of the input parameters
+        # Check the shape of the input parameters
         if P.ndim > 2:
-            raise Exception('P must be an array of shape (ndim, n+1)')
+            raise Exception("P must be an array of shape (ndim, n+1)")
 
         if not np.isscalar(p):
-            raise Exception('p must be an scalar')
+            raise Exception("p must be an scalar")
 
         if U.ndim > 1:
-            raise Exception('U must be an array of shape (r+1=n+p+2,)')
+            raise Exception("U must be an array of shape (r+1=n+p+2,)")
 
         if np.isscalar(u):
             pass
         elif u.ndim > 1:
-            raise Exception('u must be a scalar or an array of shape (N,)')
+            raise Exception("u must be a scalar or an array of shape (N,)")
 
         # Maximum index of the control points (counting from zero)
         n = np.shape(P)[1] - 1
@@ -221,13 +221,12 @@ class BSplineCurve:
 
         return C
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute basis polynomials
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_basis_polynomials(self, n, p, U, u):
 
-        """ Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
+        """Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
 
         Parameters
         ----------
@@ -254,19 +253,27 @@ class BSplineCurve:
         """
 
         # Check the order and the number of basis basis polynomials
-        assert (p <= n), 'The order of the basis polynomials cannot be larger than the number of control points minus one'
+        assert (
+            p <= n
+        ), "The order of the basis polynomials cannot be larger than the number of control points minus one"
 
         # Preliminary computations
-        Nu = self.Nu                        # Number of points where the spline curve is evaluated
-        m = n + p + 1                       # Number of basis polynomials in the current step of the recursion
-        N = np.zeros((m, np.size(u)))       # Initialize the array of basis polynomials
+        Nu = self.Nu  # Number of points where the spline curve is evaluated
+        m = (
+            n + p + 1
+        )  # Number of basis polynomials in the current step of the recursion
+        N = np.zeros((m, np.size(u)))  # Initialize the array of basis polynomials
 
         # First step of the recursion formula (p = 0)
         # The term that is not part of the definition is added to have U[i] <= u <= U[i + 1] when i=n and u=1
         # This problem is mentioned in the NURBS book section 2.5 - Computational Algorithms
         for i in range(m):
             # N[i, :] = 0.0 + 1.0 * (u >= U[i]) * (u <= U[i + 1])
-            N[i, :] = 0.0 + 1.0 * (u >= U[i]) * (u < U[i + 1]) + 1.00 * (np.logical_and(u == 1, i == n))
+            N[i, :] = (
+                0.0
+                + 1.0 * (u >= U[i]) * (u < U[i + 1])
+                + 1.00 * (np.logical_and(u == 1, i == n))
+            )
 
         # Second and next steps of the recursion formula (p = 1, 2, ...)
         p = 1
@@ -305,13 +312,12 @@ class BSplineCurve:
 
         return N
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Evaluate the derivatives of the B-Spline
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_BSplineCurve_derivative(self, u, order=1):
 
-        """ Create and evaluate the derivative of the B-Spline curve
+        """Create and evaluate the derivative of the B-Spline curve
 
         Parameters
         ----------
@@ -347,7 +353,7 @@ class BSplineCurve:
         # (the order of the implementation matters, be careful when making changes)
         for i in range(order):
             n = np.shape(P)[1] - 1
-            delta_U = U[p+1:n+p+1] - U[1:n+1]
+            delta_U = U[p + 1 : n + p + 1] - U[1 : n + 1]
             P = p / delta_U * (P[:, 1:] - P[:, 0:-1])
             p = p - 1
             U = U[1:-1]
@@ -356,11 +362,10 @@ class BSplineCurve:
         dC = self.evaluate_BSplineCurve(P, p, U, u)
 
         # Store the current derivative in a dictionary
-        self.dC[str(order) + '-derivative'] = dC
-        self.dP[str(order) + '-derivative'] = P
+        self.dC[str(order) + "-derivative"] = dC
+        self.dP[str(order) + "-derivative"] = P
 
         return dC
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Plotting functions
@@ -368,8 +373,8 @@ class BSplineCurve:
     def plot_BSplineCurve(self, options, order=0):
 
         # Choose whether to plot the B-Spline or its derivatives
-        C = np.real(self.dC[str(order) + '-derivative'])
-        P = np.real(self.dP[str(order) + '-derivative'])
+        C = np.real(self.dC[str(order) + "-derivative"])
+        P = np.real(self.dP[str(order) + "-derivative"])
 
         # Number of dimensions of the problem
         ndim = np.shape(self.P)[0]
@@ -379,17 +384,19 @@ class BSplineCurve:
             fig = plt.figure(figsize=(6, 5))
             ax = fig.add_subplot(111)
             fontsize = 12
-            ax.set_xlabel('$u$ parameter', fontsize=fontsize, color='k', labelpad=12)
-            ax.set_ylabel('B-Spline value', fontsize=fontsize, color='k', labelpad=12)
+            ax.set_xlabel("$u$ parameter", fontsize=fontsize, color="k", labelpad=12)
+            ax.set_ylabel("B-Spline value", fontsize=fontsize, color="k", labelpad=12)
             # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-            for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+            for t in ax.xaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in ax.yaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
             # ax.set_xticks([])
             # ax.set_yticks([])
             # ax.axis('off')
 
-            line, = ax.plot(self.u, C[0, :])
+            (line,) = ax.plot(self.u, C[0, :])
             line.set_linewidth(1.25)
             line.set_linestyle("-")
             line.set_color("k")
@@ -398,7 +405,7 @@ class BSplineCurve:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("k")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
             # Set the aspect ratio of the data
             # ax.set_aspect(1.0)
@@ -412,25 +419,26 @@ class BSplineCurve:
             # Adjust pad
             plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
-
         if ndim == 2:
 
             # Create the figure
             fig = plt.figure(figsize=(6, 5))
             ax = fig.add_subplot(111)
             fontsize = 12
-            ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=12)
-            ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=12)
+            ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=12)
+            ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=12)
             # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-            for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+            for t in ax.xaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in ax.yaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
             # ax.set_xticks([])
             # ax.set_yticks([])
             # ax.axis('off')
 
-            if options['line'] == 'yes':
-                line, = ax.plot(C[0, :], C[1, :])
+            if options["line"] == "yes":
+                (line,) = ax.plot(C[0, :], C[1, :])
                 line.set_linewidth(1.25)
                 line.set_linestyle("-")
                 line.set_color("k")
@@ -439,10 +447,10 @@ class BSplineCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("k")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
-            if options['control_points'] == 'yes':
-                line, = ax.plot(P[0, :], P[1, :])
+            if options["control_points"] == "yes":
+                (line,) = ax.plot(P[0, :], P[1, :])
                 line.set_linewidth(1.00)
                 line.set_linestyle("-.")
                 line.set_color("r")
@@ -451,7 +459,7 @@ class BSplineCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("r")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
             # Set the aspect ratio of the data
             ax.set_aspect(1.0)
@@ -465,33 +473,35 @@ class BSplineCurve:
             # Adjust pad
             plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
-
         elif ndim == 3:
 
             # Prepare the plot
             fig = mpl.pyplot.figure(figsize=(6, 5))
-            ax = fig.add_subplot(111, projection='3d')
+            ax = fig.add_subplot(111, projection="3d")
             ax.view_init(azim=150, elev=20)
             ax.grid(False)
             ax.xaxis.pane.fill = False
             ax.yaxis.pane.fill = False
             ax.zaxis.pane.fill = False
-            ax.xaxis.pane.set_edgecolor('k')
-            ax.yaxis.pane.set_edgecolor('k')
-            ax.zaxis.pane.set_edgecolor('k')
+            ax.xaxis.pane.set_edgecolor("k")
+            ax.yaxis.pane.set_edgecolor("k")
+            ax.zaxis.pane.set_edgecolor("k")
             ax.xaxis.pane._alpha = 0.9
             ax.yaxis.pane._alpha = 0.9
             ax.zaxis.pane._alpha = 0.9
             fontsize = 11
-            ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=12)
-            ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=12)
-            ax.set_zlabel('$z$ axis', fontsize=fontsize, color='k', labelpad=12)
+            ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=12)
+            ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=12)
+            ax.set_zlabel("$z$ axis", fontsize=fontsize, color="k", labelpad=12)
             # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             # ax.zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-            for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+            for t in ax.xaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in ax.yaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in ax.zaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
             ax.xaxis.set_rotate_label(False)
             ax.yaxis.set_rotate_label(False)
             ax.zaxis.set_rotate_label(False)
@@ -500,8 +510,8 @@ class BSplineCurve:
             # ax.set_zticks([])
             # ax.axis('off')
 
-            if options['line'] == 'yes':
-                line, = ax.plot(C[0, :], C[1, :], C[2, :])
+            if options["line"] == "yes":
+                (line,) = ax.plot(C[0, :], C[1, :], C[2, :])
                 line.set_linewidth(1.25)
                 line.set_linestyle("-")
                 line.set_color("k")
@@ -510,10 +520,10 @@ class BSplineCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("k")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
-            if options['control_points'] == 'yes':
-                line, = ax.plot(P[0, :], P[1, :], P[2, :])
+            if options["control_points"] == "yes":
+                (line,) = ax.plot(P[0, :], P[1, :], P[2, :])
                 line.set_linewidth(1.00)
                 line.set_linestyle("-.")
                 line.set_color("r")
@@ -522,7 +532,7 @@ class BSplineCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("r")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
             # Set axes aspect ratio
             x_min, x_max = ax.get_xlim()
@@ -540,42 +550,40 @@ class BSplineCurve:
             plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
 
-
-
 # -------------------------------------------------------------------------------------------------------------------- #
 # Define the B-spline surface class
 # -------------------------------------------------------------------------------------------------------------------- #
 class BSplineSurface:
 
-    """ Create a B-Spline surface object
+    """Create a B-Spline surface object
 
-        Parameters
-        ----------
-        P : ndarray with shape (ndim, n+1, m+1)
-            Array containing the coordinates of the control points
-            The first dimension of ´P´ spans the coordinates of the control points (1D, 2D, 3D, etc)
-            The second dimension of ´P´ spans the u-direction control points (0, 1, ..., n)
-            The third dimension of ´P´ spans the v-direction control points (0, 1, ..., m)
+    Parameters
+    ----------
+    P : ndarray with shape (ndim, n+1, m+1)
+        Array containing the coordinates of the control points
+        The first dimension of ´P´ spans the coordinates of the control points (1D, 2D, 3D, etc)
+        The second dimension of ´P´ spans the u-direction control points (0, 1, ..., n)
+        The third dimension of ´P´ spans the v-direction control points (0, 1, ..., m)
 
-        p : int
-            Degree of the u-basis polynomials
+    p : int
+        Degree of the u-basis polynomials
 
-        q : int
-            Degree of the v-basis polynomials
+    q : int
+        Degree of the v-basis polynomials
 
-        U : ndarray with shape (r+1=n+p+2,)
-            The knot vector in the u-direction
-            Set the multiplicity of the first and last entries equal to ´p+1´ to obtain a clamped spline
+    U : ndarray with shape (r+1=n+p+2,)
+        The knot vector in the u-direction
+        Set the multiplicity of the first and last entries equal to ´p+1´ to obtain a clamped spline
 
-        V : ndarray with shape (s+1=m+q+2,)
-            The knot vector in the v-direction
-            Set the multiplicity of the first and last entries equal to ´q+1´ to obtain a clamped spline
+    V : ndarray with shape (s+1=m+q+2,)
+        The knot vector in the v-direction
+        Set the multiplicity of the first and last entries equal to ´q+1´ to obtain a clamped spline
 
-        References
-        ----------
-        The NURBS book. Chapters 2 and 3
-        L. Piegl and W. Tiller
-        Springer, second edition
+    References
+    ----------
+    The NURBS book. Chapters 2 and 3
+    L. Piegl and W. Tiller
+    Springer, second edition
 
     """
 
@@ -594,13 +602,12 @@ class BSplineSurface:
         self.N = None
         self.S = None
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute B-Spline surface coordinates
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_BSplineSurface_value(self, u, v):
 
-        """ Evaluate the coordinates of the B-Spline surface corresponding to the (u,v) parametrization
+        """Evaluate the coordinates of the B-Spline surface corresponding to the (u,v) parametrization
 
         Parameters
         ----------
@@ -635,17 +642,18 @@ class BSplineSurface:
         if Nu == Nv:
             self.N = Nu
         else:
-            raise Exception('u and v must have the same size')
+            raise Exception("u and v must have the same size")
 
         # Evaluate the spline surface for input (u,v) parametrization
-        self.S = self.evaluate_BSplineSurface(self.P, self.p, self.q, self.U, self.V, u, v)
+        self.S = self.evaluate_BSplineSurface(
+            self.P, self.p, self.q, self.U, self.V, u, v
+        )
 
         return self.S
 
-
     def evaluate_BSplineSurface(self, P, p, q, U, V, u, v):
 
-        """ Evaluate the coordinates of the B-Spline surface corresponding to the (u,v) parametrization
+        """Evaluate the coordinates of the B-Spline surface corresponding to the (u,v) parametrization
 
         Parameters
         ----------
@@ -686,29 +694,29 @@ class BSplineSurface:
 
         # Check the shape of the input parameters
         if P.ndim > 3:
-            raise Exception('P must be an array of shape (ndim, n+1, m+1)')
+            raise Exception("P must be an array of shape (ndim, n+1, m+1)")
 
         if not np.isscalar(p):
-            raise Exception('p must be an scalar')
+            raise Exception("p must be an scalar")
 
         if not np.isscalar(q):
-            raise Exception('q must be an scalar')
+            raise Exception("q must be an scalar")
 
         if U.ndim > 1:
-            raise Exception('U must be an array of shape (r+1=n+p+2,)')
+            raise Exception("U must be an array of shape (r+1=n+p+2,)")
 
         if V.ndim > 1:
-            raise Exception('V must be an array of shape (s+1=m+q+2,)')
+            raise Exception("V must be an array of shape (s+1=m+q+2,)")
 
         if np.isscalar(u):
             pass
         elif u.ndim > 1:
-            raise Exception('u must be a scalar or an array of shape (N,)')
+            raise Exception("u must be a scalar or an array of shape (N,)")
 
         if np.isscalar(v):
             pass
         elif u.ndim > 1:
-            raise Exception('v must be a scalar or an array of shape (N,)')
+            raise Exception("v must be a scalar or an array of shape (N,)")
 
         # Shape of the array of control points
         n_dim, nn, mm = np.shape(P)
@@ -723,19 +731,20 @@ class BSplineSurface:
 
         # Compute the coordinates of the spline surface (u,v)
         # The implementation of the coordinates computations uses several functions for vectorized code (increase speed)
-        A = np.dot(P, N_basis_v)                                        # shape (ndim, n+1, N)
-        B = np.repeat(N_basis_u[np.newaxis], repeats=n_dim, axis=0)     # shape (ndim, n+1, N)
-        S = np.sum(A*B,axis=1)                                          # shape (ndim, N)
+        A = np.dot(P, N_basis_v)  # shape (ndim, n+1, N)
+        B = np.repeat(
+            N_basis_u[np.newaxis], repeats=n_dim, axis=0
+        )  # shape (ndim, n+1, N)
+        S = np.sum(A * B, axis=1)  # shape (ndim, N)
 
         return S
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute basis polynomials
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_basis_polynomials(self, n, p, U, u):
 
-        """ Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
+        """Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
 
         Parameters
         ----------
@@ -762,18 +771,26 @@ class BSplineSurface:
         """
 
         # Check the order and the number of basis basis polynomials
-        assert (p <= n), 'The order of the basis polynomials cannot be larger than the number of control points minus one'
+        assert (
+            p <= n
+        ), "The order of the basis polynomials cannot be larger than the number of control points minus one"
 
         # Preliminary computations
-        Nu = self.N                         # Number of points where the spline is evaluated
-        m = n + p + 1                       # Number of basis polynomials in the current step of the recursion
-        N = np.zeros((m, np.size(u)))       # Initialize the array of basis polynomials
+        Nu = self.N  # Number of points where the spline is evaluated
+        m = (
+            n + p + 1
+        )  # Number of basis polynomials in the current step of the recursion
+        N = np.zeros((m, np.size(u)))  # Initialize the array of basis polynomials
 
         # First step of the recursion formula (p = 0)
         # The term that is not part of the definition is added to have U[i] <= u <= U[i + 1] when i=n and u=1
         # This problem is mentioned in the NURBS book section 2.5 - Computational Algorithms
         for i in range(m):
-            N[i, :] = 0.0 + 1.0 * (u >= U[i]) * (u < U[i + 1]) + 1.00 * (np.logical_and(u == 1, i == n))
+            N[i, :] = (
+                0.0
+                + 1.0 * (u >= U[i]) * (u < U[i + 1])
+                + 1.00 * (np.logical_and(u == 1, i == n))
+            )
 
         # Second and next steps of the recursion formula (p = 1, 2, ...)
         p = 1
@@ -812,7 +829,6 @@ class BSplineSurface:
 
         return N
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Plotting functions
     # ---------------------------------------------------------------------------------------------------------------- #
@@ -820,28 +836,31 @@ class BSplineSurface:
 
         # Prepare the plot
         fig = mpl.pyplot.figure(figsize=(6, 5))
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection="3d")
         ax.view_init(azim=120, elev=20)
         ax.grid(False)
         ax.xaxis.pane.fill = False
         ax.yaxis.pane.fill = False
         ax.zaxis.pane.fill = False
-        ax.xaxis.pane.set_edgecolor('k')
-        ax.yaxis.pane.set_edgecolor('k')
-        ax.zaxis.pane.set_edgecolor('k')
+        ax.xaxis.pane.set_edgecolor("k")
+        ax.yaxis.pane.set_edgecolor("k")
+        ax.zaxis.pane.set_edgecolor("k")
         ax.xaxis.pane._alpha = 0.9
         ax.yaxis.pane._alpha = 0.9
         ax.zaxis.pane._alpha = 0.9
         fontsize = 11
-        ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=8)
-        ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=8)
-        ax.set_zlabel('$z$ axis', fontsize=fontsize, color='k', labelpad=8)
+        ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=8)
+        ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=8)
+        ax.set_zlabel("$z$ axis", fontsize=fontsize, color="k", labelpad=8)
         # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
         # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
         # ax.zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-        for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+        for t in ax.xaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.yaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.zaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
         ax.xaxis.set_rotate_label(False)
         ax.yaxis.set_rotate_label(False)
         ax.zaxis.set_rotate_label(False)
@@ -861,39 +880,59 @@ class BSplineSurface:
         Pz = np.real(self.P[2, :, :])
 
         # Plot the spline coordinates as a cloud of points
-        if options['point_cloud'] == 'yes':
-            ax.plot(x, y, z, linewidth=0, marker='o', markersize='2', markerfacecolor='w')
+        if options["point_cloud"] == "yes":
+            ax.plot(
+                x, y, z, linewidth=0, marker="o", markersize="2", markerfacecolor="w"
+            )
 
         # Plot the spline coordinates as a surface
-        if options['surface'] == 'yes':
-            Nu = options['surface_Nu']
-            Nv = options['surface_Nv']
+        if options["surface"] == "yes":
+            Nu = options["surface_Nu"]
+            Nv = options["surface_Nv"]
             X = x.reshape(Nv, Nu)
             Y = y.reshape(Nv, Nu)
             Z = z.reshape(Nv, Nu)
-            ax.plot_surface(X, Y, Z,
-                            color = 'blue',
-                            edgecolor = 'black',
-                            linewidth = 0.25,
-                            alpha = 0.7,
-                            shade = True,
-                            antialiased = True,
-                            zorder = 0)
+            ax.plot_surface(
+                X,
+                Y,
+                Z,
+                color="blue",
+                edgecolor="black",
+                linewidth=0.25,
+                alpha=0.7,
+                shade=True,
+                antialiased=True,
+                zorder=0,
+            )
 
         # Plot the control mesh coordinates
-        if options['control_points'] == 'yes':
+        if options["control_points"] == "yes":
 
-            ax.plot_wireframe(Px, Py, Pz,
-                              edgecolor = 'red',
-                              linewidth = 0.75,
-                              linestyles = 'solid',
-                              alpha = 1.0,
-                              antialiased = True,
-                              zorder = 1)
+            ax.plot_wireframe(
+                Px,
+                Py,
+                Pz,
+                edgecolor="red",
+                linewidth=0.75,
+                linestyles="solid",
+                alpha=1.0,
+                antialiased=True,
+                zorder=1,
+            )
 
-            ax.plot(Px.flatten(), Py.flatten(), Pz.flatten(),
-                    linestyle = ' ', linewidth = 1.00, zorder = 4,
-                    marker = 'o', markersize = 4, markeredgecolor = 'r', markerfacecolor = 'w', markeredgewidth = 0.75)
+            ax.plot(
+                Px.flatten(),
+                Py.flatten(),
+                Pz.flatten(),
+                linestyle=" ",
+                linewidth=1.00,
+                zorder=4,
+                marker="o",
+                markersize=4,
+                markeredgecolor="r",
+                markerfacecolor="w",
+                markeredgewidth=0.75,
+            )
 
         # Set axes aspect ratio
         x_min, x_max = ax.get_xlim()
@@ -911,19 +950,12 @@ class BSplineSurface:
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
 
-
-
-
-
-
-
-
 # -------------------------------------------------------------------------------------------------------------------- #
 # Define the NURBS curve class
 # -------------------------------------------------------------------------------------------------------------------- #
 class NurbsCurve:
 
-    """ Create a NURBS (Non-Uniform Rational Basis Spline) curve object
+    """Create a NURBS (Non-Uniform Rational Basis Spline) curve object
 
     Parameters
     ----------
@@ -963,13 +995,12 @@ class NurbsCurve:
         self.Nu = None
         self.C = None
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute NURBS curve coordinates
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_NurbsCurve_value(self, u):
 
-        """ Evaluate the coordinates of the NURBS curve corresponding to the u-parametrization
+        """Evaluate the coordinates of the NURBS curve corresponding to the u-parametrization
 
         Parameters
         ----------
@@ -996,10 +1027,9 @@ class NurbsCurve:
 
         return self.C
 
-
     def evaluate_NurbsCurve(self, P, W, p, U, u):
 
-        """ Evaluate the coordinates of the NURBS curve corresponding to the u-parametrization
+        """Evaluate the coordinates of the NURBS curve corresponding to the u-parametrization
 
         Parameters
         ----------
@@ -1032,22 +1062,21 @@ class NurbsCurve:
 
         # Check the shape of the input parameters
         if P.ndim > 2:
-            raise Exception('P must be an array of shape (ndim, n+1)')
+            raise Exception("P must be an array of shape (ndim, n+1)")
 
         if W.ndim > 1:
-            raise Exception('W must be an array of shape (n+1,)')
+            raise Exception("W must be an array of shape (n+1,)")
 
         if not np.isscalar(p):
-            raise Exception('p must be an scalar')
+            raise Exception("p must be an scalar")
 
         if U.ndim > 1:
-            raise Exception('U must be an array of shape (r+1=n+p+2,)')
+            raise Exception("U must be an array of shape (r+1=n+p+2,)")
 
         if np.isscalar(u):
             pass
         elif u.ndim > 1:
-            raise Exception('u must be a scalar or an array of shape (N,)')
-
+            raise Exception("u must be a scalar or an array of shape (N,)")
 
         # Shape of the array of control points
         n_dim, nn = np.shape(P)
@@ -1063,13 +1092,13 @@ class NurbsCurve:
 
         # Map the control points to the expanded space | P = (x*w,y*w,z*w,w)
         w = np.repeat(W[np.newaxis, :], repeats=n_dim, axis=0)
-        P_w = np.vstack((np.asarray(P*w), W[np.newaxis, :]))
+        P_w = np.vstack((np.asarray(P * w), W[np.newaxis, :]))
 
         # Compute the coordinates of the NURBS curve in the expanded space
         C_w = np.dot(P_w, N_basis)
 
         # Map the coordinates back to the ordinary space
-        C = C_w[0:-1,:]/C_w[-1, :]
+        C = C_w[0:-1, :] / C_w[-1, :]
 
         # # Brute force approach to compute the NURBS coordinates without using the expanded space (way slower!)
         # # The implementation of the coordinates computations uses several functions for vectorized code (increase speed)
@@ -1080,13 +1109,12 @@ class NurbsCurve:
 
         return C
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute basis polynomials
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_basis_polynomials(self, n, p, U, u):
 
-        """ Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
+        """Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
 
         Parameters
         ----------
@@ -1113,18 +1141,26 @@ class NurbsCurve:
         """
 
         # Check the order and the number of basis basis polynomials
-        assert (p <= n), 'The order of the basis polynomials cannot be larger than the number of control points minus one'
+        assert (
+            p <= n
+        ), "The order of the basis polynomials cannot be larger than the number of control points minus one"
 
         # Preliminary computations
-        Nu = self.Nu                        # Number of points where the spline curve is evaluated
-        m = n + p + 1                       # Number of basis polynomials in the current step of the recursion
-        N = np.zeros((m, np.size(u)))       # Initialize the array of basis polynomials
+        Nu = self.Nu  # Number of points where the spline curve is evaluated
+        m = (
+            n + p + 1
+        )  # Number of basis polynomials in the current step of the recursion
+        N = np.zeros((m, np.size(u)))  # Initialize the array of basis polynomials
 
         # First step of the recursion formula (p = 0)
         # The term that is not part of the definition is added to have U[i] <= u <= U[i + 1] when i=n and u=1
         # This problem is mentioned in the NURBS book section 2.5 - Computational Algorithms
         for i in range(m):
-            N[i, :] = 0.0 + 1.0 * (u >= U[i]) * (u < U[i + 1]) + 1.00 * (np.logical_and(u == 1, i == n))
+            N[i, :] = (
+                0.0
+                + 1.0 * (u >= U[i]) * (u < U[i + 1])
+                + 1.00 * (np.logical_and(u == 1, i == n))
+            )
 
         # Second and next steps of the recursion formula (p = 1, 2, ...)
         p = 1
@@ -1163,7 +1199,6 @@ class NurbsCurve:
 
         return N
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Plotting functions
     # ---------------------------------------------------------------------------------------------------------------- #
@@ -1180,18 +1215,20 @@ class NurbsCurve:
             fig = plt.figure(figsize=(6, 5))
             ax = fig.add_subplot(111)
             fontsize = 12
-            ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=12)
-            ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=12)
+            ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=12)
+            ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=12)
             # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-            for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+            for t in ax.xaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in ax.yaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
             # ax.set_xticks([])
             # ax.set_yticks([])
             # ax.axis('off')
 
-            if options['line'] == 'yes':
-                line, = ax.plot(C[0, :], C[1, :])
+            if options["line"] == "yes":
+                (line,) = ax.plot(C[0, :], C[1, :])
                 line.set_linewidth(1.25)
                 line.set_linestyle("-")
                 line.set_color("k")
@@ -1200,10 +1237,10 @@ class NurbsCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("k")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
-            if options['control_points'] == 'yes':
-                line, = ax.plot(P[0, :], P[1, :])
+            if options["control_points"] == "yes":
+                (line,) = ax.plot(P[0, :], P[1, :])
                 line.set_linewidth(1.00)
                 line.set_linestyle("-.")
                 line.set_color("r")
@@ -1212,7 +1249,7 @@ class NurbsCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("r")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
             # Set the aspect ratio of the data
             ax.set_aspect(1.0)
@@ -1226,33 +1263,35 @@ class NurbsCurve:
             # Adjust pad
             plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
-
         elif ndim == 3:
 
             # Prepare the plot
             fig = plt.figure(figsize=(6, 5))
-            ax = fig.add_subplot(111, projection='3d')
+            ax = fig.add_subplot(111, projection="3d")
             ax.view_init(azim=150, elev=20)
             ax.grid(False)
             ax.xaxis.pane.fill = False
             ax.yaxis.pane.fill = False
             ax.zaxis.pane.fill = False
-            ax.xaxis.pane.set_edgecolor('k')
-            ax.yaxis.pane.set_edgecolor('k')
-            ax.zaxis.pane.set_edgecolor('k')
+            ax.xaxis.pane.set_edgecolor("k")
+            ax.yaxis.pane.set_edgecolor("k")
+            ax.zaxis.pane.set_edgecolor("k")
             ax.xaxis.pane._alpha = 0.9
             ax.yaxis.pane._alpha = 0.9
             ax.zaxis.pane._alpha = 0.9
             fontsize = 11
-            ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=12)
-            ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=12)
-            ax.set_zlabel('$z$ axis', fontsize=fontsize, color='k', labelpad=12)
+            ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=12)
+            ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=12)
+            ax.set_zlabel("$z$ axis", fontsize=fontsize, color="k", labelpad=12)
             # ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             # ax.zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-            for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-            for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+            for t in ax.xaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in ax.yaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
+            for t in ax.zaxis.get_major_ticks():
+                t.label.set_fontsize(fontsize)
             ax.xaxis.set_rotate_label(False)
             ax.yaxis.set_rotate_label(False)
             ax.zaxis.set_rotate_label(False)
@@ -1261,8 +1300,8 @@ class NurbsCurve:
             # ax.set_zticks([])
             # ax.axis('off')
 
-            if options['line'] == 'yes':
-                line, = ax.plot(C[0, :], C[1, :], C[2, :])
+            if options["line"] == "yes":
+                (line,) = ax.plot(C[0, :], C[1, :], C[2, :])
                 line.set_linewidth(1.25)
                 line.set_linestyle("-")
                 line.set_color("k")
@@ -1271,10 +1310,10 @@ class NurbsCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("k")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
-            if options['control_points'] == 'yes':
-                line, = ax.plot(P[0, :], P[1, :], P[2, :])
+            if options["control_points"] == "yes":
+                (line,) = ax.plot(P[0, :], P[1, :], P[2, :])
                 line.set_linewidth(1.00)
                 line.set_linestyle("-.")
                 line.set_color("r")
@@ -1283,7 +1322,7 @@ class NurbsCurve:
                 line.set_markeredgewidth(1)
                 line.set_markeredgecolor("r")
                 line.set_markerfacecolor("w")
-                line.set_label(' ')
+                line.set_label(" ")
 
             # Set axes aspect ratio
             x_min, x_max = ax.get_xlim()
@@ -1301,15 +1340,12 @@ class NurbsCurve:
             plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
 
-
-
-
 # -------------------------------------------------------------------------------------------------------------------- #
 # Define the NURBS surface class
 # -------------------------------------------------------------------------------------------------------------------- #
 class NurbsSurface:
 
-    """ Create a NURBS (Non-Uniform Rational Basis Spline) surface object
+    """Create a NURBS (Non-Uniform Rational Basis Spline) surface object
 
     Parameters
     ----------
@@ -1362,13 +1398,12 @@ class NurbsSurface:
         self.v = None
         self.S = None
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute NURBS surface coordinates
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_NurbsSurface_value(self, u, v):
 
-        """ Evaluate the coordinates of the NURBS surface corresponding to the (u,v) parametrization
+        """Evaluate the coordinates of the NURBS surface corresponding to the (u,v) parametrization
 
         Parameters
         ----------
@@ -1403,17 +1438,18 @@ class NurbsSurface:
         if Nu == Nv:
             self.N = Nu
         else:
-            raise Exception('u and v must have the same size')
+            raise Exception("u and v must have the same size")
 
         # Evaluate the spline surface for input (u,v) parametrization
-        self.S = self.evaluate_NurbsSurface(self.P, self.W, self.p, self.q, self.U, self.V, u, v)
+        self.S = self.evaluate_NurbsSurface(
+            self.P, self.W, self.p, self.q, self.U, self.V, u, v
+        )
 
         return self.S
 
-
     def evaluate_NurbsSurface(self, P, W, p, q, U, V, u, v):
 
-        """ Evaluate the coordinates of the NURBS surface corresponding to the (u,v) parametrization
+        """Evaluate the coordinates of the NURBS surface corresponding to the (u,v) parametrization
 
         Parameters
         ----------
@@ -1459,32 +1495,32 @@ class NurbsSurface:
 
         # Check the shape of the input parameters
         if P.ndim > 3:
-            raise Exception('P must be an array of shape (ndim, n+1, m+1)')
+            raise Exception("P must be an array of shape (ndim, n+1, m+1)")
 
         if W.ndim > 2:
-            raise Exception('W must be an array of shape (n+1, m+1)')
+            raise Exception("W must be an array of shape (n+1, m+1)")
 
         if not np.isscalar(p):
-            raise Exception('p must be an scalar')
+            raise Exception("p must be an scalar")
 
         if not np.isscalar(q):
-            raise Exception('q must be an scalar')
+            raise Exception("q must be an scalar")
 
         if U.ndim > 1:
-            raise Exception('U must be an array of shape (r+1=n+p+2,)')
+            raise Exception("U must be an array of shape (r+1=n+p+2,)")
 
         if V.ndim > 1:
-            raise Exception('V must be an array of shape (s+1=m+q+2,)')
+            raise Exception("V must be an array of shape (s+1=m+q+2,)")
 
         if np.isscalar(u):
             pass
         elif u.ndim > 1:
-            raise Exception('u must be a scalar or an array of shape (N,)')
+            raise Exception("u must be a scalar or an array of shape (N,)")
 
         if np.isscalar(v):
             pass
         elif u.ndim > 1:
-            raise Exception('v must be a scalar or an array of shape (N,)')
+            raise Exception("v must be a scalar or an array of shape (N,)")
 
         # Shape of the array of control points
         n_dim, nn, mm = np.shape(P)
@@ -1499,26 +1535,27 @@ class NurbsSurface:
 
         # Map the control points to the expanded space | P = (x*w,y*w,z*w,w)
         w = np.repeat(W[np.newaxis, :, :], repeats=n_dim, axis=0)
-        P_w = np.vstack((np.asarray(P*w), W[np.newaxis, :, :]))
+        P_w = np.vstack((np.asarray(P * w), W[np.newaxis, :, :]))
 
         # Compute the coordinates of the NURBS surface in the expanded space
         # The implementation of the coordinates computations uses several functions for vectorized code (increase speed)
-        A = np.dot(P_w, N_basis_v)                                      # shape (ndim+1, n+1, N)
-        B = np.repeat(N_basis_u[np.newaxis], repeats=n_dim+1, axis=0)   # shape (ndim+1, n+1, N)
-        S_w = np.sum(A*B,axis=1)                                        # shape (ndim+1, N)
+        A = np.dot(P_w, N_basis_v)  # shape (ndim+1, n+1, N)
+        B = np.repeat(
+            N_basis_u[np.newaxis], repeats=n_dim + 1, axis=0
+        )  # shape (ndim+1, n+1, N)
+        S_w = np.sum(A * B, axis=1)  # shape (ndim+1, N)
 
         # Map the coordinates back to the ordinary space
-        S = S_w[0:-1,:]/S_w[-1, :]
+        S = S_w[0:-1, :] / S_w[-1, :]
 
         return S
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Compute basis polynomials
     # ---------------------------------------------------------------------------------------------------------------- #
     def get_basis_polynomials(self, n, p, U, u):
 
-        """ Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
+        """Evaluate the n-th B-Spline basis polynomials of degree ´p´ for the input parameter ´u´
 
         Parameters
         ----------
@@ -1545,18 +1582,26 @@ class NurbsSurface:
         """
 
         # Check the order and the number of basis basis polynomials
-        assert (p <= n), 'The order of the basis polynomials cannot be larger than the number of control points minus one'
+        assert (
+            p <= n
+        ), "The order of the basis polynomials cannot be larger than the number of control points minus one"
 
         # Preliminary computations
-        Nu = self.N                         # Number of points where the spline is evaluated
-        m = n + p + 1                       # Number of basis polynomials in the current step of the recursion
-        N = np.zeros((m, np.size(u)))       # Initialize the array of basis polynomials
+        Nu = self.N  # Number of points where the spline is evaluated
+        m = (
+            n + p + 1
+        )  # Number of basis polynomials in the current step of the recursion
+        N = np.zeros((m, np.size(u)))  # Initialize the array of basis polynomials
 
         # First step of the recursion formula (p = 0)
         # The term that is not part of the definition is added to have U[i] <= u <= U[i + 1] when i=n and u=1
         # This problem is mentioned in the NURBS book section 2.5 - Computational Algorithms
         for i in range(m):
-            N[i, :] = 0.0 + 1.0 * (u >= U[i]) * (u < U[i + 1]) + 1.00 * (np.logical_and(u == 1, i == n))
+            N[i, :] = (
+                0.0
+                + 1.0 * (u >= U[i]) * (u < U[i + 1])
+                + 1.00 * (np.logical_and(u == 1, i == n))
+            )
 
         # Second and next steps of the recursion formula (p = 1, 2, ...)
         p = 1
@@ -1595,35 +1640,37 @@ class NurbsSurface:
 
         return N
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Plotting functions
     # ---------------------------------------------------------------------------------------------------------------- #
     def plot_NurbsSurface(self, options):
 
-        """ Plot surface """
+        """Plot surface"""
 
         # Prepare the plot
         fig = plt.figure(figsize=(6, 5))
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection="3d")
         ax.view_init(azim=120, elev=20)
         ax.grid(False)
         ax.xaxis.pane.fill = False
         ax.yaxis.pane.fill = False
         ax.zaxis.pane.fill = False
-        ax.xaxis.pane.set_edgecolor('k')
-        ax.yaxis.pane.set_edgecolor('k')
-        ax.zaxis.pane.set_edgecolor('k')
+        ax.xaxis.pane.set_edgecolor("k")
+        ax.yaxis.pane.set_edgecolor("k")
+        ax.zaxis.pane.set_edgecolor("k")
         ax.xaxis.pane._alpha = 0.9
         ax.yaxis.pane._alpha = 0.9
         ax.zaxis.pane._alpha = 0.9
         fontsize = 11
-        ax.set_xlabel('$x$ axis', fontsize=fontsize, color='k', labelpad=8)
-        ax.set_ylabel('$y$ axis', fontsize=fontsize, color='k', labelpad=8)
-        ax.set_zlabel('$z$ axis', fontsize=fontsize, color='k', labelpad=8)
-        for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+        ax.set_xlabel("$x$ axis", fontsize=fontsize, color="k", labelpad=8)
+        ax.set_ylabel("$y$ axis", fontsize=fontsize, color="k", labelpad=8)
+        ax.set_zlabel("$z$ axis", fontsize=fontsize, color="k", labelpad=8)
+        for t in ax.xaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.yaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.zaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
         ax.xaxis.set_rotate_label(False)
         ax.yaxis.set_rotate_label(False)
         ax.zaxis.set_rotate_label(False)
@@ -1643,39 +1690,59 @@ class NurbsSurface:
         Pz = np.real(self.P[2, :, :])
 
         # Plot the spline coordinates as a cloud of points
-        if options['point_cloud'] == 'yes':
-            ax.plot(x, y, z, linewidth=0, marker='o', markersize='2', markerfacecolor='w')
+        if options["point_cloud"] == "yes":
+            ax.plot(
+                x, y, z, linewidth=0, marker="o", markersize="2", markerfacecolor="w"
+            )
 
         # Plot the spline coordinates as a surface
-        if options['surface'] == 'yes':
-            Nu = options['surface_Nu']
-            Nv = options['surface_Nv']
+        if options["surface"] == "yes":
+            Nu = options["surface_Nu"]
+            Nv = options["surface_Nv"]
             X = x.reshape(Nv, Nu)
             Y = y.reshape(Nv, Nu)
             Z = z.reshape(Nv, Nu)
-            ax.plot_surface(X, Y, Z,
-                            color = 'blue',
-                            edgecolor = 'black',
-                            linewidth = 0.25,
-                            alpha = 0.7,
-                            shade = True,
-                            antialiased = True,
-                            zorder = 0)
+            ax.plot_surface(
+                X,
+                Y,
+                Z,
+                color="blue",
+                edgecolor="black",
+                linewidth=0.25,
+                alpha=0.7,
+                shade=True,
+                antialiased=True,
+                zorder=0,
+            )
 
         # Plot the control mesh coordinates
-        if options['control_points'] == 'yes':
+        if options["control_points"] == "yes":
 
-            ax.plot_wireframe(Px, Py, Pz,
-                              edgecolor = 'red',
-                              linewidth = 0.75,
-                              linestyles = 'solid',
-                              alpha = 1.0,
-                              antialiased = True,
-                              zorder = 1)
+            ax.plot_wireframe(
+                Px,
+                Py,
+                Pz,
+                edgecolor="red",
+                linewidth=0.75,
+                linestyles="solid",
+                alpha=1.0,
+                antialiased=True,
+                zorder=1,
+            )
 
-            ax.plot(Px.flatten(), Py.flatten(), Pz.flatten(),
-                    linestyle = ' ', linewidth = 1.00, zorder = 4,
-                    marker = 'o', markersize = 4, markeredgecolor = 'r', markerfacecolor = 'w', markeredgewidth = 0.75)
+            ax.plot(
+                Px.flatten(),
+                Py.flatten(),
+                Pz.flatten(),
+                linestyle=" ",
+                linewidth=1.00,
+                zorder=4,
+                marker="o",
+                markersize=4,
+                markeredgecolor="r",
+                markerfacecolor="w",
+                markeredgewidth=0.75,
+            )
 
         # Set axes aspect ratio
         x_min, x_max = ax.get_xlim()
@@ -1691,5 +1758,3 @@ class NurbsSurface:
 
         # Adjust pad
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
-
-

@@ -8,7 +8,7 @@
 ###############################################################################################
 
 ################################# FILE NAME: PlotBlade.py #####################################
-#=============================================================================================#
+# =============================================================================================#
 # author: Roberto, Nitish Anand                                                               |
 #    :PhD Candidates,                                                                         |
 #    :Power and Propulsion, Energy Technology,                                                |
@@ -18,7 +18,7 @@
 #                                                                                             |
 # Description:                                                                                |
 #                                                                                             |
-#=============================================================================================#
+# =============================================================================================#
 
 from contextlib import redirect_stderr
 import enum
@@ -30,120 +30,130 @@ import cmath
 
 # TODO change name convention, functions should be all lower case with underscores for readibility if necesary
 # TODO no abbreviations!
-def WriteConfigFile(OUTFile,IN):
-    #pdb.set_trace()
+def WriteConfigFile(OUTFile, IN):
+    # pdb.set_trace()
     for key in IN:
         input = str(IN[key])
-        output = input.replace('[','')
-        output1 = output.replace(']', '')
+        output = input.replace("[", "")
+        output1 = output.replace("]", "")
         try:
-            OUTFile.write("%s=%f\n"%(key,np.real(float(output1))))
+            OUTFile.write("%s=%f\n" % (key, np.real(float(output1))))
         except:
-            #pdb.set_trace()
+            # pdb.set_trace()
             OUTFile.write("%s=%s\n" % (key, output1))
 
-def SU2_Config_change(name,dest,par,vals):
-    '''
+
+def SU2_Config_change(name, dest, par, vals):
+    """
     Changes parameter for SU2 configuration file.
     Usage SU2_Config_change(<infile abs dest>,<outfile abs dest>,[<parameter to be changed seperated by ,>],[<values separated by commas])>])
-    '''
+    """
     IN = {}
-    infile = open(name,'r')
+    infile = open(name, "r")
     for line in infile:
-      words = re.split(r'=|%|\n|#',line)
-      if not any(words[0] in s for s in ['\n','%',' ','#']):
-        words = list(filter(None,words))
-        IN[words[0]] = words[1]
-    #changing values
+        words = re.split(r"=|%|\n|#", line)
+        if not any(words[0] in s for s in ["\n", "%", " ", "#"]):
+            words = list(filter(None, words))
+            IN[words[0]] = words[1]
+    # changing values
     for i in range(len(par)):
-        IN[par[i]]=str(vals[i])
-    outfile=open(dest,'w')
+        IN[par[i]] = str(vals[i])
+    outfile = open(dest, "w")
     for key, value in IN.items():
-        if key not in ('DV_VALUE' , 'DV_PARAM'):
-            outfile.write("%s= %s\n"%(key,value))
-    outfile.write("%s= %s\n" % ('DV_PARAM', IN['DV_PARAM']))
-    outfile.write("%s= %s\n" % ('DV_VALUE', IN['DV_VALUE']))
-    #outfile.write('DV_KIND= HICKS_HENNE\nDV_PARAM= ( 0.0, 0.05)\nDEFINITION_DV= ( 1 , 1.0 | wall1,wall2  | 0.0 , 0.05  )\nNUMBER_PART= 8\nWRT_CSV_SOL= YES\nGRADIENT_METHOD= DISCRETE_ADJOINT\nDV_MARKER= ( WING )\nDV_VALUE= 0.001')
+        if key not in ("DV_VALUE", "DV_PARAM"):
+            outfile.write("%s= %s\n" % (key, value))
+    outfile.write("%s= %s\n" % ("DV_PARAM", IN["DV_PARAM"]))
+    outfile.write("%s= %s\n" % ("DV_VALUE", IN["DV_VALUE"]))
+    # outfile.write('DV_KIND= HICKS_HENNE\nDV_PARAM= ( 0.0, 0.05)\nDEFINITION_DV= ( 1 , 1.0 | wall1,wall2  | 0.0 , 0.05  )\nNUMBER_PART= 8\nWRT_CSV_SOL= YES\nGRADIENT_METHOD= DISCRETE_ADJOINT\nDV_MARKER= ( WING )\nDV_VALUE= 0.001')
 
-def WriteSU2ConfigFile(ConfigName,TYPE):
-    with open(ConfigName, 'r') as myfile:
-        if TYPE == ("SU2_CFD_AD"or"SU2_DOT_AD"):
-            data=myfile.read().replace('MATH_PROBLEM= DIRECT', 'MATH_PROBLEM= DISCRETE_ADJOINT')
+
+def WriteSU2ConfigFile(ConfigName, TYPE):
+    with open(ConfigName, "r") as myfile:
+        if TYPE == ("SU2_CFD_AD" or "SU2_DOT_AD"):
+            data = myfile.read().replace(
+                "MATH_PROBLEM= DIRECT", "MATH_PROBLEM= DISCRETE_ADJOINT"
+            )
         elif TYPE == ("SU2_DEF"):
             pass
         else:
             pass
 
 
-def ReadUserInput(name, section = None):
+def ReadUserInput(name, section=None):
     IN = {}
-    infile = open(name, 'r')
+    infile = open(name, "r")
     for line in infile:
-      words = re.split('=| |\n|,|[|]',line)
-      if not any(words[0] in s for s in ['\n', '%', ' ', '#']):
-        words = list(filter(None, words))
-        for i in range(0, len(words)):
-            try:
-                words[i] = float(words[i])
-            except:
-                words[i] = words[i]
-        if len(words[1::1]) == 1 and isinstance(words[1], float):
-            IN[words[0]] = np.array([words[1]])
-        elif len(words[1::1]) == 1 and isinstance(words[1], str):
-            IN[words[0]] = words[1]
-        else:
-            IN[words[0]] = words[1::1]
-    IN['Config_Path'] = name
+        words = re.split("=| |\n|,|[|]", line)
+        if not any(words[0] in s for s in ["\n", "%", " ", "#"]):
+            words = list(filter(None, words))
+            for i in range(0, len(words)):
+                try:
+                    words[i] = float(words[i])
+                except:
+                    words[i] = words[i]
+            if len(words[1::1]) == 1 and isinstance(words[1], float):
+                IN[words[0]] = np.array([words[1]])
+            elif len(words[1::1]) == 1 and isinstance(words[1], str):
+                IN[words[0]] = words[1]
+            else:
+                IN[words[0]] = words[1::1]
+    IN["Config_Path"] = name
     if section is None:
         return IN
     else:
-        length = len(IN['x_leading']) 
+        length = len(IN["x_leading"])
         for key, value in IN.items():
-            if type(value) == list and len(value)==length:
+            if type(value) == list and len(value) == length:
                 IN[key] = np.take(value, section)
         return IN
 
-def WriteBladeConfigFile(name,IN):
+
+def WriteBladeConfigFile(name, IN):
     for key in IN:
         input = str(list(IN[key])) if type(IN[key]) == np.ndarray else str(IN[key])
-        output = input.replace('[','')
-        output1 = output.replace(']', '')
-        name.write("%s=%s\n"%(key,output1))
+        output = input.replace("[", "")
+        output1 = output.replace("]", "")
+        name.write("%s=%s\n" % (key, output1))
+
 
 def ConfigPasser(config):
-    '''Takes in a path to a config file or directly the parsed dict and returns the parsed dict'''
+    """Takes in a path to a config file or directly the parsed dict and returns the parsed dict"""
     if type(config) == str:
         return ReadUserInput(config)
     elif type(config) == dict:
         return config
     else:
         raise TypeError(
-            'Inappropriate argument type: input must be path to cfg or the corresponding dictionary itself'
-            )
+            "Inappropriate argument type: input must be path to cfg or the corresponding dictionary itself"
+        )
+
 
 def Numpize(config):
-    if type(config['x_leading']) is not np.ndarray:
+    if type(config["x_leading"]) is not np.ndarray:
         for key in param_list:
-            config[key] = np.array(config[key]) 
+            config[key] = np.array(config[key])
     return config
+
 
 def Scale(IN, scale=1e-3, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
 
     config["SCALE_FACTOR"] = scale
     for key in meridional_channel_names[:5]:
-        config[key] = np.array(config[key])*config["SCALE_FACTOR"]
+        config[key] = np.array(config[key]) * config["SCALE_FACTOR"]
 
     return config
+
 
 def DeScale(IN, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
 
     for key in meridional_channel_names[:5]:
-        config[key] = config[key]/config["SCALE_FACTOR"]
+        config[key] = config[key] / config["SCALE_FACTOR"]
     config["SCALE_FACTOR"] = 1
 
     return config
+
 
 def Position(IN, le, te, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
@@ -151,33 +161,32 @@ def Position(IN, le, te, in_place=False):
     config["x_leading"] = np.array([le[2]])
     config["y_leading"] = np.array([le[0]])
     config["z_leading"] = np.array([np.linalg.norm((le[0], le[1]))])
-    config["x_trailing"]= np.array([te[2]])
-    config["z_trailing"]= np.array([np.linalg.norm((te[0], te[1]))])
+    config["x_trailing"] = np.array([te[2]])
+    config["z_trailing"] = np.array([np.linalg.norm((te[0], te[1]))])
 
     return config
+
 
 def Angles(IN, le, te, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
 
+    config["stagger"] = np.arctan((te[0] - le[0]) / (te[2] - le[2]))
 
-    config['stagger'] = np.arctan(
-        (te[0]-le[0])/(te[2]-le[2])
-    )
+    config["stagger"] = np.rad2deg(config["stagger"])
 
-    config['stagger'] = np.rad2deg(config['stagger'])
-
-    for key in ['stagger']:
+    for key in ["stagger"]:
         config[key] = np.array([config[key]])
 
     return config
 
+
 def Fatten(IN, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
 
-    for key in ['radius_in', 'radius_out']:
+    for key in ["radius_in", "radius_out"]:
         config[key] = np.array([0.01])
     for key in blade_section_camber_thickness[7:]:
-        config[key] = np.array(config[key])*2
+        config[key] = np.array(config[key]) * 2
 
     return config
 
@@ -241,7 +250,7 @@ param_list = meridional_channel_names[:5]
 param_list.extend(blade_section_camber_thickness)
 
 
-def ConcatenateConfig(*configs, verbose = True):
+def ConcatenateConfig(*configs, verbose=True):
     """Concatenates config files in order."""
 
     if len(configs) != 1:
@@ -250,9 +259,9 @@ def ConcatenateConfig(*configs, verbose = True):
                 configs[0][key] = np.hstack((configs[0][key], config[key]))
 
     if verbose:
-        print('\n\n')
+        print("\n\n")
         for key in param_list:
-            print(f'\t{key}\t has {configs[0][key].shape[0]} parameters')
-        print('\n\n')
+            print(f"\t{key}\t has {configs[0][key].shape[0]} parameters")
+        print("\n\n")
 
     return configs[0]

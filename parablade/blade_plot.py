@@ -8,7 +8,7 @@
 ###############################################################################################
 
 ################################# FILE NAME: PlotBlade.py #####################################
-#=============================================================================================#
+# =============================================================================================#
 # author: Roberto, Nitish Anand                                                               |
 #    :PhD Candidates,                                                                         |
 #    :Power and Propulsion, Energy Technology,                                                |
@@ -18,11 +18,11 @@
 #                                                                                             |
 # Description:                                                                                |
 #                                                                                             |
-#=============================================================================================#
+# =============================================================================================#
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # Importing general packages
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 import os
 import sys
 import pdb
@@ -31,17 +31,16 @@ import copy
 import numpy as np
 
 
-
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 # Importing ParaBlade classes and functions
-#---------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------------#
 from parablade.common.config import ReadUserInput
 from parablade.blade_3D import Blade3D
 
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # "Cluster mode" imports
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 try:
     import matplotlib as mpl
     import matplotlib.pyplot as plt
@@ -50,9 +49,9 @@ except:
     pass
 
 
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 # Define BladePlot class
-#----------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------#
 class BladePlot:
 
     # Declare additional variables as instance variables
@@ -68,14 +67,14 @@ class BladePlot:
 
         # Declare blade_in variables as instance variables
         # Configuration options
-        self.blade_in       = blade_in
-        self.NDIM           = blade_in.NDIM
-        self.N_SECTIONS     = blade_in.N_SECTIONS
-        self.N_BLADES       = blade_in.N_BLADES
-        self.PLOT_FORMAT    = blade_in.PLOT_FORMAT
-        self.CASCADE_TYPE   = blade_in.CASCADE_TYPE
+        self.blade_in = blade_in
+        self.NDIM = blade_in.NDIM
+        self.N_SECTIONS = blade_in.N_SECTIONS
+        self.N_BLADES = blade_in.N_BLADES
+        self.PLOT_FORMAT = blade_in.PLOT_FORMAT
+        self.CASCADE_TYPE = blade_in.CASCADE_TYPE
         self.OPERATION_TYPE = blade_in.OPERATION_TYPE
-        self.IN             = blade_in.IN
+        self.IN = blade_in.IN
 
         # Design variables
         self.DVs_names = blade_in.DVs_names
@@ -85,8 +84,8 @@ class BladePlot:
         # (u,v) parametrization
         self.u = blade_in.u
         self.v = blade_in.v
-        self.Nu = blade_in.Nu                   # Number of u query points from meshgrid format
-        self.Nv = blade_in.Nv                   # Number of u query points from meshgrid format
+        self.Nu = blade_in.Nu  # Number of u query points from meshgrid format
+        self.Nv = blade_in.Nv  # Number of u query points from meshgrid format
         self.N_points = blade_in.N_points
 
         # Blade geometry
@@ -101,37 +100,35 @@ class BladePlot:
         if os.path.exists("output") is False:
             os.mkdir("output")
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Make default plots
     # ---------------------------------------------------------------------------------------------------------------- #
     def make_plots(self):
 
-        """ Call the Matplotlib or Tecplot 360 plotting functions """
+        """Call the Matplotlib or Tecplot 360 plotting functions"""
 
-        if self.PLOT_FORMAT == 'MATPLOTLIB':
+        if self.PLOT_FORMAT == "MATPLOTLIB":
             self.make_python_plot()
             plt.show()
             plt.grid()
-        elif self.PLOT_FORMAT == 'INTERACTIVE':
+        elif self.PLOT_FORMAT == "INTERACTIVE":
             self.make_interactive_plot()
             plt.show()
-        elif self.PLOT_FORMAT == 'TECPLOT':
+        elif self.PLOT_FORMAT == "TECPLOT":
             self.make_tecplot_plot()
         else:
             raise Exception('Choose a valid plotting option: "MATPLOTLIB" or "TECPLOT"')
 
-
     def make_python_plot(self):
 
-        """ Call the Matplotlib plotting functions """
+        """Call the Matplotlib plotting functions"""
 
         # Import the Matplotlib library
         try:
             import matplotlib as mpl
             import matplotlib.pyplot as plt
         except:
-            raise Exception('Matplotlib library not installed... exiting... \n')
+            raise Exception("Matplotlib library not installed... exiting... \n")
 
         # Call the 2D or 3D plotting functions
         if self.NDIM == 2:
@@ -140,18 +137,17 @@ class BladePlot:
             self.make_plot_matplotlib_3D()
             # self.plot_meridional_channel()
         else:
-            raise Exception('The number of dimensions must be 2 or 3')
-
+            raise Exception("The number of dimensions must be 2 or 3")
 
     def make_tecplot_plot(self):
 
-        """ Call the Tecplot 360 plotting functions """
+        """Call the Tecplot 360 plotting functions"""
 
         # Import the Tecplot library
         try:
             import tecplot as tp
         except:
-            raise Exception('Tecplot 360 Python library not installed... exiting... \n')
+            raise Exception("Tecplot 360 Python library not installed... exiting... \n")
 
         # Call the 2D or 3D plotting functions
         if self.NDIM == 2:
@@ -159,34 +155,35 @@ class BladePlot:
         elif self.NDIM == 3:
             self.tecplot_3D()
         else:
-            raise Exception('The number of dimensions must be 2 or 3')
-
+            raise Exception("The number of dimensions must be 2 or 3")
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # TECPLOT 360 plotting functions
     # ---------------------------------------------------------------------------------------------------------------- #
     def make_plot_tecplot_2D(self):
 
-        """ Create 2D Tecplot 360 plot """
+        """Create 2D Tecplot 360 plot"""
 
-        blade = open("2D_Blade.dat",'w')
-        blade.write("VARIABLES = \"X\", \"Y\"\n")
+        blade = open("2D_Blade.dat", "w")
+        blade.write('VARIABLES = "X", "Y"\n')
         for i in self.surface_coordinates:
-            blade.write("%e, \t %e \n"%(i[0],i[1]))
+            blade.write("%e, \t %e \n" % (i[0], i[1]))
         blade.close()
-
 
     def tecplot_3D(self):
 
-        """ Create 3D Tecplot 360 plot """
+        """Create 3D Tecplot 360 plot"""
         # TODO this function needs some cleaning and maybe automation in Tecplot
 
         if self.OPERATION_TYPE == "SENSITIVITY":
             self.sensitivity_normal = {}
             for key in self.DVs_names:
                 for number in range(len(self.DVs_control_points[key])):
-                    self.sensitivity_normal[key + '_' + str(number)] = np.sum(
-                        self.surface_normals * self.surface_sensitivity[key + '_' + str(number)], axis=0)
+                    self.sensitivity_normal[key + "_" + str(number)] = np.sum(
+                        self.surface_normals
+                        * self.surface_sensitivity[key + "_" + str(number)],
+                        axis=0,
+                    )
 
         # Prepare the surface plot
         x = self.surface_coordinates[0, :]
@@ -198,37 +195,38 @@ class BladePlot:
         from tecplot.session import set_style
         from tecplot.constant import ColorMapDistribution
         import logging as log
-        header = ['x', 'y', 'z']
+
+        header = ["x", "y", "z"]
         if self.OPERATION_TYPE == "SENSITIVITY":
             for key in self.DVs_names:
                 for number in range(len(self.DVs_control_points[key])):
-                    header = header + ['Sens_'+key+'_'+str(number)]
+                    header = header + ["Sens_" + key + "_" + str(number)]
 
         with tp.session.suspend():
-            log.info('creating tecplot dataset')
-            ds = tp.active_frame().create_dataset('Data', [header])
+            log.info("creating tecplot dataset")
+            ds = tp.active_frame().create_dataset("Data", [header])
             sphere_zone = ds.add_ordered_zone("Blade", (self.Nu, self.Nv))
-            #pdb.set_trace()
-            sphere_zone.values('x')[:] = x.ravel()
-            sphere_zone.values('y')[:] = y.ravel()
-            sphere_zone.values('z')[:] = z.ravel()
+            # pdb.set_trace()
+            sphere_zone.values("x")[:] = x.ravel()
+            sphere_zone.values("y")[:] = y.ravel()
+            sphere_zone.values("z")[:] = z.ravel()
             if self.OPERATION_TYPE == "SENSITIVITY":
                 for key in self.DVs_names:
                     for number in range(len(self.DVs_control_points[key])):
-                        sphere_zone.values('Sens_'+key+'_'+str(number))[:] = self.sensitivity_normal[key + '_' + str(number)]
-            log.info('setting plot type to Cart3D')
+                        sphere_zone.values("Sens_" + key + "_" + str(number))[
+                            :
+                        ] = self.sensitivity_normal[key + "_" + str(number)]
+            log.info("setting plot type to Cart3D")
             tp.active_frame().plot_type = tp.constant.PlotType.Cartesian3D
             plot = tp.active_frame().plot()
-            tp.data.save_tecplot_plt('tecplot_blade.plt')
-
-
+            tp.data.save_tecplot_plt("tecplot_blade.plt")
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # MATPLOTLIB plotting functions
     # ---------------------------------------------------------------------------------------------------------------- #
     def make_plot_matplotlib_2D(self):
 
-        """ Create 2D Matplotlib line plot """
+        """Create 2D Matplotlib line plot"""
 
         # Get blade coordinates
         x = self.surface_coordinates[0, :]
@@ -237,15 +235,17 @@ class BladePlot:
         # Plot the prescribed and the fitted blades
         self.fig_2D = plt.figure(figsize=(8, 6))
         self.ax_2D = self.fig_2D.add_subplot(111)
-        self.ax_2D.set_xlabel('$x$ axis', fontsize=12, color='k', labelpad=12)
-        self.ax_2D.set_ylabel('$y$ axis', fontsize=12, color='k', labelpad=12)
+        self.ax_2D.set_xlabel("$x$ axis", fontsize=12, color="k", labelpad=12)
+        self.ax_2D.set_ylabel("$y$ axis", fontsize=12, color="k", labelpad=12)
         # self.ax_2D.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
         # self.ax_2D.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
-        for t in self.ax_2D.xaxis.get_major_ticks(): t.label.set_fontsize(12)
-        for t in self.ax_2D.yaxis.get_major_ticks(): t.label.set_fontsize(12)
+        for t in self.ax_2D.xaxis.get_major_ticks():
+            t.label.set_fontsize(12)
+        for t in self.ax_2D.yaxis.get_major_ticks():
+            t.label.set_fontsize(12)
 
         # Plot prescribed coordinates
-        self.points_2D, = self.ax_2D.plot(x, y)
+        (self.points_2D,) = self.ax_2D.plot(x, y)
         self.points_2D.set_marker(" ")
         self.points_2D.set_markersize(3.5)
         self.points_2D.set_markeredgewidth(0.5)
@@ -270,34 +270,36 @@ class BladePlot:
         # Adjust pad
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
-
     def make_plot_matplotlib_3D(self):
 
-        """ Create 3D Matplotlib scatter plot """
+        """Create 3D Matplotlib scatter plot"""
 
         # Prepare the plot
         self.fig_3D = plt.figure(figsize=(8, 7))
-        self.ax_3D = self.fig_3D.add_subplot(111, projection='3d')
+        self.ax_3D = self.fig_3D.add_subplot(111, projection="3d")
         self.ax_3D.view_init(azim=-55, elev=30)
         self.ax_3D.grid(False)
         self.ax_3D.xaxis.pane.fill = False
         self.ax_3D.yaxis.pane.fill = False
         self.ax_3D.zaxis.pane.fill = False
-        self.ax_3D.xaxis.pane.set_edgecolor('k')
-        self.ax_3D.yaxis.pane.set_edgecolor('k')
-        self.ax_3D.zaxis.pane.set_edgecolor('k')
+        self.ax_3D.xaxis.pane.set_edgecolor("k")
+        self.ax_3D.yaxis.pane.set_edgecolor("k")
+        self.ax_3D.zaxis.pane.set_edgecolor("k")
         self.ax_3D.xaxis.pane._alpha = 0.9
         self.ax_3D.yaxis.pane._alpha = 0.9
         self.ax_3D.zaxis.pane._alpha = 0.9
-        self.ax_3D.set_xlabel('$x$ axis', fontsize=12, color='k', labelpad=16)
-        self.ax_3D.set_ylabel('$y$ axis', fontsize=12, color='k', labelpad=16)
-        self.ax_3D.set_zlabel('$z$ axis', fontsize=12, color='k', labelpad=16)
+        self.ax_3D.set_xlabel("$x$ axis", fontsize=12, color="k", labelpad=16)
+        self.ax_3D.set_ylabel("$y$ axis", fontsize=12, color="k", labelpad=16)
+        self.ax_3D.set_zlabel("$z$ axis", fontsize=12, color="k", labelpad=16)
         # self.ax_3D.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.0f'))
         # self.ax_3D.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.0f'))
         # self.ax_3D.zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.0f'))
-        for t in self.ax_3D.xaxis.get_major_ticks(): t.label.set_fontsize(12)
-        for t in self.ax_3D.yaxis.get_major_ticks(): t.label.set_fontsize(12)
-        for t in self.ax_3D.zaxis.get_major_ticks(): t.label.set_fontsize(12)
+        for t in self.ax_3D.xaxis.get_major_ticks():
+            t.label.set_fontsize(12)
+        for t in self.ax_3D.yaxis.get_major_ticks():
+            t.label.set_fontsize(12)
+        for t in self.ax_3D.zaxis.get_major_ticks():
+            t.label.set_fontsize(12)
         self.ax_3D.xaxis.set_rotate_label(False)
         self.ax_3D.yaxis.set_rotate_label(False)
         self.ax_3D.zaxis.set_rotate_label(False)
@@ -326,9 +328,9 @@ class BladePlot:
         self.blade_sections = [None, None]
         for k, v in enumerate([0, 1]):
             u_plot = np.linspace(0, 1, 250)
-            v_plot = v*np.ones((250,))
+            v_plot = v * np.ones((250,))
             x, y, z = np.real(self.blade_in.get_surface_coordinates(u_plot, v_plot))
-            self.blade_sections[k], = self.ax_3D.plot(x, y, z)
+            (self.blade_sections[k],) = self.ax_3D.plot(x, y, z)
             self.blade_sections[k].set_marker(" ")
             self.blade_sections[k].set_markersize(3.5)
             self.blade_sections[k].set_markeredgewidth(0.5)
@@ -344,14 +346,18 @@ class BladePlot:
         z = z_blade.reshape((self.Nv, self.Nu))
 
         # Plot the blade surface
-        self.blade_surface = self.ax_3D.plot_surface(x, y, z,
-                                                     color='blue',
-                                                     # edgecolor='k',
-                                                     linewidth=0.50,
-                                                     alpha=0.6,
-                                                     shade=False,
-                                                     antialiased=True,
-                                                     zorder=3)
+        self.blade_surface = self.ax_3D.plot_surface(
+            x,
+            y,
+            z,
+            color="blue",
+            # edgecolor='k',
+            linewidth=0.50,
+            alpha=0.6,
+            shade=False,
+            antialiased=True,
+            zorder=3,
+        )
 
         # Set axes aspect ratio
         x_min, x_max = self.ax_3D.get_xlim()
@@ -368,18 +374,17 @@ class BladePlot:
         # Adjust pad
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
-
     # ---------------------------------------------------------------------------------------------------------------- #
     # Plot the blade in interactive mode
     # ---------------------------------------------------------------------------------------------------------------- #
     def make_interactive_plot(self):
 
-        """ Create an iteractive plot that updates the geometry in real time when the .cfg file is changed """
+        """Create an iteractive plot that updates the geometry in real time when the .cfg file is changed"""
         try:
             import matplotlib.animation as animation
             import matplotlib.pyplot as plt
         except:
-            raise Exception('Matplotlib library not installed... exiting... \n')
+            raise Exception("Matplotlib library not installed... exiting... \n")
 
         print("\n")
         print("Opening the interactive plot...\n")
@@ -389,32 +394,37 @@ class BladePlot:
         # This calls the function animate with a refresh time of "interval" miliseconds
         if self.NDIM == 2:
             self.make_plot_matplotlib_2D()
-            animation_2D = animation.FuncAnimation(self.fig_2D, self.animate, interval=500)
+            animation_2D = animation.FuncAnimation(
+                self.fig_2D, self.animate, interval=500
+            )
         elif self.NDIM == 3:
             self.make_plot_matplotlib_3D()
-            animation_3D = animation.FuncAnimation(self.fig_3D, self.animate, interval=1500)
+            animation_3D = animation.FuncAnimation(
+                self.fig_3D, self.animate, interval=1500
+            )
         else:
             raise Exception('The number of dimensions must be "2" or "3"')
 
         plt.show()
         print("Closing the interactive plot...\n")
 
-
     def animate(self, _):
 
-        """ Update the geometry of the interactive plot """
+        """Update the geometry of the interactive plot"""
 
         # Read the .cfg file and update the geometry
         while True:
             try:
-                self.IN = ReadUserInput(self.IN['Config_Path'])
+                self.IN = ReadUserInput(self.IN["Config_Path"])
                 self.blade_in = Blade3D(self.IN)
                 self.blade_in.make_blade()
-                self.surface_coordinates = self.blade_in.get_surface_coordinates(self.u, self.v)
+                self.surface_coordinates = self.blade_in.get_surface_coordinates(
+                    self.u, self.v
+                )
                 break
             except:
                 print("The .cfg file could not be loaded, trying again...")
-                time.sleep(1.5)     # Wait a moment in case the .cfg file is not found
+                time.sleep(1.5)  # Wait a moment in case the .cfg file is not found
 
         # Rename coordinates
         x_blade = np.real(self.surface_coordinates[0, :])
@@ -443,7 +453,7 @@ class BladePlot:
                 u_plot = np.linspace(0, 1, 250)
                 v_plot = v * np.ones((250,))
                 x, y, z = np.real(self.blade_in.get_surface_coordinates(u_plot, v_plot))
-                self.blade_sections[k], = self.ax_3D.plot(x, y, z)
+                (self.blade_sections[k],) = self.ax_3D.plot(x, y, z)
                 self.blade_sections[k].set_marker(" ")
                 self.blade_sections[k].set_markersize(3.5)
                 self.blade_sections[k].set_markeredgewidth(0.5)
@@ -459,21 +469,22 @@ class BladePlot:
             z = z_blade.reshape((self.Nv, self.Nu))
 
             # Plot the blade surface
-            self.blade_surface = self.ax_3D.plot_surface(x, y, z,
-                                                         color='blue',
-                                                         # edgecolor='k',
-                                                         linewidth=0.50,
-                                                         alpha=0.6,
-                                                         shade=False,
-                                                         antialiased=True,
-                                                         zorder=3)
-
+            self.blade_surface = self.ax_3D.plot_surface(
+                x,
+                y,
+                z,
+                color="blue",
+                # edgecolor='k',
+                linewidth=0.50,
+                alpha=0.6,
+                shade=False,
+                antialiased=True,
+                zorder=3,
+            )
 
             # self.blade_surface.set_3d_properties(z_blade)
         else:
             raise Exception('The number of dimensions must be "2" or "3"')
-
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Additional plots
@@ -484,16 +495,18 @@ class BladePlot:
         fig = plt.figure(figsize=(8, 6))
         ax = fig.add_subplot(111)
         fontsize = 10
-        ax.set_xlabel('$z$ - axis', fontsize=fontsize, color='k', labelpad=12)
-        ax.set_ylabel('$x$ - axis', fontsize=fontsize, color='k', labelpad=12)
-        ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
-        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
-        for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
-        for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(fontsize)
+        ax.set_xlabel("$z$ - axis", fontsize=fontsize, color="k", labelpad=12)
+        ax.set_ylabel("$x$ - axis", fontsize=fontsize, color="k", labelpad=12)
+        ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%.2f"))
+        ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter("%.2f"))
+        for t in ax.xaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
+        for t in ax.yaxis.get_major_ticks():
+            t.label.set_fontsize(fontsize)
 
         # Plot extended hub
         x, z = self.hub_coordinates
-        line, = ax.plot(x, z)
+        (line,) = ax.plot(x, z)
         line.set_linewidth(1.25)
         line.set_linestyle("-")
         line.set_color("k")
@@ -502,11 +515,11 @@ class BladePlot:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
         # Plot extended shroud
         x, z = self.shroud_coordinates
-        line, = ax.plot(x, z)
+        (line,) = ax.plot(x, z)
         line.set_linewidth(1.25)
         line.set_linestyle("-")
         line.set_color("k")
@@ -515,17 +528,22 @@ class BladePlot:
         line.set_markeredgewidth(1)
         line.set_markeredgecolor("k")
         line.set_markerfacecolor("w")
-        line.set_label(' ')
+        line.set_label(" ")
 
         # Plot the blade
         u = np.linspace(0.00, 1.00, 1000)
-        names = [('x_hub', 'z_hub'), ('x_shroud', 'z_shroud'), ('x_leading', 'z_leading'), ('x_trailing', 'z_trailing')]
+        names = [
+            ("x_hub", "z_hub"),
+            ("x_shroud", "z_shroud"),
+            ("x_leading", "z_leading"),
+            ("x_trailing", "z_trailing"),
+        ]
         for name in names:
 
             # Plot the meridional channel boundaries
-            x = np.real(self.DVs_functions[name[0]](u)[0,:])
-            z = np.real(self.DVs_functions[name[1]](u)[0,:])
-            line, = ax.plot(x, z)
+            x = np.real(self.DVs_functions[name[0]](u)[0, :])
+            z = np.real(self.DVs_functions[name[1]](u)[0, :])
+            (line,) = ax.plot(x, z)
             line.set_linewidth(1.25)
             line.set_linestyle("-")
             line.set_color("k")
@@ -534,12 +552,12 @@ class BladePlot:
             line.set_markeredgewidth(1)
             line.set_markeredgecolor("k")
             line.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
             # Plot the meridional channel control points
             Px = np.asarray(self.DVs_control_points[name[0]])
             Pz = np.asarray(self.DVs_control_points[name[1]])
-            points, = ax.plot(Px, Pz)
+            (points,) = ax.plot(Px, Pz)
             points.set_linewidth(0.75)
             points.set_linestyle("-.")
             points.set_color("k")
@@ -548,7 +566,7 @@ class BladePlot:
             points.set_markeredgewidth(1)
             points.set_markeredgecolor("r")
             points.set_markerfacecolor("w")
-            line.set_label(' ')
+            line.set_label(" ")
 
         # Set the aspect ratio of the data
         ax.set_aspect(1.0)
@@ -557,4 +575,4 @@ class BladePlot:
         plt.tight_layout(pad=5.0, w_pad=None, h_pad=None)
 
         # Hide axes
-        plt.axis('off')
+        plt.axis("off")

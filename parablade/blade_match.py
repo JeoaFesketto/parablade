@@ -47,7 +47,13 @@ import warnings
 # ---------------------------------------------------------------------------------------------#
 from parablade.blade_3D import Blade3D
 from parablade.common.common import printProgress
-from parablade.common.config import ReadUserInput, DeScale, WriteBladeConfigFile, ConfigPasser, Numpize
+from parablade.common.config import (
+    ReadUserInput,
+    DeScale,
+    WriteBladeConfigFile,
+    ConfigPasser,
+    Numpize,
+)
 
 
 # ---------------------------------------------------------------------------------------------#
@@ -100,7 +106,7 @@ class BladeMatch:
         _convergence_mean_dev_rel=0.1,
         _uv_optim_method="L-BFGS-B",
         _dv_optim_method="SLSQP",
-        _max_retries_slsqp=1
+        _max_retries_slsqp=1,
     ):
 
         # Declare input variables as instance variables
@@ -120,9 +126,11 @@ class BladeMatch:
         # os.system("rm -rf output_matching")
         if not _no_subfolder:
             try:
-                os.mkdir(self._output_path+"/output_matching")
+                os.mkdir(self._output_path + "/output_matching")
             except:
-                print('\n\n\tOutput folder for parametrization results already exists, files might have been overwriten\n\n')
+                print(
+                    "\n\n\tOutput folder for parametrization results already exists, files might have been overwriten\n\n"
+                )
 
         # Load prescribed blade coordinates
         if self.NDIM == 2:
@@ -168,7 +176,6 @@ class BladeMatch:
             self.u, self.v
         )
         self.error_distribution = None
-
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Blade matching main function
@@ -429,9 +436,11 @@ class BladeMatch:
 
         print(self.solution.message)
 
-        if self.dv_optim_method == 'SLSQP':
+        if self.dv_optim_method == "SLSQP":
             while self.solution.status == 4 and bool(self.max_retries_slsqp):
-                print(f'Retrying to get better result, new itermax is {self.optimization_max_iter+self.iteration}.')
+                print(
+                    f"Retrying to get better result, new itermax is {self.optimization_max_iter+self.iteration}."
+                )
                 self.solution = minimize(
                     fun=self.my_objective_function,
                     x0=my_x0,
@@ -444,7 +453,6 @@ class BladeMatch:
                 )
                 print(self.solution.message)
                 self.max_retries_slsqp -= 1
-
 
         self.coordinates_matched = self.blade_matched.get_surface_coordinates(
             self.u, self.v
@@ -614,7 +622,10 @@ class BladeMatch:
 
             # TODO this is really bad but i couldn't find a better way
             self.max_deviation_rel = self.max_deviation / self.meanline_length * 100
-            if self.max_deviation_rel < self.convergence_max_dev_rel and self.mean_deviation_rel < self.convergence_mean_dev_rel:
+            if (
+                self.max_deviation_rel < self.convergence_max_dev_rel
+                and self.mean_deviation_rel < self.convergence_mean_dev_rel
+            ):
                 return 0
 
         # Update number of function calls
@@ -658,7 +669,7 @@ class BladeMatch:
             self.update_plots()
 
         # Update the (u,v)-parametrization each N iterations
-        if self.iteration % N == 0 and self.iteration>=40:
+        if self.iteration % N == 0 and self.iteration >= 40:
             self.match_blade_uv()
 
         # Update the matched coordinates
@@ -682,8 +693,8 @@ class BladeMatch:
         full_path = path + "/output_matching/"
         file = open(full_path + filename + ".csv", "w")
 
-        matched_output = self.coordinates_matched/self.IN["SCALE_FACTOR"]
-        prescribed_output = self.coordinates_prescribed/self.IN["SCALE_FACTOR"]
+        matched_output = self.coordinates_matched / self.IN["SCALE_FACTOR"]
+        prescribed_output = self.coordinates_prescribed / self.IN["SCALE_FACTOR"]
 
         if self.NDIM == 2:
             file.write(
@@ -694,15 +705,9 @@ class BladeMatch:
                     "%i,\t%+.15e,\t%+.15e,\t%+.15e,\t%+.15e,\t%.15f,\t%.15f\n"
                     % (
                         prescribed_output[0, i],  # Mesh point index
-                        prescribed_output[
-                            1, i
-                        ],  # Prescribed x coordinate (axial)
-                        prescribed_output[
-                            2, i
-                        ],  # Prescribed y coordinate (tangential)
-                        np.real(
-                            matched_output[0, i]
-                        ),  # Matched x-coordinate (axial)
+                        prescribed_output[1, i],  # Prescribed x coordinate (axial)
+                        prescribed_output[2, i],  # Prescribed y coordinate (tangential)
+                        np.real(matched_output[0, i]),  # Matched x-coordinate (axial)
                         np.real(
                             matched_output[1, i]
                         ),  # Matched y-coordinate (tangential)
@@ -721,19 +726,11 @@ class BladeMatch:
                     % (
                         prescribed_output[0, i],  # Mesh point index
                         prescribed_output[3, i],  # SU2 x coordinate (radial)
-                        prescribed_output[
-                            2, i
-                        ],  # SU2 y coordinate (tangential)
+                        prescribed_output[2, i],  # SU2 y coordinate (tangential)
                         prescribed_output[1, i],  # SU2 z coordinate (axial)
-                        np.real(
-                            matched_output[2, i]
-                        ),  # SU2 x coordinate (radial)
-                        np.real(
-                            matched_output[1, i]
-                        ),  # SU2 y coordinate (tangential)
-                        np.real(
-                            matched_output[0, i]
-                        ),  # SU2 z coordinate (axial)
+                        np.real(matched_output[2, i]),  # SU2 x coordinate (radial)
+                        np.real(matched_output[1, i]),  # SU2 y coordinate (tangential)
+                        np.real(matched_output[0, i]),  # SU2 z coordinate (axial)
                         self.u[i],
                         self.v[i],
                     )
@@ -1210,27 +1207,32 @@ class BladeMatch:
 
     def save_plots(self):
 
-        os.mkdir(self._output_path+"/output_matching/figures/")
+        os.mkdir(self._output_path + "/output_matching/figures/")
 
         if self.plot_options["view_xy"] == "yes":
             self.figure_1.savefig(
-                self._output_path+"/output_matching/figures/view_xy.pdf", bbox_inches="tight"
+                self._output_path + "/output_matching/figures/view_xy.pdf",
+                bbox_inches="tight",
             )
         if self.plot_options["view_xR"] == "yes":
             self.figure_2.savefig(
-                self._output_path+"/output_matching/figures/view_xR.pdf", bbox_inches="tight"
+                self._output_path + "/output_matching/figures/view_xR.pdf",
+                bbox_inches="tight",
             )
         if self.plot_options["view_yz"] == "yes":
             self.figure_3.savefig(
-                self._output_path+"/output_matching/figures/view_yz.pdf", bbox_inches="tight"
+                self._output_path + "/output_matching/figures/view_yz.pdf",
+                bbox_inches="tight",
             )
         if self.plot_options["view_3D"] == "yes":
             self.figure_4.savefig(
-                self._output_path+"/output_matching/figures/view_3D.pdf", bbox_inches="tight"
+                self._output_path + "/output_matching/figures/view_3D.pdf",
+                bbox_inches="tight",
             )
         if self.plot_options["error_distribution"] == "yes":
             self.figure_5.savefig(
-                self._output_path+"/output_matching/figures/error_distribution.pdf", bbox_inches="tight"
+                self._output_path + "/output_matching/figures/error_distribution.pdf",
+                bbox_inches="tight",
             )
 
     def do_interactive_matching(self):
