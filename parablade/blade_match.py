@@ -101,12 +101,12 @@ class BladeMatch:
         },
         _output_path=None,
         _no_subfolder=False,
-        _optimization_max_iter=300,
-        _convergence_max_dev_rel=0.4,
-        _convergence_mean_dev_rel=0.1,
-        _uv_optim_method="L-BFGS-B",
-        _dv_optim_method="SLSQP",
-        _max_retries_slsqp=1,
+        _optim_max_iter=300,
+        _optim_convergence_max_dev_rel=0.4,
+        _optim_convergence_mean_dev_rel=0.1,
+        _optim_uv_method="L-BFGS-B",
+        _optim_dv_method="SLSQP",
+        _optim_max_retries_slsqp=1,
     ):
 
         # Declare input variables as instance variables
@@ -116,11 +116,12 @@ class BladeMatch:
         self.PRESCRIBED_BLADE_FILENAME = self.IN["PRESCRIBED_BLADE_FILENAME"]
         self.plot_options = plot_options
         self._output_path = os.getcwd() if _output_path is None else _output_path
-        self.convergence_max_dev_rel = _convergence_max_dev_rel
-        self.convergence_mean_dev_rel = _convergence_mean_dev_rel
-        self.uv_optim_method = _uv_optim_method
-        self.dv_optim_method = _dv_optim_method
-        self.max_retries_slsqp = _max_retries_slsqp
+        self.optim_max_iter = _optim_max_iter
+        self.optim_convergence_max_dev_rel = _optim_convergence_max_dev_rel
+        self.optim_convergence_mean_dev_rel = _optim_convergence_mean_dev_rel
+        self.optim_uv_method = _optim_uv_method
+        self.optim_dv_method = _optim_dv_method
+        self.optim_max_retries_slsqp = _optim_max_retries_slsqp
 
         # Create output directory
         # os.system("rm -rf output_matching")
@@ -160,7 +161,6 @@ class BladeMatch:
         self.function_calls = 0
         self.iteration = 0
 
-        self.optimization_max_iter = _optimization_max_iter
 
         # Initialize mismatch indicators
         self.mean_deviation = 0
@@ -358,7 +358,7 @@ class BladeMatch:
                     fun=self.my_objective_function,
                     x0=np.asarray([my_u0[k], my_v0[k]]),
                     args=("uv_parametrization", i),
-                    method=self.uv_optim_method,  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
+                    method=self.optim_uv_method,  # 'SLSQP' proved to be more robust and faster than 'L-BFGS-B'
                     jac=None,
                     # hess=None,
                     # hessp=None,
@@ -419,7 +419,7 @@ class BladeMatch:
             "ftol": 1e-1000,
             # 'gtol': 1e-9,
             # 'eps': np.finfo(np.float64).eps ** (1 / 2),
-            "maxiter": self.optimization_max_iter,
+            "maxiter": self.optim_max_iter,
         }
 
         # Solve the optimization problem
@@ -427,7 +427,7 @@ class BladeMatch:
             fun=self.my_objective_function,
             x0=my_x0,
             args="design_variables",
-            method=self.dv_optim_method,
+            method=self.optim_dv_method,
             jac=None,
             bounds=my_bounds,
             callback=self.callback_function,
@@ -436,23 +436,23 @@ class BladeMatch:
 
         print(self.solution.message)
 
-        if self.dv_optim_method == "SLSQP":
-            while self.solution.status == 4 and bool(self.max_retries_slsqp):
+        if self.optim_dv_method == "SLSQP":
+            while self.solution.status == 4 and bool(self.optim_max_retries_slsqp):
                 print(
-                    f"Retrying to get better result, new itermax is {self.optimization_max_iter+self.iteration}."
+                    f"Retrying to get better result, new itermax is {self.optim_max_iter+self.iteration}."
                 )
                 self.solution = minimize(
                     fun=self.my_objective_function,
                     x0=my_x0,
                     args="design_variables",
-                    method=self.dv_optim_method,
+                    method=self.optim_dv_method,
                     jac=None,
                     bounds=my_bounds,
                     callback=self.callback_function,
                     options=my_options,
                 )
                 print(self.solution.message)
-                self.max_retries_slsqp -= 1
+                self.optim_max_retries_slsqp -= 1
 
         self.coordinates_matched = self.blade_matched.get_surface_coordinates(
             self.u, self.v
@@ -623,8 +623,8 @@ class BladeMatch:
             # TODO this is really bad but i couldn't find a better way
             self.max_deviation_rel = self.max_deviation / self.meanline_length * 100
             if (
-                self.max_deviation_rel < self.convergence_max_dev_rel
-                and self.mean_deviation_rel < self.convergence_mean_dev_rel
+                self.max_deviation_rel < self.optim_convergence_max_dev_rel
+                and self.mean_deviation_rel < self.optim_convergence_mean_dev_rel
             ):
                 return 0
 
