@@ -136,6 +136,9 @@ def Numpize(config):
 
 
 def Scale(IN, scale=1e-3, in_place=False):
+    """
+    Scales the blade according to the scale factor `scale` by changing the relevant parameters.
+    """
     config = IN if in_place else copy.deepcopy(IN)
 
     config["SCALE_FACTOR"] = scale
@@ -146,6 +149,9 @@ def Scale(IN, scale=1e-3, in_place=False):
 
 
 def DeScale(IN, in_place=False):
+    """
+    Scales the blade back to its original scale according to the applied scale factor that is saved in the config file.
+    """
     config = IN if in_place else copy.deepcopy(IN)
 
     for key in meridional_channel_names[:5]:
@@ -156,17 +162,48 @@ def DeScale(IN, in_place=False):
 
 
 def Position(IN, le, te, in_place=False):
+    """
+    Sets the position of the leading and trailing edges of the blade based on the coordinates of the leading
+    edge `le` and the trailing edge `te`.
+
+    Parameters
+    ----------
+    IN : dict
+        Blade parameter dictionary to be fattened.
+    le : numpy.ndarray
+        numpy array of shape (3,) with the 3D coordinates of the leading edge point.
+    te : numpy.ndarray
+        numpy array of shape (3,) with the 3D coordinates of the trailing edge point.
+    
+    in_place : bool, optional
+        Boolean to set whether the dict should be modified in place or not.
+    
+    Returns
+    -------
+    config : dict
+        A new modified config dictionary if `in_place` was false. Else, this returns a copy of the modified input
+        dictionary.
+    """
     config = IN if in_place else copy.deepcopy(IN)
+
     # x, y, z = 2, 0, 1
+
+    y1 = le[1]*np.arcsin(le[0]/le[1]) # because of annular cascade
+    y2 = te[1]*np.arcsin(te[0]/te[1])
+
     config["x_leading"] = np.array([le[2]])
-    config["y_leading"] = np.array([le[1]*np.arcsin(le[0]/le[1])]) # np.array([le[0]])
+    config["y_leading"] = np.array([y1]) # np.array([le[0]])
     config["z_leading"] = np.array([np.linalg.norm((le[0], le[1]))])
     config["x_trailing"] = np.array([te[2]])
     config["z_trailing"] = np.array([np.linalg.norm((te[0], te[1]))])
 
+    config["stagger"] = np.arctan((y2 - y1) / (te[2] - le[2]))
+    config["stagger"] = np.array([np.rad2deg(config["stagger"])])
+
     return config
 
 
+# deprecated method. TODO delete
 def Angles(IN, le, te, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
 
@@ -175,15 +212,29 @@ def Angles(IN, le, te, in_place=False):
 
     config["stagger"] = np.arctan((y2 - y1) / (te[2] - le[2]))
 
-    config["stagger"] = np.rad2deg(config["stagger"])
-
-    for key in ["stagger"]:
-        config[key] = np.array([config[key]])
+    config["stagger"] = np.array([np.rad2deg(config["stagger"])])
 
     return config
 
 
 def Fatten(IN, in_place=False):
+    """
+    \"Fattens\" a blade section in order to help avoiding overlapping of the pressure and suction sides of the
+    prescribed and matched geometry on initialisation of the optimization process.
+
+    Parameters
+    ----------
+    IN : dict
+        Blade parameter dictionary to be fattened.
+    
+    in_place : bool, optional
+        Boolean to set whether the dict should be modified in place or not.
+    
+    Returns
+    -------
+    config : dict
+        The new config dictionary if `in_place` was false. Else, this returns a copy of the modified input dictionary.
+    """
     config = IN if in_place else copy.deepcopy(IN)
 
     for key in ["radius_in", "radius_out"]:
@@ -254,7 +305,8 @@ param_list.extend(blade_section_camber_thickness)
 
 
 def ConcatenateConfig(*configs, verbose=True):
-    """Concatenates config files in order."""
+    """Concatenates config files into one that contains all the parameters. The number of values per parameter is not
+    required to be the same for all the files."""
 
     if len(configs) != 1:
         for config in configs[1:]:
