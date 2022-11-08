@@ -37,14 +37,13 @@ class Blades:
         self.variants[variant_name] = t
 
     def modify_section(
-        self, variant_name, section, scale=1, rotate=0
+        self, variant_name, section, scale=1, rotate=0, smoothing='gaussian'
     ):
-        pedoncule = np.zeros(self.variants[variant_name].x_l.shape)
-        pedoncule[section] = 1
-        _coeff = gaussian_filter(pedoncule, sigma=2)
-        print(_coeff)
-        _coeff = 1/np.amax(_coeff)*_coeff
-        print(_coeff)
+        _coeff = np.zeros(self.variants[variant_name].x_l.shape)
+        _coeff[section] = 1
+        if smoothing == 'gaussian':
+            _coeff = gaussian_filter(_coeff, sigma=2)
+            _coeff = 1/np.amax(_coeff)*_coeff
 
         t = copy.deepcopy(self.variants[variant_name])
         t.x_t = (t.x_t - t.x_l) * (1 + (scale - 1) * _coeff) + t.x_l[
