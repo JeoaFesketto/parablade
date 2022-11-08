@@ -41,7 +41,7 @@ from parablade.CAD_functions import *
 from parablade.interpolation_functions import *
 from parablade.blade_2D_connecting_arcs import Blade2DConnectingArcs
 from parablade.blade_2D_camber_thickness import Blade2DCamberThickness
-
+from parablade.manipulator import BladeManipulator
 
 # ----------------------------------------------------------------------------------------------------------------------#
 # "Cluster mode" imports
@@ -228,16 +228,17 @@ class Blade3D:
         try:
             self.SCALE_FACTOR = IN["SCALE_FACTOR"]
         except:
-            self.SCALE_FACTOR, IN["SCALE_FACTOR"] = 1, 1
+            self.SCALE_FACTOR, self.IN["SCALE_FACTOR"] = 1, 1
 
         self._transformations = _transformations
 
-        self.IN["CHORD"] = np.array(
-            [
-                (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
-                / np.cos(np.deg2rad(self.IN["stagger"][0]))
-            ]
-        )
+        tmp = BladeManipulator(self.IN)
+        tmp.chord = (
+            (tmp.x_t - tmp.x_l)
+                / np.cos(np.deg2rad(tmp.stgr))
+            )
+        self.IN = copy.deepcopy(tmp.IN)
+        del tmp.IN
 
         # Check the number of sections
         if self.N_SECTIONS < 2:
@@ -248,6 +249,7 @@ class Blade3D:
         self.ORIGIN = [
             self.IN["x_leading"][0],
             self.IN["y_leading"][0],
+            self.IN["z_leading"][0]
         ]
 
         try:
@@ -255,17 +257,17 @@ class Blade3D:
         except:
             self.CFG_VERSION = 1
 
-        if self.CFG_VERSION == 2:
+        # if self.CFG_VERSION == 2:
 
-            self.IN["chord"] = np.array(
-                [
-                    (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
-                    / np.cos(np.deg2rad(self.IN["stagger"][0]))
-                ]
-            )
-            self.IN["x_trailing"] = np.cos(np.deg2rad(self.IN["stagger"]))
-            self.IN["x_leading"] -= self.IN["x_leading"][0]
-            self.IN["y_leading"] -= self.IN["y_leading"][0]
+        #     self.IN["chord"] = np.array(
+        #         [
+        #             (self.IN["x_trailing"][0] - self.IN["x_leading"][0])
+        #             / np.cos(np.deg2rad(self.IN["stagger"][0]))
+        #         ]
+        #     )
+        #     self.IN["x_trailing"] = np.cos(np.deg2rad(self.IN["stagger"]))
+        #     self.IN["x_leading"] -= self.IN["x_leading"][0]
+        #     self.IN["y_leading"] -= self.IN["y_leading"][0]
 
         # Initialize design variables
         self.initialize_DVs_names()
@@ -281,6 +283,30 @@ class Blade3D:
             self.N_points = np.shape(UV)[1]
 
         self.make_surface_interpolant(interp_method="bilinear")
+    
+    @property
+    def N_BLADES(self):
+        return int(self.IN['N_BLADES'][0])
+    
+    @N_BLADES.setter
+    def N_BLADES(self, value):
+        self.IN['N_BLADES'][0] = int(value)
+        self._N_BLADES = value
+    
+    @property
+    def ORIGIN(self):
+        return [
+            self.IN["x_leading"][0],
+            self.IN["y_leading"][0],
+            self.IN["z_leading"][0]
+        ]
+    
+    @ORIGIN.setter
+    def ORIGIN(self, value):
+        self.IN["x_leading"][0] = value[0]
+        self.IN["y_leading"][0] = value[1]
+        self.IN["z_leading"][0] = value[2]
+        self._ORIGIN = value
 
     # ---------------------------------------------------------------------------------------------------------------- #
     # Generate the blade geometry and/or sensitivities
@@ -1052,39 +1078,39 @@ class Blade3D:
 
         return shroud_coordinates
 
-    def transform(self, dx=0, dy=0, rotate=0, scale=1):
+    # def transform(self, dx=0, dy=0, rotate=0, scale=1):
 
-        # translation
-        self.IN["x_leading"] += dx
-        self.IN["x_trailing"] += dx
-        self.IN["y_leading"] += dy
+    #     # translation
+    #     self.IN["x_leading"] += dx
+    #     self.IN["x_trailing"] += dx
+    #     self.IN["y_leading"] += dy
 
-        if self._transformations is not None:
-            self._transformations[:3] += [dx, dy, rotate]
-            self._transformations[3] *= scale
-            self.__init__(self.IN, _transformations=self._transformations)
+    #     if self._transformations is not None:
+    #         self._transformations[:3] += [dx, dy, rotate]
+    #         self._transformations[3] *= scale
+    #         self.__init__(self.IN, _transformations=self._transformations)
 
-        else:
-            self._transformations = np.array([dx, dy, rotate, scale], dtype="float32")
-            self.__init__(self.IN, _transformations=self._transformations)
+    #     else:
+    #         self._transformations = np.array([dx, dy, rotate, scale], dtype="float32")
+    #         self.__init__(self.IN, _transformations=self._transformations)
 
-        self.make_blade(rotate=self._transformations[2], scale=self._transformations[3])
+    #     self.make_blade(rotate=self._transformations[2], scale=self._transformations[3])
 
-    def set_origin(self, x, y):
-        self.transform(dx=x - self.IN["x_leading"][0], dy=y - self.IN["y_leading"][0])
+    # def set_origin(self, x, y):
+    #     self.transform(dx=x - self.IN["x_leading"][0], dy=y - self.IN["y_leading"][0])
 
-    def set_pitch(self, beta):
-        """The pitch angle beta is defined as the angle between the x axis
-        and the chord of the blade. Upon creation, beta is equal to the
-        stagger"""
-        self._transformations[2] = 0
+    # def set_pitch(self, beta):
+    #     """The pitch angle beta is defined as the angle between the x axis
+    #     and the chord of the blade. Upon creation, beta is equal to the
+    #     stagger"""
+    #     self._transformations[2] = 0
 
-        self.transform(rotate=beta + self.IN["stagger"][0])
+    #     self.transform(rotate=beta + self.IN["stagger"][0])
 
-    def set_chord(self, chord):
-        if self.CFG_VERSION != 2:
-            raise NotImplementedError(
-                "This method is not implemented for cfg version 1."
-            )
-        self._transformations[3] = 1
-        self.transform(scale=chord / self.IN["chord"][0])
+    # def set_chord(self, chord):
+    #     if self.CFG_VERSION != 2:
+    #         raise NotImplementedError(
+    #             "This method is not implemented for cfg version 1."
+    #         )
+    #     self._transformations[3] = 1
+    #     self.transform(scale=chord / self.IN["chord"][0])
