@@ -1,8 +1,11 @@
 import copy
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
 
 import parablade.common.config as cfg
+from parablade.blade_3D import Blade3D
+from parablade.blade_plot import BladePlot
 from parablade.manipulator import BladeManipulator
 
 # TODO find a better name for this object
@@ -14,8 +17,11 @@ class Blades:
     """
 
     def __init__(self, config_file):
+        self.config_file = config_file
+
         IN = cfg.ReadUserInput(config_file)
         self.variants = {"base": BladeManipulator(IN)}
+
         if self.variants["base"].chord.shape[0] != self.variants["base"].x_l.shape[0]:
             self.variants["base"].chord = (
                 self.variants["base"].x_t - self.variants["base"].x_l
@@ -59,3 +65,22 @@ class Blades:
         )
 
         self.variants[variant_name] = t
+    
+    def get_blade_object(self, variant_name, make_blade=True):
+        blade = Blade3D(self.variants[variant_name].IN)
+        if make_blade:
+            blade.make_blade()
+        return blade
+    
+    def plot_blade(self, variant_name):
+        blade = self.get_blade_object(variant_name)
+        plot = BladePlot(blade)
+        plot.make_python_plot()
+        plt.show()
+
+    def write_blade(self, variant_name, file_name='default'):
+        if file_name == 'default':
+            file_name = f'{self.config_file[-4]}_{variant_name}.cfg'
+        cfg.WriteBladeConfigFile(open(file_name, 'w'), self.variants[variant_name].IN)
+        
+
