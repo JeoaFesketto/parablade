@@ -42,6 +42,10 @@ class Blades:
             self.variants["base"].chord = (
                 self.variants["base"].x_t - self.variants["base"].x_l
             ) / np.cos(np.deg2rad(self.variants["base"].stgr))
+        
+    @property
+    def variants_list(self):
+        return [key for key, _ in self.variants.items()]
 
     def make_variant(self, variant_name, from_variant="base"):
         self.variants[variant_name] = copy.deepcopy(self.variants[from_variant])
