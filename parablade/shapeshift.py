@@ -30,7 +30,6 @@ class Blades:
     Plotting and writing the blade to a specified file.
     >>> o.plot_blade('scale_10')
     >>> o.write_blade('scale_10', 'test.cfg')
-
     """
 
     def __init__(self, config_file):
@@ -60,44 +59,58 @@ class Blades:
         self.variants[variant_name] = t
 
     def modify_section(
-        self, variant_name, section, scale=1, rotate=0, smoothing='gaussian'
+        self, variant_name, section, scale=1, rotate=0, smoothing="gaussian"
     ):
         _coeff = np.zeros(self.variants[variant_name].x_l.shape)
         _coeff[section] = 1
-        if smoothing == 'gaussian':
+        if smoothing == "gaussian":
             _coeff = gaussian_filter(_coeff, sigma=2)
-            _coeff = 1/np.amax(_coeff)*_coeff
+            _coeff = 1 / np.amax(_coeff) * _coeff
 
         t = copy.deepcopy(self.variants[variant_name])
-        t.x_t = (t.x_t - t.x_l) * (1 + (scale - 1) * _coeff) + t.x_l[
-            section
-        ]
-        t.chord *= (1 + (scale - 1) * _coeff)
+        t.x_t = (t.x_t - t.x_l) * (1 + (scale - 1) * _coeff) + t.x_l[section]
+        t.chord *= 1 + (scale - 1) * _coeff
 
         t.stgr += rotate * _coeff
         t.t_i += rotate * _coeff
         t.t_o += rotate * _coeff
-        t.x_t = (
-            np.cos(np.deg2rad(t.stgr)) * t.chord + t.x_l
-        )
+        t.x_t = np.cos(np.deg2rad(t.stgr)) * t.chord + t.x_l
 
         self.variants[variant_name] = t
-    
+
     def get_blade_object(self, variant_name, make_blade=True):
         blade = Blade3D(self.variants[variant_name].IN)
         if make_blade:
             blade.make_blade()
         return blade
-    
+
     def plot_blade(self, variant_name):
         blade = self.get_blade_object(variant_name)
         plot = BladePlot(blade)
         plot.make_python_plot()
         plt.show()
 
-    def write_blade(self, variant_name, file_name='default'):
-        if file_name == 'default':
-            file_name = f'{self.config_file[-4]}_{variant_name}.cfg'
-        cfg.WriteBladeConfigFile(open(file_name, 'w'), self.variants[variant_name].IN)
-        
+    def write_blade(self, variant_name, file_name="default"):
+        if file_name == "default":
+            file_name = f"{self.config_file[-4]}_{variant_name}.cfg"
+        cfg.WriteBladeConfigFile(open(file_name, "w"), self.variants[variant_name].IN)
 
+    def batch_modify(
+        self,
+        section,
+        scale=1,
+        rotate=0,
+        prefix="auto",
+        from_variant="base",
+    ):
+        for s in list(scale):
+            for r in list(rotate):
+                self.make_variant(
+                    f"{prefix}_{section}_{s}_{r}", from_variant=from_variant
+                )
+                self.modify_section(
+                    f"{prefix}_{section}_{s}_{r}",
+                    section,
+                    scale=s,
+                    rotate=r,
+                )
