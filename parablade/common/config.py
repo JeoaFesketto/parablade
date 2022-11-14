@@ -97,6 +97,7 @@ def ReadUserInput(name, section=None):
                 IN[words[0]] = words[1]
             else:
                 IN[words[0]] = words[1::1]
+    infile.close()
     IN["Config_Path"] = name
     if section is None:
         return IN
@@ -114,6 +115,7 @@ def WriteBladeConfigFile(name, IN):
         output = input.replace("[", "")
         output1 = output.replace("]", "")
         name.write("%s=%s\n" % (key, output1))
+    name.close()
 
 
 def ConfigPasser(config):
