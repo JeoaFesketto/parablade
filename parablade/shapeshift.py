@@ -14,6 +14,23 @@ from parablade.manipulator import BladeManipulator
 class Blades:
     """
     Object that stores a parametrized blade's parameters and all its variants.
+
+    Examples
+    --------
+    >>> from parablade.shapeshift import Blades
+
+    Creating an instance of the `Blades` object.
+    >>> o = Blades('../DECAP/source_param_geometries/DGEN_rotor_8/rotor_DGEN_5_parametrized.cfg')
+
+    Creating a new variant and modifying it. Here `4` correspond to the parameter section index to which to apply the
+    modification.
+    >>> o.make_variant('scale_10')
+    >>> o.modify_section('scale_10', 4, scale=1.10)
+
+    Plotting and writing the blade to a specified file.
+    >>> o.plot_blade('scale_10')
+    >>> o.write_blade('scale_10', 'test.cfg')
+
     """
 
     def __init__(self, config_file):

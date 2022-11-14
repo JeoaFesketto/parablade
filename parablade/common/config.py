@@ -169,7 +169,7 @@ def Position(IN, le, te, in_place=False):
     Parameters
     ----------
     IN : dict
-        Blade parameter dictionary to be fattened.
+        Blade parameter dictionary.
     le : numpy.ndarray
         numpy array of shape (3,) with the 3D coordinates of the leading edge point.
     te : numpy.ndarray
@@ -216,7 +216,7 @@ def Angles(IN, le, te, in_place=False):
 
     return config
 
-
+# TODO fix bugs associated with this function.
 def Fatten(IN, in_place=False):
     """
     \"Fattens\" a blade section in order to help avoiding overlapping of the pressure and suction sides of the
