@@ -232,6 +232,8 @@ class Blade3D:
 
         self._transformations = _transformations
 
+        if 'CHORD' not in self.IN:
+            self.IN['CHORD'] = None
         tmp = BladeManipulator(self.IN)
         tmp.chord = (
             (tmp.x_t - tmp.x_l)
