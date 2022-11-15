@@ -15,6 +15,11 @@ class BladeManipulator:
         self.stgr = np.array(self.IN["stagger"])
 
         self.chord = np.array(self.IN["CHORD"])
+
+        for side in ['upper', 'lower']:
+            for i in range(1, 7):
+                self.__setattr__(f't_{side[0]}{i}', np.array(self.IN[f'thickness_{side}_{i}']))
+
     
     def __setitem__(self):
         raise NotImplementedError(
@@ -86,3 +91,88 @@ class BladeManipulator:
     @chord.setter
     def chord(self, value):
         self.IN["CHORD"], self._chord = value.tolist(), value
+
+    @property
+    def t_u1(self):
+        return np.array(self.IN['thickness_upper_1'])
+    @t_u1.setter
+    def t_u1(self, value):
+        self.IN['thickness_upper_1'], self._t_u1 = value.tolist(), value
+    
+    @property
+    def t_u2(self):
+        return np.array(self.IN['thickness_upper_2'])
+    @t_u2.setter
+    def t_u2(self, value):
+        self.IN['thickness_upper_2'], self._t_u2 = value.tolist(), value
+    
+    @property
+    def t_u3(self):
+        return np.array(self.IN['thickness_upper_3'])
+    @t_u3.setter
+    def t_u3(self, value):
+        self.IN['thickness_upper_3'], self._t_u3 = value.tolist(), value
+    
+    @property
+    def t_u4(self):
+        return np.array(self.IN['thickness_upper_4'])
+    @t_u4.setter
+    def t_u4(self, value):
+        self.IN['thickness_upper_4'], self._t_u4 = value.tolist(), value
+    
+    @property
+    def t_u5(self):
+        return np.array(self.IN['thickness_upper_5'])
+    @t_u5.setter
+    def t_u5(self, value):
+        self.IN['thickness_upper_5'], self._t_u5 = value.tolist(), value
+
+    @property
+    def t_u6(self):
+        return np.array(self.IN['thickness_upper_6'])
+    @t_u6.setter
+    def t_u6(self, value):
+        self.IN['thickness_upper_6'], self._t_u6 = value.tolist(), value
+    
+    @property
+    def t_l1(self):
+        return np.array(self.IN['thickness_lower_1'])
+    @t_l1.setter
+    def t_l1(self, value):
+        self.IN['thickness_lower_1'], self._t_l1 = value.tolist(), value
+    
+    @property
+    def t_l2(self):
+        return np.array(self.IN['thickness_lower_2'])
+    @t_l2.setter
+    def t_l2(self, value):
+        self.IN['thickness_lower_2'], self._t_l2 = value.tolist(), value
+    
+    @property
+    def t_l3(self):
+        return np.array(self.IN['thickness_lower_3'])
+    @t_l3.setter
+    def t_l3(self, value):
+        self.IN['thickness_lower_3'], self._t_l3 = value.tolist(), value
+    
+    @property
+    def t_l4(self):
+        return np.array(self.IN['thickness_lower_4'])
+    @t_l4.setter
+    def t_l4(self, value):
+        self.IN['thickness_lower_4'], self._t_l4 = value.tolist(), value
+    
+    @property
+    def t_l5(self):
+        return np.array(self.IN['thickness_lower_5'])
+    @t_l5.setter
+    def t_l5(self, value):
+        self.IN['thickness_lower_5'], self._t_l5 = value.tolist(), value
+    
+    @property
+    def t_l6(self):
+        return np.array(self.IN['thickness_lower_6'])
+    @t_l6.setter
+    def t_l6(self, value):
+        self.IN['thickness_lower_6'], self._t_l6 = value.tolist(), value
+    
