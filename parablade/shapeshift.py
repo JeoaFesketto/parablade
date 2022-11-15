@@ -42,7 +42,7 @@ class Blades:
             self.variants["base"].chord = (
                 self.variants["base"].x_t - self.variants["base"].x_l
             ) / np.cos(np.deg2rad(self.variants["base"].stgr))
-        
+
     @property
     def variants_list(self):
         return [key for key, _ in self.variants.items()]
@@ -81,6 +81,35 @@ class Blades:
         t.x_t = np.cos(np.deg2rad(t.stgr)) * t.chord + t.x_l
 
         self.variants[variant_name] = t
+
+    def bump_blade(
+        self, variant_name, 
+        upper_coefficient_matrix = None, 
+        lower_coefficient_matrix = None
+    ):
+        t = copy.deepcopy(self.variants[variant_name])
+
+        if upper_coefficient_matrix is not None:
+            t.t_u1 *= upper_coefficient_matrix[0, :]
+            t.t_u2 *= upper_coefficient_matrix[1, :]
+            t.t_u3 *= upper_coefficient_matrix[2, :]
+            t.t_u4 *= upper_coefficient_matrix[3, :]
+            t.t_u5 *= upper_coefficient_matrix[4, :]
+            t.t_u6 *= upper_coefficient_matrix[5, :]
+
+        if lower_coefficient_matrix is not None:
+            t.t_l1 *= lower_coefficient_matrix[0, :]
+            t.t_l2 *= lower_coefficient_matrix[1, :]
+            t.t_l3 *= lower_coefficient_matrix[2, :]
+            t.t_l4 *= lower_coefficient_matrix[3, :]
+            t.t_l5 *= lower_coefficient_matrix[4, :]
+            t.t_l6 *= lower_coefficient_matrix[5, :]
+
+        self.variants[variant_name] = t
+
+    # def gaussian_coefficient_matrix(self, ):
+    #     _coeff = np.zeros((12, self.variants[variant_name].x_l.shape))
+    #     _coeff[section, thickness_point] = coefficient
 
     def get_blade_object(self, variant_name, make_blade=True):
         blade = Blade3D(self.variants[variant_name].IN)
