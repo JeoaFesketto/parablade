@@ -87,6 +87,28 @@ class Blades:
         upper_coefficient_matrix = None, 
         lower_coefficient_matrix = None
     ):
+        """
+        Examples
+        --------
+        import libraries:
+        >>> from scipy.ndimage import gaussian_filter
+        >>> import numpy as np
+        >>> from parablade.shapeshift import Blades
+
+        create blade object:
+        >>> o = Blades('container_DGEN_14/DGEN_14/rotor_DGEN_5_parametrized.cfg')
+
+        make array to be used as filter:
+        >>> a = np.zeros((6, o.variants['base'].x_l.shape[0]))
+        >>> a[3, 4] = 100
+        >>> a = gaussian_filter(a, sigma=2) + 1
+
+        modify the initially created blade. This will make a bump on the upper side of the blade.
+        a second matrix or the same can be added for the lower side of the blade:
+        >>> o.make_variant('test')
+        >>> o.bump_blade('test', a)
+        """
+
         t = copy.deepcopy(self.variants[variant_name])
 
         if upper_coefficient_matrix is not None:
@@ -117,12 +139,6 @@ class Blades:
             blade.make_blade()
         return blade
 
-    def plot_blade(self, variant_name):
-        blade = self.get_blade_object(variant_name)
-        plot = BladePlot(blade)
-        plot.make_python_plot()
-        plt.show()
-
     def write_blade(self, variant_name, file_name="default"):
         if file_name == "default":
             file_name = f"{self.config_file[-4]}_{variant_name}.cfg"
@@ -147,3 +163,15 @@ class Blades:
                     scale=s,
                     rotate=r,
                 )
+
+    def plot_variant(self, variant_name):
+        blade = self.get_blade_object(variant_name)
+        plot = BladePlot(blade)
+        plot.make_python_plot()
+        plt.show()
+ 
+    def plot_variant_section(self, variant_name, section=0):
+        blade = self.get_blade_object(variant_name)
+        plot = BladePlot(blade)
+        plot.section_plot(section)
+        plt.show()

@@ -224,6 +224,64 @@ class BladePlot:
     # ---------------------------------------------------------------------------------------------------------------- #
     # MATPLOTLIB plotting functions
     # ---------------------------------------------------------------------------------------------------------------- #
+    def section_plot(self, indeces):
+
+        if not isinstance(indeces, list):
+            indeces = [indeces]
+
+        x = self.surface_coordinates[0, :]
+        y = self.surface_coordinates[1, :]
+
+        x = np.array(np.split(x, x.shape[0]//500))[indeces]
+        y = np.array(np.split(y, y.shape[0]//500))[indeces]
+
+        # Plot the prescribed and the fitted blades
+        self.fig_2D, self.ax_2D = plt.subplots(3, 3, figsize=(8, 8), squeeze=False)
+        self.ax_2D = self.ax_2D.flatten()
+
+        for i in range(x.shape[0]):
+
+            # self.ax_2D[i].set_xlabel("$x$ axis", fontsize=12, color="k", labelpad=12)
+            # self.ax_2D[i].set_ylabel("$y$ axis", fontsize=12, color="k", labelpad=12)
+            # self.ax_2D.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
+            # self.ax_2D.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.2f'))
+            # for t in self.ax_2D[i].xaxis.get_major_ticks():
+            #     t.label.set_fontsize(5)
+            # for t in self.ax_2D[i].yaxis.get_major_ticks():
+            #     t.label.set_fontsize(5)
+
+        # Plot prescribed coordinates
+            (self.points_2D,) = self.ax_2D[i].plot(x[i], y[i])
+            self.points_2D.set_marker(" ")
+            self.points_2D.set_markersize(2)
+            self.points_2D.set_markeredgewidth(0.25)
+            self.points_2D.set_markeredgecolor("k")
+            self.points_2D.set_markerfacecolor("w")
+            self.points_2D.set_linestyle("-")
+            self.points_2D.set_color("k")
+            self.points_2D.set_linewidth(0.50)
+
+            # Set the aspect ratio of the data
+            self.ax_2D[i].set_aspect(1.0)
+
+            # Set axes aspect ratio
+            if i == 0:
+                x_min, x_max = self.ax_2D[0].get_xlim()
+                y_min, y_max = self.ax_2D[0].get_ylim()
+                x_mid = (x_min + x_max) / 2
+                y_mid = (y_min + y_max) / 2
+                L = np.max((x_max - x_min, y_max - y_min)) / 2
+
+            self.ax_2D[i].set_xlim([x_mid - 1.25 * L, x_mid + 1.25 * L])
+            self.ax_2D[i].set_ylim([y_mid - 1.25 * L, y_mid + 1.25 * L])
+
+            self.ax_2D[i].label_outer()
+        for i in range(i+1, self.ax_2D.shape[0]):
+            self.fig_2D.delaxes(self.ax_2D[i])
+
+        # Adjust pad
+        plt.tight_layout(pad=2.0, w_pad=None, h_pad=None)
+
     def make_plot_matplotlib_2D(self):
 
         """Create 2D Matplotlib line plot"""
