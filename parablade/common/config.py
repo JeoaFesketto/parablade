@@ -188,35 +188,22 @@ def Position(IN, le, te, in_place=False):
     """
     config = IN if in_place else copy.deepcopy(IN)
 
-    # x, y, z = 2, 0, 1
+    # x, y, z = 0, 1, 2
 
-    y1 = le[1]*np.arcsin(le[0]/le[1]) # because of annular cascade
-    y2 = te[1]*np.arcsin(te[0]/te[1])
+    y1 = le[2]*np.arcsin(le[1]/le[2]) # because of annular cascade
+    y2 = te[2]*np.arcsin(te[1]/te[2])
 
-    config["x_leading"] = np.array([le[2]])
+    config["x_leading"] = np.array([le[0]])
     config["y_leading"] = np.array([y1]) # np.array([le[0]])
-    config["z_leading"] = np.array([np.linalg.norm((le[0], le[1]))])
-    config["x_trailing"] = np.array([te[2]])
-    config["z_trailing"] = np.array([np.linalg.norm((te[0], te[1]))])
+    config["z_leading"] = np.array([np.linalg.norm((le[1], le[2]))])
+    config["x_trailing"] = np.array([te[0]])
+    config["z_trailing"] = np.array([np.linalg.norm((te[1], te[2]))])
 
-    config["stagger"] = np.arctan((y2 - y1) / (te[2] - le[2]))
+    config["stagger"] = np.arctan((y2 - y1) / (te[0] - le[0]))
     config["stagger"] = np.array([np.rad2deg(config["stagger"])])
 
     return config
 
-
-# deprecated method. TODO delete
-def Angles(IN, le, te, in_place=False):
-    config = IN if in_place else copy.deepcopy(IN)
-
-    y1 = le[1]*np.arcsin(le[0]/le[1]) # because of annular cascade
-    y2 = te[1]*np.arcsin(te[0]/te[1])
-
-    config["stagger"] = np.arctan((y2 - y1) / (te[2] - le[2]))
-
-    config["stagger"] = np.array([np.rad2deg(config["stagger"])])
-
-    return config
 
 # TODO fix bugs associated with this function.
 def Fatten(IN, in_place=False):
