@@ -189,15 +189,21 @@ def Position(IN, le, te, in_place=False):
     config = IN if in_place else copy.deepcopy(IN)
 
     # x, y, z = 0, 1, 2
+    sign_le = np.where(le[2]<0, -1, 1)
+    sign_te = np.where(te[2]<0, -1, 1)
 
-    y1 = le[2]*np.arcsin(le[1]/le[2]) # because of annular cascade
-    y2 = te[2]*np.arcsin(te[1]/te[2])
+
+
+    z1 = sign_le*np.linalg.norm([le[1], le[2]])
+    z2 = sign_te*np.linalg.norm([te[1], te[2]])
+    y1 = z1*le[1]/le[2] 
+    y2 = z2*te[1]/te[2] 
 
     config["x_leading"] = np.array([le[0]])
-    config["y_leading"] = np.array([y1]) # np.array([le[0]])
-    config["z_leading"] = np.array([np.linalg.norm((le[1], le[2]))])
+    config["y_leading"] = np.array([y1]) 
+    config["z_leading"] = np.array([z1])
     config["x_trailing"] = np.array([te[0]])
-    config["z_trailing"] = np.array([np.linalg.norm((te[1], te[2]))])
+    config["z_trailing"] = np.array([z2])
 
     config["stagger"] = np.arctan((y2 - y1) / (te[0] - le[0]))
     config["stagger"] = np.array([np.rad2deg(config["stagger"])])
