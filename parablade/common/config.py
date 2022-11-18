@@ -193,20 +193,33 @@ def Position(IN, le, te, in_place=False):
     sign_te = np.where(te[2]<0, -1, 1)
 
 
+    # z1 = le[2]*np.arccos(le[1]/le[2]) # because of annular cascade
+    # z2 = te[2]*np.arccos(te[1]/te[2])
+    # y1 = z1*np.arcsin(le[1]/z1) # because of annular cascade
+    # y2 = z2*np.arcsin(te[1]/z2)
 
     z1 = sign_le*np.linalg.norm([le[1], le[2]])
     z2 = sign_te*np.linalg.norm([te[1], te[2]])
-    y1 = z1*le[1]/le[2] 
-    y2 = z2*te[1]/te[2] 
+    # y1 = z1*le[1]/le[2] 
+    # y2 = z2*te[1]/te[2] 
+    y1 = 2*(z1*np.arctan((z1-le[2])/le[1]))
+    y2 = 2*(z2*np.arctan((z2-te[2])/te[1]))
+
+    config["stagger"] = np.arctan((y2 - y1) / (te[0] - le[0]))
+    # config["stagger"] = np.arctan((te[1]-le[1]) / (te[0] - le[0]))
+    # print(np.arctan((y2 - y1) / (te[0] - le[0])))
+    # print(np.arctan((te[1]-le[1]) / (te[0] - le[0])))
+    config["stagger"] = np.array([np.rad2deg(config["stagger"])])
+
 
     config["x_leading"] = np.array([le[0]])
+    # config["y_leading"] = np.array([le[1]])
+    # config["z_leading"] = np.array([le[2]])
     config["y_leading"] = np.array([y1]) 
     config["z_leading"] = np.array([z1])
     config["x_trailing"] = np.array([te[0]])
+    # config["z_trailing"] = np.array([te[2]])
     config["z_trailing"] = np.array([z2])
-
-    config["stagger"] = np.arctan((y2 - y1) / (te[0] - le[0]))
-    config["stagger"] = np.array([np.rad2deg(config["stagger"])])
 
     return config
 
