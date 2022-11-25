@@ -713,11 +713,17 @@ class Blade3D:
         m_func = lambda u: np.concatenate((x_func(u), z_func(u)), axis=0)
 
         # Compute the arc length of the meridional channel (streamline)
-        arc_length = get_arc_length(m_func, 0.0 + 1e-6, 1.0 - 1e-6)
+        # arc_length = get_arc_length(m_func, 0.0 + 1e-6, 1.0 - 1e-6)
 
         # Compute the y-coordinates of the current blade section by scaling the unitary blade
-        y = self.DVs_functions["y_leading"](v_section) + y * arc_length
+        phi = self.IN['stagger'][0]
+        x1 = self.IN['x_leading'][0]
+        x2 = self.IN['x_trailing'][0]
+        y1 = self.IN['y_leading'][0]
+        real_y_trailing = np.tan(np.deg2rad(phi))*(x2-x1)+y1
 
+        y = y1 + y * ((real_y_trailing-y1)/y[250])
+        # y = self.DVs_functions["y_leading"](v_section) + y * arc_length
         # Transform the blade coordinates to cartesian coordinates
         if self.CASCADE_TYPE == "LINEAR":
             X = x
