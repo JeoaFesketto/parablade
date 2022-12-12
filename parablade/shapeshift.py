@@ -34,6 +34,7 @@ class Blades:
 
     def __init__(self, config_file):
         self.config_file = config_file
+        self.config_name = config_file.split('/')[-1].split('.')[0]
 
         IN = cfg.ReadUserInput(config_file)
         self.variants = {"base": BladeManipulator(IN)}
@@ -141,7 +142,7 @@ class Blades:
 
     def write_blade(self, variant_name, file_name="default"):
         if file_name == "default":
-            file_name = f"{self.config_file[-4]}_{variant_name}.cfg"
+            file_name = f"{self.config_name}_{variant_name}.cfg"
         cfg.WriteBladeConfigFile(open(file_name, "w"), self.variants[variant_name].IN)
 
     def batch_modify(
@@ -175,3 +176,49 @@ class Blades:
         plot = BladePlot(blade)
         plot.section_plot(section)
         plt.show()
+    
+    def flipx_variant(self, variant_name):
+        temp = self.variants[variant_name]
+        temp.stgr *= -1
+        temp.t_i *= -1
+        temp.t_o *= -1
+        temp.y_l *= -1
+
+        upper_thicknesses = [f't_u{i+1}' for i in range(6)]
+        lower_thicknesses = [f't_l{i+1}' for i in range(6)]
+
+        for u_t, l_t in zip(upper_thicknesses, lower_thicknesses):
+            temp_thickness = getattr(temp, u_t)
+            setattr(temp, u_t, getattr(temp, l_t))
+            setattr(temp, l_t, temp_thickness)
+
+
+
+    def mix_cfgs(self, variant_name, cfg_file, proportion=50):
+        """
+        Method to mix two cfg files together to obtain an intermediate one, based on the proportion set. 0 returns the initial file, 100 returns the new one. 
+        """
+        new_IN =  BladeManipulator(cfg.ReadUserInput(cfg_file))
+        proportion /= 100
+
+        upper_thicknesses = [f't_u{i+1}' for i in range(6)]
+        lower_thicknesses = [f't_l{i+1}' for i in range(6)]
+
+        new_name = f"merged_{variant_name}_{cfg_file.split('/')[-1].split('.')[0]}",
+        self.make_variant(
+            new_name,
+            from_variant=variant_name,
+        )
+
+        temp = self.variants[new_name]
+
+        for attribute in ['stgr', 't_i', 't_o']+upper_thicknesses+lower_thicknesses:
+            setattr(
+                temp, 
+                attribute,
+                (1-proportion)*getattr(temp, attribute)+(proportion)*getattr(new_IN, attribute)
+                )
+        
+        # returns the name of the new variant for convenience.
+        return new_name
+
