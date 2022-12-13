@@ -191,7 +191,14 @@ class Blades:
             temp_thickness = getattr(temp, u_t)
             setattr(temp, u_t, getattr(temp, l_t))
             setattr(temp, l_t, temp_thickness)
+    
+    def flipz_variant(self, variant_name):
+        temp = self.variants[variant_name]
+        temp.z_l *= -1
+        temp.z_t *= -1
 
+    def delete(self, variant_name):
+        del self.variants[variant_name]
 
 
     def mix_cfgs(self, variant_name, cfg_file, proportion=50):
