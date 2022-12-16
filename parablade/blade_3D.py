@@ -313,7 +313,7 @@ class Blade3D:
     # ---------------------------------------------------------------------------------------------------------------- #
     # Generate the blade geometry and/or sensitivities
     # ---------------------------------------------------------------------------------------------------------------- #
-    def make_blade(self, rotate=0, scale=1):
+    def make_blade(self):
 
         """Compute the blade surface coordinates and the sensitivity with respect to the design variables"""
 
@@ -323,40 +323,40 @@ class Blade3D:
             # self.make_surface_interpolant(interp_method='bilinear')   # TODO bicubic interpolation is not ready
             self.surface_coordinates = self.get_surface_coordinates(self.u, self.v)
 
-            if (rotate != 0 or scale != 1) and self.CFG_VERSION != 2:
-                raise NotImplementedError(
-                    "Version 2 of the config file must be used to transform the blade"
-                )
+            # if (rotate != 0 or scale != 1) and self.CFG_VERSION != 2:
+            #     raise NotImplementedError(
+            #         "Version 2 of the config file must be used to transform the blade"
+            #     )
 
-            if self.CFG_VERSION == 2:
-                self.surface_coordinates = (
-                    self.surface_coordinates * self.IN["chord"][0] * scale
-                )
+            # if self.CFG_VERSION == 2:
+            #     self.surface_coordinates = (
+            #         self.surface_coordinates * self.IN["chord"][0] * scale
+            #     )
 
-                if rotate != 0:
-                    theta = np.deg2rad(rotate)
+            #     if rotate != 0:
+            #         theta = np.deg2rad(rotate)
 
-                    rotation_matrix = np.array(
-                        [
-                            [np.cos(theta), -np.sin(theta), 0],
-                            [np.sin(theta), np.cos(theta), 0],
-                            [0, 0, 1],
-                        ]
-                    )
+            #         rotation_matrix = np.array(
+            #             [
+            #                 [np.cos(theta), -np.sin(theta), 0],
+            #                 [np.sin(theta), np.cos(theta), 0],
+            #                 [0, 0, 1],
+            #             ]
+            #         )
 
-                    self.surface_coordinates = np.tensordot(
-                        self.surface_coordinates.T, rotation_matrix, axes=1
-                    ).T
+            #         self.surface_coordinates = np.tensordot(
+            #             self.surface_coordinates.T, rotation_matrix, axes=1
+            #         ).T
 
-                self.surface_coordinates[0] += self.ORIGIN[0]
-                self.surface_coordinates[1] += self.ORIGIN[1]
+            #     self.surface_coordinates[0] += self.ORIGIN[0]
+            #     self.surface_coordinates[1] += self.ORIGIN[1]
 
-                self.IN["x_leading"] += self.ORIGIN[0]
-                self.IN["y_leading"] += self.ORIGIN[1]
-                self.IN["x_trailing"] = (
-                    self.IN["chord"][0] * np.cos(np.deg2rad(self.IN["stagger"]))
-                    + self.ORIGIN[0]
-                )
+            #     self.IN["x_leading"] += self.ORIGIN[0]
+            #     self.IN["y_leading"] += self.ORIGIN[1]
+            #     self.IN["x_trailing"] = (
+            #         self.IN["chord"][0] * np.cos(np.deg2rad(self.IN["stagger"]))
+            #         + self.ORIGIN[0]
+            #     )
 
             self.make_hub_surface()
             self.make_shroud_surface()
