@@ -34,7 +34,7 @@ class Blades:
 
     def __init__(self, config_file):
         self.config_file = config_file
-        self.config_name = config_file.split('/')[-1].split('.')[0]
+        self.config_name = config_file.split("/")[-1].split(".")[0]
 
         IN = cfg.ReadUserInput(config_file)
         self.variants = {"base": BladeManipulator(IN)}
@@ -50,6 +50,15 @@ class Blades:
 
     def make_variant(self, variant_name, from_variant="base"):
         self.variants[variant_name] = copy.deepcopy(self.variants[from_variant])
+    
+    def make_variant_from_cfg(self, variant_name, cfg_file):
+        IN = cfg.ReadUserInput(cfg_file)
+        self.variants[variant_name] = BladeManipulator(IN)
+        
+        if self.variants[variant_name].chord.shape[0] != self.variants[variant_name].x_l.shape[0]:
+            self.variants[variant_name].chord = (
+                self.variants[variant_name].x_t - self.variants[variant_name].x_l
+            ) / np.cos(np.deg2rad(self.variants[variant_name].stgr))
 
     def modify_blade(self, variant_name, scale=1, rotate=0):
         t = copy.deepcopy(self.variants[variant_name])
@@ -84,9 +93,7 @@ class Blades:
         self.variants[variant_name] = t
 
     def bump_blade(
-        self, variant_name, 
-        upper_coefficient_matrix = None, 
-        lower_coefficient_matrix = None
+        self, variant_name, upper_coefficient_matrix=None, lower_coefficient_matrix=None
     ):
         """
         Examples
@@ -170,13 +177,13 @@ class Blades:
         plot = BladePlot(blade)
         plot.make_python_plot()
         plt.show()
- 
+
     def plot_variant_section(self, variant_name, section=0):
         blade = self.get_blade_object(variant_name)
         plot = BladePlot(blade)
         plot.section_plot(section)
         plt.show()
-    
+
     def flipx_variant(self, variant_name):
         temp = self.variants[variant_name]
         temp.stgr *= -1
@@ -184,14 +191,14 @@ class Blades:
         temp.t_o *= -1
         temp.y_l *= -1
 
-        upper_thicknesses = [f't_u{i+1}' for i in range(6)]
-        lower_thicknesses = [f't_l{i+1}' for i in range(6)]
+        upper_thicknesses = [f"t_u{i+1}" for i in range(6)]
+        lower_thicknesses = [f"t_l{i+1}" for i in range(6)]
 
         for u_t, l_t in zip(upper_thicknesses, lower_thicknesses):
             temp_thickness = getattr(temp, u_t)
             setattr(temp, u_t, getattr(temp, l_t))
             setattr(temp, l_t, temp_thickness)
-    
+
     def flipz_variant(self, variant_name):
         temp = self.variants[variant_name]
         temp.z_l *= -1
@@ -200,18 +207,19 @@ class Blades:
     def delete(self, variant_name):
         del self.variants[variant_name]
 
-
-    def mix_cfgs(self, variant_name, cfg_file, proportion=50):
+    def mix_cfgs(self, variant_name, cfg_file, proportion=50, new_name=None):
         """
-        Method to mix two cfg files together to obtain an intermediate one, based on the proportion set. 0 returns the initial file, 100 returns the new one. 
+        Method to mix two cfg files together to obtain an intermediate one, based on the proportion set. 0 returns the initial file, 100 returns the new one.
         """
-        new_IN =  BladeManipulator(cfg.ReadUserInput(cfg_file))
+        new_IN = BladeManipulator(cfg.ReadUserInput(cfg_file))
         proportion /= 100
 
-        upper_thicknesses = [f't_u{i+1}' for i in range(6)]
-        lower_thicknesses = [f't_l{i+1}' for i in range(6)]
+        upper_thicknesses = [f"t_u{i+1}" for i in range(6)]
+        lower_thicknesses = [f"t_l{i+1}" for i in range(6)]
 
-        new_name = f"merged_{variant_name}_{cfg_file.split('/')[-1].split('.')[0]}",
+        if new_name is None:
+            new_name = f"merged_{variant_name}_{cfg_file.split('/')[-1].split('.')[0]}"
+
         self.make_variant(
             new_name,
             from_variant=variant_name,
@@ -219,13 +227,49 @@ class Blades:
 
         temp = self.variants[new_name]
 
-        for attribute in ['stgr', 't_i', 't_o']+upper_thicknesses+lower_thicknesses:
+        for attribute in ["stgr", "t_i", "t_o"] + upper_thicknesses + lower_thicknesses:
             setattr(
-                temp, 
+                temp,
                 attribute,
-                (1-proportion)*getattr(temp, attribute)+(proportion)*getattr(new_IN, attribute)
-                )
-        
+                (1 - proportion) * getattr(temp, attribute)
+                + (proportion) * getattr(new_IN, attribute),
+            )
+
         # returns the name of the new variant for convenience.
         return new_name
 
+    def mix_variants(
+        self, variant_name, variants_list, coefficient_list, new_name=None
+    ):
+        """
+        Method to mix N variants together to obtain an intermediate one, based on the proportion set. 0 returns the initial variant, 100 returns the new one.
+        """
+
+        upper_thicknesses = [f"t_u{i+1}" for i in range(6)]
+        lower_thicknesses = [f"t_l{i+1}" for i in range(6)]
+
+        if new_name is None:
+            new_name = f"merged_variants"
+
+        self.make_variant(
+            new_name,
+            from_variant=variant_name,
+        )
+
+        temp = self.variants[new_name]
+
+        coefficient_list = np.array(coefficient_list)
+        total = np.sum(coefficient_list)
+        coefficient_list = coefficient_list/total
+
+        for attribute in ["stgr", "t_i", "t_o"] + upper_thicknesses + lower_thicknesses:
+            values = [
+                coefficient_list[i] * getattr(self.variants[variant], attribute)
+                for i, variant in enumerate([variant_name] + variants_list)
+            ]
+            new_value = np.sum(np.array(values), 0)
+
+            setattr(temp, attribute, new_value)
+
+        # returns the name of the new variant for convenience.
+        return new_name
