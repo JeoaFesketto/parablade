@@ -44,7 +44,6 @@ from parablade.blade_3D import Blade3D
 try:
     import matplotlib as mpl
     import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
 except:
     pass
 
