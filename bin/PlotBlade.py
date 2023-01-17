@@ -61,7 +61,7 @@ except:
     INFile = DIR + "blade.cfg"  # Default File name
 
 try:
-    IN = ReadUserInput(INFile)
+    IN = read_user_input(INFile)
 except:
     raise Exception(
         "\n\n\n"

@@ -20,18 +20,11 @@
 #                                                                                             |
 # =============================================================================================#
 
-from contextlib import redirect_stderr
-import enum
 import numpy as np
 import re
-import pdb
 import copy
-import cmath
 
-# TODO change name convention, functions should be all lower case with underscores for readibility if necesary
-# TODO no abbreviations!
-def WriteConfigFile(OUTFile, IN):
-    # pdb.set_trace()
+def write_config_file(OUTFile, IN):
     for key in IN:
         input = str(IN[key])
         output = input.replace("[", "")
@@ -39,11 +32,10 @@ def WriteConfigFile(OUTFile, IN):
         try:
             OUTFile.write("%s=%f\n" % (key, np.real(float(output1))))
         except:
-            # pdb.set_trace()
             OUTFile.write("%s=%s\n" % (key, output1))
 
 
-def SU2_Config_change(name, dest, par, vals):
+def su2_config_change(name, dest, par, vals):
     """
     Changes parameter for SU2 configuration file.
     Usage SU2_Config_change(<infile abs dest>,<outfile abs dest>,[<parameter to be changed seperated by ,>],[<values separated by commas])>])
@@ -67,7 +59,7 @@ def SU2_Config_change(name, dest, par, vals):
     # outfile.write('DV_KIND= HICKS_HENNE\nDV_PARAM= ( 0.0, 0.05)\nDEFINITION_DV= ( 1 , 1.0 | wall1,wall2  | 0.0 , 0.05  )\nNUMBER_PART= 8\nWRT_CSV_SOL= YES\nGRADIENT_METHOD= DISCRETE_ADJOINT\nDV_MARKER= ( WING )\nDV_VALUE= 0.001')
 
 
-def WriteSU2ConfigFile(ConfigName, TYPE):
+def write_su2_config_file(ConfigName, TYPE):
     with open(ConfigName, "r") as myfile:
         if TYPE == ("SU2_CFD_AD" or "SU2_DOT_AD"):
             data = myfile.read().replace(
@@ -79,7 +71,7 @@ def WriteSU2ConfigFile(ConfigName, TYPE):
             pass
 
 
-def ReadUserInput(name, section=None):
+def read_user_input(name, section=None):
     IN = {}
     infile = open(name, "r")
     for line in infile:
@@ -109,7 +101,7 @@ def ReadUserInput(name, section=None):
         return IN
 
 
-def WriteBladeConfigFile(name, IN):
+def write_blade_config_file(name, IN):
     for key in IN:
         input = str(list(IN[key])) if type(IN[key]) == np.ndarray else str(IN[key])
         output = input.replace("[", "")
@@ -118,10 +110,10 @@ def WriteBladeConfigFile(name, IN):
     name.close()
 
 
-def ConfigPasser(config):
+def config_passer(config):
     """Takes in a path to a config file or directly the parsed dict and returns the parsed dict"""
     if type(config) == str:
-        return ReadUserInput(config)
+        return read_user_input(config)
     elif type(config) == dict:
         return config
     else:
@@ -130,40 +122,40 @@ def ConfigPasser(config):
         )
 
 
-def Numpize(config):
+def numpize(config):
     if type(config["x_leading"]) is not np.ndarray:
-        for key in param_list:
+        for key in PARAMETER_LIST:
             config[key] = np.array(config[key])
     return config
 
 
-def Scale(IN, scale=1e-3, in_place=False):
+def scale(IN, scale=1e-3, in_place=False):
     """
     Scales the blade according to the scale factor `scale` by changing the relevant parameters.
     """
     config = IN if in_place else copy.deepcopy(IN)
 
     config["SCALE_FACTOR"] = scale
-    for key in meridional_channel_names[:5]:
+    for key in MERIDIONAL_CHANNEL_NAMES[:5]:
         config[key] = np.array(config[key]) * config["SCALE_FACTOR"]
 
     return config
 
 
-def DeScale(IN, in_place=False):
+def descale(IN, in_place=False):
     """
     Scales the blade back to its original scale according to the applied scale factor that is saved in the config file.
     """
     config = IN if in_place else copy.deepcopy(IN)
 
-    for key in meridional_channel_names[:5]:
+    for key in MERIDIONAL_CHANNEL_NAMES[:5]:
         config[key] = config[key] / config["SCALE_FACTOR"]
     config["SCALE_FACTOR"] = 1
 
     return config
 
 
-def Position(IN, le, te, in_place=False):
+def reposition(IN, le, te, in_place=False):
     """
     Sets the position of the leading and trailing edges of the blade based on the coordinates of the leading
     edge `le` and the trailing edge `te`.
@@ -221,7 +213,7 @@ def Position(IN, le, te, in_place=False):
 
 
 # TODO fix bugs associated with this function.
-def Fatten(IN, in_place=False):
+def fatten(IN, in_place=False):
     """
     \"Fattens\" a blade section in order to help avoiding overlapping of the pressure and suction sides of the
     prescribed and matched geometry on initialisation of the optimization process.
@@ -243,33 +235,12 @@ def Fatten(IN, in_place=False):
 
     for key in ["radius_in", "radius_out"]:
         config[key] = np.array([0.01])
-    for key in blade_section_camber_thickness[7:]:
+    for key in BLADE_SECTION_CAMBER_THICKNESS[7:]:
         config[key] = np.array(config[key]) * 2
 
     return config
 
-
-# NOTE Likely not needed anymore
-
-# def ConfigCorrector(input_file, output_file):
-#     with open(input_file, 'r') as f:
-#         data = f.readlines()
-#     for i, elem in enumerate(data):
-#         data[i] = elem.lstrip()
-#         data[i] = ' '.join(elem.split())
-
-#     for i, line in enumerate(data):
-#         if '=' not in line:
-#             data[i] = data[i]+' '
-#         else:
-#             data[i] = '\n\n'+data[i]+' '
-#         data[i] = data[i].replace('= ', '=').replace(' ', ', ')
-#     data = ''.join(data)
-#     data = data.replace(', \n', '\n')
-#     with open(output_file, 'w') as f:
-#         f.write(data)
-
-blade_section_camber_thickness = [
+BLADE_SECTION_CAMBER_THICKNESS = [
     "stagger",
     "theta_in",
     "theta_out",
@@ -291,7 +262,7 @@ blade_section_camber_thickness = [
     "thickness_lower_6",
 ]
 
-meridional_channel_names = [
+MERIDIONAL_CHANNEL_NAMES = [
     "x_leading",
     "y_leading",
     "z_leading",
@@ -303,23 +274,23 @@ meridional_channel_names = [
     "z_shroud",
 ]
 
-param_list = meridional_channel_names[:5]
+PARAMETER_LIST = MERIDIONAL_CHANNEL_NAMES[:5]
 
-param_list.extend(blade_section_camber_thickness)
+PARAMETER_LIST.extend(BLADE_SECTION_CAMBER_THICKNESS)
 
 
-def ConcatenateConfig(*configs, verbose=True):
+def concatenate_config_files(*configs, verbose=True):
     """Concatenates config files into one that contains all the parameters. The number of values per parameter is not
     required to be the same for all the files."""
 
     if len(configs) != 1:
         for config in configs[1:]:
-            for key in param_list:
+            for key in PARAMETER_LIST:
                 configs[0][key] = np.hstack((configs[0][key], config[key]))
 
     if verbose:
         print("\n\n")
-        for key in param_list:
+        for key in PARAMETER_LIST:
             print(f"\t{key}\t has {configs[0][key].shape[0]} parameters")
         print("\n\n")
 

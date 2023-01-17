@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-from parablade.common.config import ReadUserInput
+from parablade.common.config import read_user_input
 
-details_dict = ReadUserInput('/home/daep/j.fesquet/git_repos/parablade/testcases/MatchBlades/Aachen_2D/Aachen_2D.cfg')
+details_dict = read_user_input('/home/daep/j.fesquet/git_repos/parablade/testcases/MatchBlades/Aachen_2D/Aachen_2D.cfg')
 o = pb.BladeMatch(details_dict, 
         plot_options={
             "view_xy": "yes",

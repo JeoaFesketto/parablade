@@ -36,7 +36,7 @@ class Blades:
         self.config_file = config_file
         self.config_name = config_file.split("/")[-1].split(".")[0]
 
-        IN = cfg.ReadUserInput(config_file)
+        IN = cfg.read_user_input(config_file)
         self.variants = {"base": BladeManipulator(IN)}
 
         if self.variants["base"].chord.shape[0] != self.variants["base"].x_l.shape[0]:
@@ -52,7 +52,7 @@ class Blades:
         self.variants[variant_name] = copy.deepcopy(self.variants[from_variant])
     
     def make_variant_from_cfg(self, variant_name, cfg_file):
-        IN = cfg.ReadUserInput(cfg_file)
+        IN = cfg.read_user_input(cfg_file)
         self.variants[variant_name] = BladeManipulator(IN)
         
         if self.variants[variant_name].chord.shape[0] != self.variants[variant_name].x_l.shape[0]:
@@ -150,7 +150,7 @@ class Blades:
     def write_blade(self, variant_name, file_name="default"):
         if file_name == "default":
             file_name = f"{self.config_name}_{variant_name}.cfg"
-        cfg.WriteBladeConfigFile(open(file_name, "w"), self.variants[variant_name].IN)
+        cfg.write_blade_config_file(open(file_name, "w"), self.variants[variant_name].IN)
 
     def batch_modify(
         self,
@@ -211,7 +211,7 @@ class Blades:
         """
         Method to mix two cfg files together to obtain an intermediate one, based on the proportion set. 0 returns the initial file, 100 returns the new one.
         """
-        new_IN = BladeManipulator(cfg.ReadUserInput(cfg_file))
+        new_IN = BladeManipulator(cfg.read_user_input(cfg_file))
         proportion /= 100
 
         upper_thicknesses = [f"t_u{i+1}" for i in range(6)]

@@ -48,11 +48,11 @@ import warnings
 from parablade.blade_3D import Blade3D
 from parablade.common.common import printProgress
 from parablade.common.config import (
-    ReadUserInput,
-    DeScale,
-    WriteBladeConfigFile,
-    ConfigPasser,
-    Numpize,
+    read_user_input,
+    descale,
+    write_blade_config_file,
+    config_passer,
+    numpize,
 )
 
 
@@ -110,7 +110,7 @@ class BladeMatch:
     ):
 
         # Declare input variables as instance variables
-        self.IN = ConfigPasser(IN)
+        self.IN = config_passer(IN)
         self.NDIM = int(self.IN["NDIM"][0])
         self.N_SECTIONS = self.IN["N_SECTIONS"][0]
         self.PRESCRIBED_BLADE_FILENAME = self.IN["PRESCRIBED_BLADE_FILENAME"]
@@ -745,13 +745,13 @@ class BladeMatch:
 
         """Print a configuration .cfg file for the current set of design variables"""
 
-        self.IN = Numpize(self.IN)
+        self.IN = numpize(self.IN)
 
-        IN_output = DeScale(self.IN)
+        IN_output = descale(self.IN)
 
         full_path = path + "/output_matching/"
         file = open(full_path + filename + ".cfg", "w")
-        WriteBladeConfigFile(file, IN_output)
+        write_blade_config_file(file, IN_output)
         file.close()
 
     def print_optimization_progress(
@@ -1275,7 +1275,7 @@ class BladeMatch:
         # Read the .cfg file and update the geometry
         while True:
             try:
-                self.IN = ReadUserInput(self.IN["Config_Path"])
+                self.IN = read_user_input(self.IN["Config_Path"])
                 self.blade_matched = Blade3D(self.IN)
                 self.blade_matched.make_blade()
                 self.coordinates_matched = self.blade_matched.get_surface_coordinates(
@@ -1481,7 +1481,7 @@ class BladeMatch:
 
             def save(event):
                 file = open(self.IN["Config_Path"], "w")
-                WriteBladeConfigFile(file, self.IN)
+                write_blade_config_file(file, self.IN)
                 file.close()
                 print(f'Parameters saved in {self.IN["Config_Path"]}.')
 

@@ -58,7 +58,7 @@ except:
     INFile = DIR + 'blade.cfg'      # Default File name
 
 try:
-    IN = ReadUserInput(INFile)
+    IN = read_user_input(INFile)
 except:
     raise Exception('\n\n\n''Something went wrong when reading the configuration file,exiting the program...'
                     '\n\nTo call MakeBlade.py from terminal type:'

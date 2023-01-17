@@ -45,7 +45,7 @@ except:
 # Import user-defined packages
 # ----------------------------------------------------------------------------------------------------------------------#
 from parablade.CAD_functions import *
-from parablade.common.config import ConfigPasser
+from parablade.common.config import config_passer
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

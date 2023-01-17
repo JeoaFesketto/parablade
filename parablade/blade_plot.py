@@ -34,7 +34,7 @@ import numpy as np
 # ---------------------------------------------------------------------------------------------#
 # Importing ParaBlade classes and functions
 # ---------------------------------------------------------------------------------------------#
-from parablade.common.config import ReadUserInput
+from parablade.common.config import read_user_input
 from parablade.blade_3D import Blade3D
 
 
@@ -473,7 +473,7 @@ class BladePlot:
         # Read the .cfg file and update the geometry
         while True:
             try:
-                self.IN = ReadUserInput(self.IN["Config_Path"])
+                self.IN = read_user_input(self.IN["Config_Path"])
                 self.blade_in = Blade3D(self.IN)
                 self.blade_in.make_blade()
                 self.surface_coordinates = self.blade_in.get_surface_coordinates(

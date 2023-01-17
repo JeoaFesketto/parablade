@@ -75,7 +75,7 @@ try:
 except:
     INFile = DIR + 'Optimization.cfg'
 try:
-    IN = ReadUserInput(INFile)
+    IN = read_user_input(INFile)
 except:
     raise Exception('\n\n\n''Something went wrong when reading the configuration file,exiting the program...'
                     '\n\nTo call MakeBlade.py from terminal type:'
@@ -411,10 +411,10 @@ class ShapeOptimization:
 
             # Copy required files
             shutil.copyfile(DIR+self.SU2_CONFIG_IN['MESH_FILENAME'],DISC_ADJ_FOLDER+'/'+self.SU2_CONFIG_IN['MESH_FILENAME'])
-            SU2_Config_change(DIR + self.SU2_CONFIG,
+            su2_config_change(DIR + self.SU2_CONFIG,
                             DISC_ADJ_FOLDER +'/' +
                             self.CFD_CONFIG,[],[])
-            SU2_Config_change(DIR + self.SU2_CONFIG,
+            su2_config_change(DIR + self.SU2_CONFIG,
                             DISC_ADJ_FOLDER +'/' +
                             self.ADJ_CONFIG,['MATH_PROBLEM','CONV_FILENAME'],['DISCRETE_ADJOINT','history_ADJ'])
             shutil.copyfile(DIR + self.IN['BLADE_PAR_FILE'], DISC_ADJ_FOLDER + '/' + self.CAD_CONFIG)
@@ -1187,7 +1187,7 @@ class ShapeOptimization:
 
         # Write file
         fileOUT = open(parablade_cfg, 'w')
-        WriteConfigFile(fileOUT, local_hash)
+        write_config_file(fileOUT, local_hash)
         fileOUT.close()
 
     def move_files(self):
@@ -1348,7 +1348,7 @@ class ShapeOptimization:
 
         # Change and move config file
         if change_cfg:
-            SU2_Config_change(ref_cfg, new_cfg, option_cfg, new_option_cfg)
+            su2_config_change(ref_cfg, new_cfg, option_cfg, new_option_cfg)
 
     def run_plot_validation(self, loc_ADJ = 'DISCRETE_ADJOINT_' + IN['OBJECTIVE_FUNCTION'], loc_FD = FINDIFF_FOLDER):
         """
@@ -1508,7 +1508,7 @@ class ShapeOptimization:
             print("Press Ctrl + C to abort")
             try:
                 time.sleep(5)
-                SU2_Config_change(DIR + self.SU2_CONFIG,
+                su2_config_change(DIR + self.SU2_CONFIG,
                                   DIR + self.SU2_CONFIG, ['OBJECTIVE_FUNCTION'], [self.OBJ_FUNCTION])
             except KeyboardInterrupt:
                 raise Exception("\nExiting...")
@@ -1765,13 +1765,13 @@ class ShapeOptimization:
         """
 
         if self.OPERATION_TYPE != 'PLOT_VALIDATION':
-                self.SU2_CONFIG_IN  = ReadUserInput(DIR + self.SU2_CONFIG)      # Read SU2 configuration file
-                self.CAD_CONFIG_IN  = ReadUserInput(DIR + self.CAD_CONFIG)      # Read CAD configuration file
+                self.SU2_CONFIG_IN  = read_user_input(DIR + self.SU2_CONFIG)      # Read SU2 configuration file
+                self.CAD_CONFIG_IN  = read_user_input(DIR + self.CAD_CONFIG)      # Read CAD configuration file
 
                 self.OBJ_FUNCTION = self.IN['OBJECTIVE_FUNCTION']               # Objective function defined by the user
                 self.objective_function_checks()                                # Perform consistency checks on OBJ fun
         else:
-            self.CAD_CONFIG_IN = ReadUserInput(DIR + self.CAD_CONFIG)
+            self.CAD_CONFIG_IN = read_user_input(DIR + self.CAD_CONFIG)
 
         self.initialize_DVs()
         #try:

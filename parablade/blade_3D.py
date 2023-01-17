@@ -36,7 +36,7 @@ import scipy.integrate as integrate
 # Importing ParaBlade classes and functions
 # ---------------------------------------------------------------------------------------------#
 from parablade.common.common import printProgress
-from parablade.common.config import ReadUserInput, ConfigPasser
+from parablade.common.config import read_user_input, config_passer
 from parablade.CAD_functions import *
 from parablade.interpolation_functions import *
 from parablade.blade_2D_connecting_arcs import Blade2DConnectingArcs
@@ -216,7 +216,7 @@ class Blade3D:
     def __init__(self, IN, UV=None, _transformations=None):
 
         # Declare input variables as instance variables
-        IN = ConfigPasser(IN)
+        IN = config_passer(IN)
         self.IN = IN
         self.N_BLADES = int(IN["N_BLADES"][0])
         self.NDIM = int(IN["NDIM"][0])

@@ -10,7 +10,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from parablade.common.config import ConfigPasser
+from parablade.common.config import config_passer
 
 
 #----------------------------------------------------------------------------------------------------------------------#
@@ -48,7 +48,7 @@ from parablade.blade_2D_camber_thickness import Blade2DCamberThickness
 # for i in design_variables:
 #     design_variables[i] = np.asarray(design_variables[i])
 
-design_variables = ConfigPasser(r'/home/daep/j.fesquet/git_repos/parablade/my_tests/blade.cfg')
+design_variables = config_passer(r'/home/daep/j.fesquet/git_repos/parablade/my_tests/blade.cfg')
 
 #----------------------------------------------------------------------------------------------------------------------#
 # Create the 2D section
