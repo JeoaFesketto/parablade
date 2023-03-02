@@ -83,7 +83,7 @@ def read_user_input(name, section=None):
                     words[i] = float(words[i])
                 except:
                     words[i] = words[i]
-            if len(words[1::1]) != 0 and isinstance(words[1], float):
+            if len(words[1::1]) == 1 and isinstance(words[1], float):
                 IN[words[0]] = np.array([words[1]])
             elif len(words[1::1]) == 1 and isinstance(words[1], str):
                 IN[words[0]] = words[1]
